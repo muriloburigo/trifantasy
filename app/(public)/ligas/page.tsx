@@ -27,7 +27,7 @@ export default async function LigasPage() {
     <div className="max-w-4xl mx-auto px-4 py-10">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Ligas</h1>
+          <h1 className="text-2xl font-bold">Trix Leagues</h1>
           <p className="text-sm text-[var(--color-muted)] mt-1">
             {totalLeagues ?? 0} ligas criadas · {totalTeams ?? 0} times montados
           </p>
@@ -47,10 +47,10 @@ export default async function LigasPage() {
       {!user && (
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-orange)]/30 rounded-2xl p-8 mb-8 text-center">
           <Trophy size={36} className="mx-auto mb-3 text-[var(--color-orange)] opacity-80" />
-          <h2 className="text-lg font-bold mb-2">Crie sua liga privada</h2>
+          <h2 className="text-lg font-bold mb-2">Crie sua Trix League</h2>
           <p className="text-sm text-[var(--color-muted)] max-w-md mx-auto mb-6">
-            Crie uma liga, convide seus amigos e disputem quem monta o melhor time de triathlon.
-            As ligas são privadas — só entra com código de convite.
+            Crie uma liga privada, convide seus amigos e disputem quem monta o melhor time.
+            Onde inteligência vence — só entra com código de convite.
           </p>
           <div className="flex items-center justify-center gap-3">
             <Link

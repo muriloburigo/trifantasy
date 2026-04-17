@@ -1,24 +1,38 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-navy:          #0F1629;
-  --color-navy-card:     #1A2540;
-  --color-navy-elevated: #253354;
-  --color-navy-border:   #2E3F66;
-  --color-orange:        #FF6B35;
-  --color-orange-light:  #FF8C5A;
-  --color-text:          #F0F4FF;
-  --color-muted:         #8B9DC3;
+  /* Trixer brand palette */
+  --color-navy:          #0B0B0F;
+  --color-navy-card:     #1A1A22;
+  --color-navy-elevated: #22222C;
+  --color-navy-border:   #2E2E3A;
+
+  /* Primary accent: Blue */
+  --color-orange:        #1E90FF;
+  --color-orange-light:  #4DA8FF;
+  --color-orange-dim:    rgba(30, 144, 255, 0.12);
+
+  /* Secondary accent: Purple */
+  --color-purple:        #7B3FE4;
+  --color-purple-dim:    rgba(123, 63, 228, 0.12);
+
+  --color-text:          #FFFFFF;
+  --color-muted:         #888899;
   --color-success:       #22C55E;
   --color-danger:        #EF4444;
 
   --font-sans: var(--font-inter);
+  --font-heading: var(--font-sora);
 }
 
 body {
   background: var(--color-navy);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-sora), var(--font-inter), sans-serif;
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }

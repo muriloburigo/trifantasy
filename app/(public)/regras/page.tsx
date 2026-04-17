@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Regras do Jogo',
-  description: 'Entenda como funciona o TriFantasy — orçamento, pontuação, ligas e mais.',
+  description: 'Entenda como funciona o Trixer — orçamento, Trix Score, Trix Leagues e mais.',
 }
 
 export default function RegrasPage() {
@@ -14,7 +14,7 @@ export default function RegrasPage() {
       </div>
 
       <h1 className="text-3xl font-extrabold mb-2">Regras do Jogo</h1>
-      <p className="text-[var(--color-muted)] mb-10">Tudo que você precisa saber para jogar o TriFantasy.</p>
+      <p className="text-[var(--color-muted)] mb-10">Tudo que você precisa saber para jogar o Trixer.</p>
 
       <div className="space-y-10">
 
@@ -23,12 +23,12 @@ export default function RegrasPage() {
           <h2 className="text-xl font-bold mb-3 text-[var(--color-orange)]">1. Objetivo</h2>
           <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-5 text-sm text-[var(--color-muted)] space-y-2 leading-relaxed">
             <p>
-              O TriFantasy é um jogo de fantasia baseado em provas reais de triathlon (distâncias Full e Middle Distance).
+              O Trixer é um fantasy game baseado em provas reais de triathlon (distâncias Full e Middle Distance).
               Você monta um time de <strong className="text-[var(--color-text)]">5 atletas reais</strong> — misturando PROs e age-groupers —
               e pontua conforme o desempenho deles na prova.
             </p>
             <p>
-              Dispute com amigos em <strong className="text-[var(--color-text)]">ligas privadas</strong> para ver quem tem melhor olho clínico para escalar atletas.
+              Dispute com amigos em <strong className="text-[var(--color-text)]">Trix Leagues</strong> para ver quem tem mais inteligência para escalar atletas.
             </p>
           </div>
         </section>
@@ -152,14 +152,14 @@ export default function RegrasPage() {
 
         {/* Ligas */}
         <section>
-          <h2 className="text-xl font-bold mb-3 text-[var(--color-orange)]">5. Ligas</h2>
+          <h2 className="text-xl font-bold mb-3 text-[var(--color-orange)]">5. Trix Leagues</h2>
           <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-5 text-sm text-[var(--color-muted)] space-y-2 leading-relaxed">
             <ul className="space-y-2 list-disc list-inside">
-              <li>Ligas são <strong className="text-[var(--color-text)]">privadas</strong> — acessadas por código de convite.</li>
+              <li>Trix Leagues são <strong className="text-[var(--color-text)]">privadas</strong> — acessadas por código de convite.</li>
               <li>Cada liga é vinculada a <strong className="text-[var(--color-text)]">uma prova específica</strong>.</li>
-              <li>O ranking da liga é calculado pela pontuação total do time de cada participante.</li>
+              <li>O Trix Rank é calculado pela pontuação total do time de cada Trixers.</li>
               <li>Não há limite de participantes por liga.</li>
-              <li>É possível participar de <strong className="text-[var(--color-text)]">múltiplas ligas</strong> com o mesmo time.</li>
+              <li>É possível participar de <strong className="text-[var(--color-text)]">múltiplas Trix Leagues</strong> com o mesmo time.</li>
             </ul>
           </div>
         </section>
@@ -182,7 +182,7 @@ export default function RegrasPage() {
           <h2 className="text-xl font-bold mb-3 text-[var(--color-orange)]">7. Observações Gerais</h2>
           <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-5 text-sm text-[var(--color-muted)] space-y-2 leading-relaxed">
             <ul className="space-y-2 list-disc list-inside">
-              <li>O TriFantasy é um jogo recreativo sem premiação em dinheiro.</li>
+              <li>O Trixer é um jogo recreativo sem premiação em dinheiro.</li>
               <li>Não somos afiliados ao Ironman/WTC nem a qualquer organização de triathlon.</li>
               <li>Os resultados são inseridos manualmente — pode haver atraso após a prova.</li>
               <li>Em caso de empate no ranking, a posição é desempatada pela menor variação de orçamento utilizado.</li>
@@ -198,7 +198,7 @@ export default function RegrasPage() {
           href="/register"
           className="inline-block bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-semibold px-8 py-3 rounded-xl text-sm transition-colors"
         >
-          Criar conta grátis e montar meu time
+          Entrar no jogo — grátis
         </Link>
       </div>
     </div>
