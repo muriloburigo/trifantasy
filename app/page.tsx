@@ -1,65 +1,145 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { createPublicClient } from '~/lib/supabase/server'
+import { formatDate, daysUntil } from '~/lib/utils'
+import type { Race } from '~/lib/types'
+import { MapPin, Calendar, Timer, ChevronRight } from 'lucide-react'
+import PublicShell from './(public)/PublicShell'
 
-export default function Home() {
+export const revalidate = 3600
+
+const STATUS_LABEL: Record<string, { label: string; color: string }> = {
+  upcoming: { label: 'Em breve',   color: 'text-[var(--color-muted)] border-[var(--color-navy-border)]' },
+  open:     { label: 'Aberto',     color: 'text-[var(--color-success)] border-[var(--color-success)]/40' },
+  locked:   { label: 'Encerrado',  color: 'text-yellow-400 border-yellow-400/40' },
+  finished: { label: 'Finalizado', color: 'text-[var(--color-muted)] border-[var(--color-navy-border)]' },
+}
+
+function RaceCard({ race }: { race: Race }) {
+  const days = daysUntil(race.date)
+  const status = STATUS_LABEL[race.status]
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <Link
+      href={`/provas/${race.slug}`}
+      className="group bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/50 rounded-2xl p-5 flex flex-col gap-3 transition-all hover:shadow-lg hover:shadow-[var(--color-orange)]/5"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <span className="text-xs font-semibold text-[var(--color-orange)] uppercase tracking-wider">
+            {race.distance === 'full' ? 'Ironman' : 'Ironman 70.3'}
+          </span>
+          <h3 className="font-bold text-base mt-0.5 group-hover:text-[var(--color-orange)] transition-colors leading-tight">
+            {race.name}
+          </h3>
+        </div>
+        <span className={`text-xs border rounded-full px-2 py-0.5 shrink-0 ${status.color}`}>
+          {status.label}
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-1.5 text-sm text-[var(--color-muted)]">
+        <div className="flex items-center gap-1.5">
+          <MapPin size={13} />
+          <span>{race.location}, {race.country}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Calendar size={13} />
+          <span>{formatDate(race.date)}</span>
+          {days > 0 && days <= 90 && (
+            <span className="text-xs text-[var(--color-orange)]">({days}d)</span>
+          )}
+        </div>
+        {race.has_pro_field && (
+          <div className="flex items-center gap-1.5">
+            <Timer size={13} />
+            <span>Com campo PRO</span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between mt-auto pt-2 border-t border-[var(--color-navy-border)]">
+        <span className="text-xs text-[var(--color-muted)]">
+          {race.status === 'open' ? 'Monte seu time' : 'Ver detalhes'}
+        </span>
+        <ChevronRight size={14} className="text-[var(--color-muted)] group-hover:text-[var(--color-orange)] transition-colors" />
+      </div>
+    </Link>
+  )
+}
+
+export default async function HomePage() {
+  const supabase = createPublicClient()
+  const { data: races } = await supabase
+    .from('races')
+    .select('*')
+    .order('date', { ascending: true })
+
+  const upcoming = (races ?? []).filter(r => r.status !== 'finished') as Race[]
+  const finished = (races ?? []).filter(r => r.status === 'finished') as Race[]
+
+  return (
+    <PublicShell>
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="text-center mb-14">
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
+            Fantasy Game do<br />
+            <span className="text-[var(--color-orange)]">Circuito Ironman</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-[var(--color-muted)] text-lg max-w-xl mx-auto">
+            Monte seu time com atletas PRO e age-groupers reais. Pontue pelo desempenho deles nas provas.
           </p>
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <Link
+              href="/register"
+              className="bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors"
+            >
+              Criar conta grátis
+            </Link>
+            <Link href="#como-funciona" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors">
+              Como funciona →
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div id="como-funciona" className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16">
+          {[
+            { num: '01', title: 'Escolha uma prova', desc: 'Selecione qualquer evento do calendário Ironman global com atletas cadastrados.' },
+            { num: '02', title: 'Monte seu time', desc: 'Escale 5 atletas com T$100. Misture PROs e age-groupers para equilibrar risco e retorno.' },
+            { num: '03', title: 'Pontue', desc: 'Cada atleta pontua pelo desempenho real — posição no AG, segmentos, Kona slots.' },
+          ].map(step => (
+            <div key={step.num} className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-5">
+              <span className="text-3xl font-black text-[var(--color-orange)]/30">{step.num}</span>
+              <h3 className="font-bold mt-2 mb-1">{step.title}</h3>
+              <p className="text-sm text-[var(--color-muted)]">{step.desc}</p>
+            </div>
+          ))}
         </div>
-      </main>
-    </div>
-  );
+
+        {upcoming.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-xl font-bold mb-4">Próximas Provas</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {upcoming.map(race => <RaceCard key={race.id} race={race} />)}
+            </div>
+          </section>
+        )}
+
+        {finished.length > 0 && (
+          <section>
+            <h2 className="text-xl font-bold mb-4 text-[var(--color-muted)]">Provas Encerradas</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 opacity-60">
+              {finished.map(race => <RaceCard key={race.id} race={race} />)}
+            </div>
+          </section>
+        )}
+
+        {upcoming.length === 0 && finished.length === 0 && (
+          <div className="text-center py-24 text-[var(--color-muted)]">
+            <p className="text-5xl mb-4">🏊</p>
+            <p className="text-lg font-medium">Calendário sendo montado...</p>
+          </div>
+        )}
+      </div>
+    </PublicShell>
+  )
 }
