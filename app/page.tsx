@@ -86,13 +86,13 @@ export default async function HomePage() {
             O fantasy game do endurance
           </p>
           <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight tracking-tight">
-            Onde inteligência<br />
+            A prova é deles.<br />
             <span className="bg-gradient-to-r from-[var(--color-orange)] to-[var(--color-purple)] bg-clip-text text-transparent">
-              vence
+              O pódio é seu.
             </span>
           </h1>
           <p className="text-[var(--color-muted)] text-lg max-w-lg mx-auto leading-relaxed">
-            Escale atletas PRO e age-groupers reais. Pontue pelo desempenho deles nas provas. Dispute com seus amigos.
+            Escale atletas PRO e age-groupers reais. Pontue pelo desempenho deles nas provas. Dispute o Trix Rank com seus amigos.
           </p>
           <div className="flex items-center justify-center gap-4 mt-8">
             <Link
