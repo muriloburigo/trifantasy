@@ -30,7 +30,7 @@ export default async function PublicShell({ children }: { children: React.ReactN
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-[var(--color-muted)]">
           <span style={{ fontFamily: 'var(--font-sora)' }}>
             <span className="text-[var(--color-orange)] font-bold">TRIX</span><span className="text-white font-bold">ER</span>
-            <span className="ml-2">— O fantasy game do endurance</span>
+            <span className="ml-2">— Jogo de escalação do endurance</span>
           </span>
           <div className="flex items-center gap-4">
             <Link href="/regras" className="hover:text-white transition-colors">Regras</Link>

@@ -23,7 +23,7 @@ export default function RegrasPage() {
           <h2 className="text-xl font-bold mb-3 text-[var(--color-orange)]">1. Objetivo</h2>
           <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-5 text-sm text-[var(--color-muted)] space-y-2 leading-relaxed">
             <p>
-              O Trixer é um fantasy game baseado em provas reais de triathlon (distâncias Full e Middle Distance).
+              O Trixer é um jogo de escalação baseado em provas reais de triathlon (distâncias Full e Middle Distance).
               Você monta um time de <strong className="text-[var(--color-text)]">5 atletas reais</strong> — misturando PROs e age-groupers —
               e pontua conforme o desempenho deles na prova.
             </p>

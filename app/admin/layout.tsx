@@ -25,7 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="w-52 border-r border-[var(--color-navy-border)] bg-[var(--color-navy-card)] flex flex-col">
         <div className="px-4 py-4 border-b border-[var(--color-navy-border)]">
           <Link href="/" className="font-bold text-base">
-            <span className="text-[var(--color-orange)]">Tri</span>Fantasy
+            <span className="text-[var(--color-orange)]">TRIX</span>ER
             <span className="text-xs text-[var(--color-muted)] block">Admin</span>
           </Link>
         </div>
