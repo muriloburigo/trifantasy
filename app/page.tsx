@@ -80,35 +80,42 @@ export default async function HomePage() {
   return (
     <PublicShell>
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="text-center mb-14">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-            Fantasy Game do<br />
-            <span className="text-[var(--color-orange)]">Circuito de Triathlon</span>
-          </h1>
-          <p className="text-[var(--color-muted)] text-lg max-w-xl mx-auto">
-            Monte seu time com atletas PRO e age-groupers reais. Pontue pelo desempenho deles nas provas.
+        {/* Hero */}
+        <div className="text-center mb-16">
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[var(--color-orange)] mb-4">
+            O fantasy game do endurance
           </p>
-          <div className="flex items-center justify-center gap-4 mt-6">
+          <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight tracking-tight">
+            Onde inteligência<br />
+            <span className="bg-gradient-to-r from-[var(--color-orange)] to-[var(--color-purple)] bg-clip-text text-transparent">
+              vence
+            </span>
+          </h1>
+          <p className="text-[var(--color-muted)] text-lg max-w-lg mx-auto leading-relaxed">
+            Escale atletas PRO e age-groupers reais. Pontue pelo desempenho deles nas provas. Dispute com seus amigos.
+          </p>
+          <div className="flex items-center justify-center gap-4 mt-8">
             <Link
               href="/register"
               className="bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors"
             >
-              Criar conta grátis
+              Entrar no jogo — grátis
             </Link>
             <Link href="/regras" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors">
-              Regras do jogo →
+              Como funciona →
             </Link>
           </div>
         </div>
 
-        <div id="como-funciona" className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16">
+        {/* How it works */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16">
           {[
             { num: '01', title: 'Escolha uma prova', desc: 'Selecione qualquer evento do calendário de triathlon com atletas cadastrados.' },
             { num: '02', title: 'Monte seu time', desc: 'Escale 5 atletas com T$100. Misture PROs e age-groupers para equilibrar risco e retorno.' },
-            { num: '03', title: 'Pontue', desc: 'Cada atleta pontua pelo desempenho real — posição no AG, segmentos, Kona slots.' },
+            { num: '03', title: 'Trix Score', desc: 'Cada atleta pontua pelo desempenho real — posição no AG, segmentos, Kona slots.' },
           ].map(step => (
             <div key={step.num} className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-5">
-              <span className="text-3xl font-black text-[var(--color-orange)]/30">{step.num}</span>
+              <span className="text-3xl font-black text-[var(--color-orange)]/20">{step.num}</span>
               <h3 className="font-bold mt-2 mb-1">{step.title}</h3>
               <p className="text-sm text-[var(--color-muted)]">{step.desc}</p>
             </div>

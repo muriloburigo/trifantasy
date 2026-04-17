@@ -40,8 +40,10 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-[var(--color-orange)]">TriFantasy</Link>
-          <p className="text-[var(--color-muted)] mt-2 text-sm">Criar conta gratuita</p>
+          <Link href="/" className="text-2xl font-bold" style={{ fontFamily: 'var(--font-sora)' }}>
+            <span className="text-[var(--color-orange)]">TRIX</span><span className="text-white">ER</span>
+          </Link>
+          <p className="text-[var(--color-muted)] mt-2 text-sm">Criar conta — é grátis</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-[var(--color-navy-card)] rounded-2xl p-6 space-y-4 border border-[var(--color-navy-border)]">
