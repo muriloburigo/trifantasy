@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!race) return {}
   return {
     title: race.name,
-    description: `Monte seu time fantasy para o ${race.name} — ${race.location}, ${race.country}. ${formatDate(race.date)}.`,
+    description: `Escale seu time para o ${race.name} — ${race.location}, ${race.country}. ${formatDate(race.date)}.`,
   }
 }
 

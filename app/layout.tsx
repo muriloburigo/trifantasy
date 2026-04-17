@@ -20,7 +20,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://trixer.com.br'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Trixer — O fantasy game do endurance',
+    default: 'Trixer — Jogo de escalação do endurance',
     template: '%s | Trixer',
   },
   description:

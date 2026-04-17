@@ -83,12 +83,13 @@ export default async function HomePage() {
         {/* Hero */}
         <div className="text-center mb-16">
           <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[var(--color-orange)] mb-4">
-            O fantasy game do endurance
+            Jogo de escalação do endurance
           </p>
           <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight tracking-tight">
-            A prova é deles.<br />
+            Três modalidades.<br />
+            Cinco escolhas.<br />
             <span className="bg-gradient-to-r from-[var(--color-orange)] to-[var(--color-purple)] bg-clip-text text-transparent">
-              O pódio é seu.
+              Uma Trix League.
             </span>
           </h1>
           <p className="text-[var(--color-muted)] text-lg max-w-lg mx-auto leading-relaxed">
