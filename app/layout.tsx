@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     template: '%s | TriFantasy',
   },
   description:
-    'Monte seu time com atletas reais do circuito Ironman — PROs e age-groupers — e pontue pelo desempenho deles nas provas.',
+    'Monte seu time com atletas reais do circuito de triathlon — PROs e age-groupers — e pontue pelo desempenho deles nas provas.',
   openGraph: {
     type: 'website',
     locale: 'pt_BR',

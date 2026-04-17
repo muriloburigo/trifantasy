@@ -15,9 +15,8 @@ export default async function PublicShell({ children }: { children: React.ReactN
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-[var(--color-muted)]">
             <Link href="/" className="hover:text-white transition-colors">Provas</Link>
-            {user && (
-              <Link href="/ligas" className="hover:text-white transition-colors">Minhas Ligas</Link>
-            )}
+            <Link href="/ligas" className="hover:text-white transition-colors">Ligas</Link>
+            <Link href="/regras" className="hover:text-white transition-colors">Regras</Link>
           </nav>
           <UserMenu user={user} />
         </div>
@@ -28,7 +27,10 @@ export default async function PublicShell({ children }: { children: React.ReactN
       <footer className="border-t border-[var(--color-navy-border)] py-8 mt-16">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-[var(--color-muted)]">
           <span><span className="text-[var(--color-orange)] font-bold">Tri</span>Fantasy — Fantasy Game de Triathlon</span>
-          <span>Não afiliado ao Ironman/WTC. Apenas para fins recreativos.</span>
+          <div className="flex items-center gap-4">
+            <Link href="/regras" className="hover:text-white transition-colors">Regras</Link>
+            <span>Não afiliado ao Ironman/WTC. Apenas para fins recreativos.</span>
+          </div>
         </div>
       </footer>
     </div>
