@@ -68,7 +68,7 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
       {/* Race header */}
       <div className="mb-8">
         <span className="text-xs font-semibold text-[var(--color-orange)] uppercase tracking-wider">
-          {race.distance === 'full' ? 'Ironman' : 'Ironman 70.3'}
+          {race.distance === 'full' ? 'Full Triathlon' : 'Middle Distance'}
         </span>
         <h1 className="text-3xl md:text-4xl font-extrabold mt-1 mb-3">{race.name}</h1>
         <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-muted)]">

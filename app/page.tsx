@@ -26,7 +26,7 @@ function RaceCard({ race }: { race: Race }) {
       <div className="flex items-start justify-between gap-2">
         <div>
           <span className="text-xs font-semibold text-[var(--color-orange)] uppercase tracking-wider">
-            {race.distance === 'full' ? 'Ironman' : 'Ironman 70.3'}
+            {race.distance === 'full' ? 'Full Triathlon' : 'Middle Distance'}
           </span>
           <h3 className="font-bold text-base mt-0.5 group-hover:text-[var(--color-orange)] transition-colors leading-tight">
             {race.name}
@@ -83,7 +83,7 @@ export default async function HomePage() {
         <div className="text-center mb-14">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
             Fantasy Game do<br />
-            <span className="text-[var(--color-orange)]">Circuito Ironman</span>
+            <span className="text-[var(--color-orange)]">Circuito de Triathlon</span>
           </h1>
           <p className="text-[var(--color-muted)] text-lg max-w-xl mx-auto">
             Monte seu time com atletas PRO e age-groupers reais. Pontue pelo desempenho deles nas provas.
@@ -95,15 +95,15 @@ export default async function HomePage() {
             >
               Criar conta grátis
             </Link>
-            <Link href="#como-funciona" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors">
-              Como funciona →
+            <Link href="/regras" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors">
+              Regras do jogo →
             </Link>
           </div>
         </div>
 
         <div id="como-funciona" className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16">
           {[
-            { num: '01', title: 'Escolha uma prova', desc: 'Selecione qualquer evento do calendário Ironman global com atletas cadastrados.' },
+            { num: '01', title: 'Escolha uma prova', desc: 'Selecione qualquer evento do calendário de triathlon com atletas cadastrados.' },
             { num: '02', title: 'Monte seu time', desc: 'Escale 5 atletas com T$100. Misture PROs e age-groupers para equilibrar risco e retorno.' },
             { num: '03', title: 'Pontue', desc: 'Cada atleta pontua pelo desempenho real — posição no AG, segmentos, Kona slots.' },
           ].map(step => (
