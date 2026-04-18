@@ -123,7 +123,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
-      <BackLink href="/atletas" label="Mercado de Atletas" />
+      <BackLink href="/atletas" />
 
       {/* Hero */}
       <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-6 mb-6 flex gap-5 items-center">

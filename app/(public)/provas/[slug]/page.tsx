@@ -66,7 +66,7 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      <BackLink href="/provas" label="Calendário de Provas" />
+      <BackLink href="/provas" />
       {/* Race header */}
       <div className="mb-8">
         <span className="text-xs font-semibold text-[var(--color-orange)] uppercase tracking-wider">

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function RegrasPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <BackLink href="/" label="Início" />
+      <BackLink href="/" />
 
       <h1 className="text-3xl font-extrabold mb-2">Regras do Jogo</h1>
       <p className="text-[var(--color-muted)] mb-10">Tudo que você precisa saber para jogar o Trixer.</p>

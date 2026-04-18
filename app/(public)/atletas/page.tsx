@@ -95,7 +95,7 @@ export default async function AtletasPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
-      <BackLink href="/" label="Home" />
+      <BackLink href="/" />
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Mercado de Atletas</h1>
         <p className="text-sm text-[var(--color-muted)] mt-1">
