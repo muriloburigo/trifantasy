@@ -9,6 +9,7 @@ export async function calculateScores(raceId: string): Promise<{
   success?: boolean
   teamsScored?: number
   error?: string
+  marketUpdates?: import('~/lib/scoring/market').MarketUpdate[]
 }> {
   await requireAdmin()
   const supabase = createAdminClient()
