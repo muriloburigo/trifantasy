@@ -270,15 +270,16 @@ export default async function HomePage() {
           {/* Right: stats */}
           <div className="grid grid-cols-3 gap-3 md:w-64 w-full">
             {[
-              { label: 'Atletas', value: athleteCount ?? 0, icon: Zap, color: 'text-[var(--color-orange)]' },
-              { label: 'Times', value: teamCount ?? 0, icon: Users, color: 'text-[var(--color-purple)]' },
-              { label: 'Ligas', value: leagueCount ?? 0, icon: Trophy, color: 'text-yellow-400' },
-            ].map(({ label, value, icon: Icon, color }) => (
-              <div key={label} className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-xl p-3 text-center">
+              { label: 'Atletas', value: athleteCount ?? 0, icon: Zap,    color: 'text-[var(--color-orange)]', href: '/atletas' },
+              { label: 'Times',   value: teamCount ?? 0,    icon: Users,  color: 'text-[var(--color-purple)]', href: '/rank' },
+              { label: 'Ligas',   value: leagueCount ?? 0,  icon: Trophy, color: 'text-yellow-400',            href: '/ligas' },
+            ].map(({ label, value, icon: Icon, color, href }) => (
+              <Link key={label} href={href}
+                className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/40 rounded-xl p-3 text-center transition-all hover:bg-[var(--color-navy-card)] group">
                 <Icon size={14} className={`mx-auto mb-1 ${color}`} />
-                <p className="text-xl font-black">{value}</p>
+                <p className="text-xl font-black group-hover:text-[var(--color-orange)] transition-colors">{value}</p>
                 <p className="text-[10px] text-[var(--color-muted)] mt-0.5">{label}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
