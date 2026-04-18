@@ -8,6 +8,12 @@ import { saveTeam } from './actions'
 
 type Filter = { type: 'all' | 'pro' | 'age_grouper'; gender: 'all' | 'M' | 'F'; search: string }
 
+function PriceTrend({ change }: { change: number | null }) {
+  if (!change || change === 0) return <span className="text-[var(--color-muted)] text-xs">—</span>
+  if (change > 0) return <span className="text-[var(--color-success)] text-xs font-semibold">↑{change.toFixed(1)}</span>
+  return <span className="text-[var(--color-danger)] text-xs font-semibold">↓{Math.abs(change).toFixed(1)}</span>
+}
+
 function AthleteCard({
   ra, selected, onToggle, canAdd,
 }: {
@@ -47,6 +53,7 @@ function AthleteCard({
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
           <span className="font-bold text-sm text-[var(--color-orange)]">T${ra.price}</span>
+          <PriceTrend change={(a as any).price_change ?? null} />
           {selected && <Check size={14} className="text-[var(--color-orange)]" />}
         </div>
       </div>

@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '~/lib/supabase/server'
 import { requireAdmin } from '~/lib/auth/require-admin'
 import { scoreAthlete, type AthleteForScoring } from '~/lib/scoring/calculate'
+import { updateMarket } from '~/lib/scoring/market'
 
 export async function calculateScores(raceId: string): Promise<{
   success?: boolean
@@ -100,8 +101,12 @@ export async function calculateScores(raceId: string): Promise<{
   // 7. Mark race as finished
   await supabase.from('races').update({ status: 'finished' }).eq('id', raceId)
 
+  // 8. Update dynamic market prices
+  const marketUpdates = await updateMarket(raceId)
+
   revalidatePath('/')
   revalidatePath('/admin/pontuacao')
+  revalidatePath('/admin/mercado')
 
-  return { success: true, teamsScored }
+  return { success: true, teamsScored, marketUpdates }
 }
