@@ -58,12 +58,17 @@ function AthleteCard({ a, rank }: { a: any; rank?: number }) {
       )}
 
       {/* Avatar */}
-      <div className={`w-14 h-14 rounded-full flex items-center justify-center text-base font-black text-white mt-2 ${
-        isPro
-          ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)]'
-          : 'bg-gradient-to-br from-[var(--color-purple)] to-[#3B1F8C]'
+      <div className={`w-14 h-14 rounded-full overflow-hidden flex items-center justify-center text-base font-black text-white mt-2 shrink-0 ${
+        !a.photo_url
+          ? isPro
+            ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)]'
+            : 'bg-gradient-to-br from-[var(--color-purple)] to-[#3B1F8C]'
+          : ''
       }`}>
-        {initials(a.name)}
+        {a.photo_url
+          ? <img src={a.photo_url} alt={a.name} className="w-full h-full object-cover" loading="lazy" />
+          : initials(a.name)
+        }
       </div>
 
       {/* Name */}
