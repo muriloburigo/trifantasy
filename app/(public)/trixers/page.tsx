@@ -79,7 +79,7 @@ export default async function TrixersPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
-      <BackLink href="/" label="Home" />
+      <BackLink href="/" />
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Comunidade Trixers</h1>
         <p className="text-sm text-[var(--color-muted)] mt-1">

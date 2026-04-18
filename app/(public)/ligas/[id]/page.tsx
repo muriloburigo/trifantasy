@@ -64,7 +64,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
     <div className="max-w-4xl mx-auto px-4 py-10">
       {/* Header */}
       <div className="mb-8">
-        <BackLink href="/ligas" label="Minhas Ligas" />
+        <BackLink href="/ligas" />
         <div className="flex items-start justify-between mt-3 gap-4">
           <div>
             <h1 className="text-2xl font-bold">{league.name}</h1>

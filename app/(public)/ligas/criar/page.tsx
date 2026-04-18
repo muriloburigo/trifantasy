@@ -25,7 +25,7 @@ export default async function CriarLigaPage() {
 
   return (
     <div className="max-w-xl mx-auto px-4 py-10">
-      <BackLink href="/ligas" label="Ligas" />
+      <BackLink href="/ligas" />
 
       {/* Create league */}
       <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-6 mb-6">
