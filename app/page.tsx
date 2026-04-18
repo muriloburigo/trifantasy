@@ -179,7 +179,7 @@ export default async function HomePage() {
     { data: topScores },
     { data: races },
     { count: leagueCount },
-    { count: teamCount },
+    { count: trixerCount },
     { count: athleteCount },
   ] = await Promise.all([
     // Market: rising
@@ -217,7 +217,7 @@ export default async function HomePage() {
       .limit(30),
 
     admin.from('leagues').select('*', { count: 'exact', head: true }),
-    admin.from('teams').select('*', { count: 'exact', head: true }),
+    pub.from('profiles').select('*', { count: 'exact', head: true }),
     pub.from('athletes').select('*', { count: 'exact', head: true }),
   ])
 
@@ -271,7 +271,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-3 gap-3 md:w-64 w-full">
             {[
               { label: 'Atletas', value: athleteCount ?? 0, icon: Zap,    color: 'text-[var(--color-orange)]', href: '/atletas' },
-              { label: 'Times',   value: teamCount ?? 0,    icon: Users,  color: 'text-[var(--color-purple)]', href: '/rank' },
+              { label: 'Trixers', value: trixerCount ?? 0,  icon: Users,  color: 'text-[var(--color-purple)]', href: '/rank' },
               { label: 'Ligas',   value: leagueCount ?? 0,  icon: Trophy, color: 'text-yellow-400',            href: '/ligas' },
             ].map(({ label, value, icon: Icon, color, href }) => (
               <Link key={label} href={href}
