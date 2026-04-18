@@ -46,7 +46,7 @@ export default function AddAthleteForm({ raceId }: { raceId: string }) {
         className="w-full bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-orange)]" />
 
       <div className="grid grid-cols-2 gap-2">
-        <input name="price" type="number" step="0.5" min="1" max="35" placeholder="Preço T$" defaultValue="10"
+        <input name="price" type="number" step="0.5" min="1" max="35" placeholder="Preço Trix Coin (T$)" defaultValue="10"
           className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-orange)]" />
         <input name="bib" type="number" placeholder="Bib #"
           className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-orange)]" />

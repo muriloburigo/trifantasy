@@ -112,7 +112,7 @@ export default async function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16">
           {[
             { num: '01', title: 'Escolha uma prova', desc: 'Selecione qualquer evento do calendário de triathlon com atletas cadastrados.' },
-            { num: '02', title: 'Monte seu time', desc: 'Escale 5 atletas com T$100. Misture PROs e age-groupers para equilibrar risco e retorno.' },
+            { num: '02', title: 'Monte seu time', desc: 'Escale 5 atletas com T$100 em Trix Coin. Misture PROs e age-groupers para equilibrar risco e retorno.' },
             { num: '03', title: 'Trix Score', desc: 'Cada atleta pontua pelo desempenho real — posição no AG, segmentos, Kona slots.' },
           ].map(step => (
             <div key={step.num} className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-5">

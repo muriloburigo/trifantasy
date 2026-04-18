@@ -52,7 +52,7 @@ export default function RegrasPage() {
               </div>
             </div>
             <ul className="space-y-1.5 list-disc list-inside">
-              <li>Cada atleta tem um preço em <strong className="text-[var(--color-text)]">TriDólares (T$)</strong> definido pelo admin.</li>
+              <li>Cada atleta tem um preço em <strong className="text-[var(--color-text)]">Trix Coin (T$)</strong> definido pelo admin.</li>
               <li>Você pode escalar <strong className="text-[var(--color-text)]">qualquer combinação</strong> de atletas PRO e age-groupers.</li>
               <li>Máximo de <strong className="text-[var(--color-text)]">2 atletas do mesmo clube</strong> por time.</li>
               <li>Não há capitão — todos os atletas valem igual.</li>

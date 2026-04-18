@@ -108,7 +108,7 @@ export default async function MercadoPage() {
         <p className="font-semibold text-[var(--color-text)]">Como funciona o Mercado Dinâmico</p>
         <p><span className="text-[var(--color-text)]">PRO:</span> 1º +4 · 2º-3º +3 · 4º-5º +2 · 6º-10º +1 · 11º-20º 0 · 21º+ −1 · DNF −2 · Segmento líder +1 · CR +2</p>
         <p><span className="text-[var(--color-text)]">AG:</span> 1º +3 · 2º-3º +2 · Top 25% +1 · Top 50% 0 · Abaixo 50% −1 · DNF −2 · Segmento AG +1 · Kona slot +2</p>
-        <p>Preços entre T$1 e T$35. Propagados automaticamente para todas as provas abertas ou futuras.</p>
+        <p>Preços em Trix Coin (T$) entre T$1 e T$35. Propagados automaticamente para todas as provas abertas ou futuras.</p>
       </div>
     </div>
   )
