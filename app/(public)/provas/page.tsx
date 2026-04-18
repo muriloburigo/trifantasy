@@ -2,8 +2,7 @@ import Link from 'next/link'
 import { createPublicClient } from '~/lib/supabase/server'
 import { formatDate, daysUntil } from '~/lib/utils'
 import type { Race } from '~/lib/types'
-import { MapPin, Calendar, ChevronRight, Users } from 'lucide-react'
-import PublicShell from '../PublicShell'
+import { MapPin, Calendar, ChevronRight } from 'lucide-react'
 
 export const revalidate = 900
 
@@ -67,8 +66,7 @@ export default async function ProvasPage() {
   const finished = (races ?? []).filter(r => r.status === 'finished') as Race[]
 
   return (
-    <PublicShell>
-      <div className="max-w-6xl mx-auto px-4 py-10">
+    <div className="max-w-6xl mx-auto px-4 py-10">
         <div className="mb-8">
           <h1 className="text-2xl font-bold">Calendário de Provas</h1>
           <p className="text-sm text-[var(--color-muted)] mt-1">
@@ -106,7 +104,6 @@ export default async function ProvasPage() {
             </div>
           </section>
         )}
-      </div>
-    </PublicShell>
+    </div>
   )
 }
