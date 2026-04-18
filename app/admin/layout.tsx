@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createClient } from '~/lib/supabase/server'
+import { createClient, createAdminClient } from '~/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LayoutDashboard, Flag, Users, FileText, BarChart2, LogOut } from 'lucide-react'
 
@@ -8,7 +8,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single()
+  const admin = createAdminClient()
+  const { data: profile } = await admin.from('profiles').select('is_admin').eq('id', user.id).single()
   if (!profile?.is_admin) redirect('/')
 
   const nav = [
