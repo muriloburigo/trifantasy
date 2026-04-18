@@ -89,7 +89,7 @@ const races = [
   { name: 'IRONMAN 70.3 Oceanside',             location: 'Oceanside',           country: 'United States',  date: '2026-03-28', distance: '70.3' },
   { name: 'IRONMAN 70.3 Texas',                 location: 'Galveston',           country: 'United States',  date: '2026-03-29', distance: '70.3' },
   { name: 'IRONMAN 70.3 Puerto Varas',          location: 'Puerto Varas',        country: 'Chile',          date: '2026-04-12', distance: '70.3' },
-  { name: 'IRONMAN 70.3 Florianópolis',         location: 'Florianópolis',       country: 'Brazil',         date: '2026-04-13', distance: '70.3' },
+  { name: 'IRONMAN 70.3 Florianópolis',         location: 'Florianópolis',       country: 'Brazil',         date: '2026-10-05', distance: '70.3' },
 
   // Open
   { name: 'IRONMAN 70.3 Peru',                  location: 'Lima',                country: 'Peru',           date: '2026-04-26', distance: '70.3' },
