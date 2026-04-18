@@ -204,12 +204,12 @@ export default async function HomePage() {
       .order('total_points', { ascending: false })
       .limit(10),
 
-    // Races
+    // Races (enough to count beyond 7-day window)
     pub.from('races')
       .select('*')
       .in('status', ['open', 'upcoming'])
       .order('date', { ascending: true })
-      .limit(8),
+      .limit(30),
 
     admin.from('leagues').select('*', { count: 'exact', head: true }),
     admin.from('teams').select('*', { count: 'exact', head: true }),
@@ -218,8 +218,14 @@ export default async function HomePage() {
 
   const rising  = risingRaw ?? []
   const falling = fallingRaw ?? []
-  const openRaces = (races ?? []).filter(r => r.status === 'open') as Race[]
-  const upcomingRaces = (races ?? []).filter(r => r.status === 'upcoming').slice(0, 3) as Race[]
+
+  const today = new Date()
+  const in7   = new Date(today); in7.setDate(today.getDate() + 7)
+
+  const allActive = (races ?? []).filter(r => r.status === 'open' || r.status === 'upcoming') as Race[]
+  const openRaces     = allActive.filter(r => r.status === 'open')
+  const next7Races    = allActive.filter(r => new Date(r.date) <= in7)
+  const remainingCount = allActive.length - next7Races.length
 
   const featuredAthletes = (topAthletesRaw ?? []).slice(0, 12)
 
@@ -276,25 +282,30 @@ export default async function HomePage() {
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-10">
 
         {/* ── Provas abertas (banner) ── */}
-        {openRaces.length > 0 && (
+        {next7Races.length > 0 && (
           <div className="bg-[var(--color-success)]/5 border border-[var(--color-success)]/25 rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex items-center gap-2.5 shrink-0">
               <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-success)] animate-pulse" />
               <span className="text-sm font-bold text-[var(--color-success)]">
-                {openRaces.length} {openRaces.length === 1 ? 'prova aberta' : 'provas abertas'} para escalação
+                {openRaces.length > 0
+                  ? `${openRaces.length} ${openRaces.length === 1 ? 'prova aberta' : 'provas abertas'} para escalação`
+                  : `${next7Races.length} ${next7Races.length === 1 ? 'prova' : 'provas'} nos próximos 7 dias`
+                }
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {openRaces.map(r => (
+              {next7Races.map(r => (
                 <Link key={r.id} href={`/provas/${r.slug}`}
                   className="text-xs bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/50 px-3 py-1.5 rounded-lg transition-colors font-medium">
                   {r.name}
                 </Link>
               ))}
             </div>
-            <Link href="/provas" className="text-xs text-[var(--color-muted)] hover:text-white ml-auto shrink-0 flex items-center gap-1">
-              Ver todas <ChevronRight size={12} />
-            </Link>
+            {remainingCount > 0 && (
+              <Link href="/provas" className="text-xs text-[var(--color-muted)] hover:text-white ml-auto shrink-0 flex items-center gap-1">
+                +{remainingCount} mais <ChevronRight size={12} />
+              </Link>
+            )}
           </div>
         )}
 
@@ -388,27 +399,28 @@ export default async function HomePage() {
           {/* ── Sidebar (1/3) ── */}
           <div className="space-y-4">
 
-            {/* Open races */}
-            {openRaces.length > 0 && (
+            {/* Races: next 7 days */}
+            {next7Races.length > 0 && (
               <section>
                 <h2 className="font-bold text-sm mb-3 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[var(--color-success)] animate-pulse" />
-                  Escalar agora
+                  Próximos 7 dias
                 </h2>
                 <div className="space-y-3">
-                  {openRaces.map(r => <RaceCard key={r.id} race={r} />)}
+                  {next7Races.map(r => <RaceCard key={r.id} race={r} />)}
                 </div>
               </section>
             )}
 
-            {/* Upcoming races */}
-            {upcomingRaces.length > 0 && (
-              <section>
-                <h2 className="font-bold text-sm mb-3 text-[var(--color-muted)]">Próximas provas</h2>
-                <div className="space-y-3">
-                  {upcomingRaces.map(r => <RaceCard key={r.id} race={r} />)}
-                </div>
-              </section>
+            {/* Ver mais */}
+            {remainingCount > 0 && (
+              <Link
+                href="/provas"
+                className="flex items-center justify-between w-full bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/40 rounded-xl px-4 py-3 text-sm text-[var(--color-muted)] hover:text-white transition-all"
+              >
+                <span>Ver mais {remainingCount} {remainingCount === 1 ? 'prova' : 'provas'}</span>
+                <ChevronRight size={14} />
+              </Link>
             )}
 
             {/* Liga CTA */}
