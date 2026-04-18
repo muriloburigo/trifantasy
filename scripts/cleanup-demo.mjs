@@ -19,13 +19,21 @@ for (const u of demoUsers) {
 }
 console.log('✓ Usuários removidos')
 
-// 2. Remove prova de Florianópolis 70.3 (e tudo em cascata via FK)
-const { data: flo } = await sb.from('races').select('id').eq('slug', 'ironman-703-florianopolis-2026').single()
-if (flo) {
-  await sb.from('races').delete().eq('id', flo.id)
-  console.log('✓ Prova Florianópolis 70.3 2026 removida')
-} else {
-  console.log('— Florianópolis não encontrada, nada a remover')
+// 2. Remove apenas os times/scores/ligas fake ligados a usuários demo
+//    A prova de Florianópolis é real — não deve ser removida.
+const demoEmails = demoUsers.map(u => u.id)
+if (demoEmails.length > 0) {
+  // Remove league memberships de usuários demo
+  for (const uid of demoEmails) {
+    await sb.from('league_members').delete().eq('user_id', uid)
+    const { data: teams } = await sb.from('teams').select('id').eq('user_id', uid)
+    for (const t of (teams ?? [])) {
+      await sb.from('scores').delete().eq('team_id', t.id)
+      await sb.from('team_athletes').delete().eq('team_id', t.id)
+    }
+    await sb.from('teams').delete().eq('user_id', uid)
+  }
+  console.log('✓ Times, scores e ligas dos usuários demo removidos')
 }
 
 console.log('✅ Cleanup concluído')
