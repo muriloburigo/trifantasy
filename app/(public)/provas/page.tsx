@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createPublicClient } from '~/lib/supabase/server'
+import BackLink from '~/app/components/BackLink'
 import { formatDate, daysUntil } from '~/lib/utils'
 import type { Race } from '~/lib/types'
 import { MapPin, Calendar, ChevronRight } from 'lucide-react'
@@ -67,6 +68,7 @@ export default async function ProvasPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
+        <BackLink href="/" label="Home" />
         <div className="mb-8">
           <h1 className="text-2xl font-bold">Calendário de Provas</h1>
           <p className="text-sm text-[var(--color-muted)] mt-1">

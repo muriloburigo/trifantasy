@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createPublicClient, createAdminClient } from '~/lib/supabase/server'
+import BackLink from '~/app/components/BackLink'
 import { formatDate, formatTime } from '~/lib/utils'
 import { TrendingUp, TrendingDown, Minus, Trophy, Flag, Timer, Bike, PersonStanding, Waves } from 'lucide-react'
 
@@ -122,6 +123,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
+      <BackLink href="/atletas" label="Mercado de Atletas" />
 
       {/* Hero */}
       <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-6 mb-6 flex gap-5 items-center">
