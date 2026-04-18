@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createPublicClient } from '~/lib/supabase/server'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
@@ -43,7 +44,7 @@ export default async function AtletasPage() {
   function AthleteRow({ a }: { a: any }) {
     const isPro = a.type === 'pro'
     return (
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-navy-border)] last:border-0 hover:bg-[var(--color-navy-elevated)]/30 transition-colors">
+      <Link href={`/atletas/${a.id}`} className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-navy-border)] last:border-0 hover:bg-[var(--color-navy-elevated)]/30 transition-colors cursor-pointer">
         {/* Avatar */}
         <div className={`w-9 h-9 rounded-full overflow-hidden shrink-0 flex items-center justify-center text-xs font-black text-white ${
           !a.photo_url
@@ -87,7 +88,7 @@ export default async function AtletasPage() {
         <span className="text-sm font-black text-[var(--color-orange)] w-14 text-right shrink-0">
           T${Number(a.current_price).toFixed(0)}
         </span>
-      </div>
+      </Link>
     )
   }
 
