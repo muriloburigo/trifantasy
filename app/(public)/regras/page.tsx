@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import BackLink from '~/app/components/BackLink'
 
 export const metadata: Metadata = {
