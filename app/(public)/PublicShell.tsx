@@ -16,7 +16,9 @@ export default async function PublicShell({ children }: { children: React.ReactN
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-[var(--color-muted)]">
-            <Link href="/" className="hover:text-white transition-colors">Provas</Link>
+            <Link href="/" className="hover:text-white transition-colors">Home</Link>
+            <Link href="/provas" className="hover:text-white transition-colors">Provas</Link>
+            <Link href="/atletas" className="hover:text-white transition-colors">Atletas</Link>
             <Link href="/ligas" className="hover:text-white transition-colors">Trix Leagues</Link>
             <Link href="/regras" className="hover:text-white transition-colors">Regras</Link>
           </nav>
