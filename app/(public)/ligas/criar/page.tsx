@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient, createPublicClient } from '~/lib/supabase/server'
 import { formatDate } from '~/lib/utils'
 import CreateLeagueForm from './CreateLeagueForm'
 import JoinForm from './JoinForm'
+import BackLink from '~/app/components/BackLink'
 
 export default async function CriarLigaPage() {
   const supabase = await createClient()
@@ -25,9 +25,7 @@ export default async function CriarLigaPage() {
 
   return (
     <div className="max-w-xl mx-auto px-4 py-10">
-      <div className="flex items-center gap-3 mb-8">
-        <Link href="/ligas" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors">← Ligas</Link>
-      </div>
+      <BackLink href="/ligas" label="Ligas" />
 
       {/* Create league */}
       <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-6 mb-6">

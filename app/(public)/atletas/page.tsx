@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createPublicClient } from '~/lib/supabase/server'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import BackLink from '~/app/components/BackLink'
 
 export const revalidate = 600
 
@@ -94,6 +95,7 @@ export default async function AtletasPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
+      <BackLink href="/" label="Home" />
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Mercado de Atletas</h1>
         <p className="text-sm text-[var(--color-muted)] mt-1">

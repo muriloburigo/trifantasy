@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient, createPublicClient } from '~/lib/supabase/server'
 import { formatDate } from '~/lib/utils'
 import { Plus, Trophy, Users, Lock } from 'lucide-react'
+import BackLink from '~/app/components/BackLink'
 
 export default async function LigasPage() {
   const supabase = await createClient()
@@ -25,6 +26,7 @@ export default async function LigasPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
+      <BackLink href="/" label="Home" />
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold">Trix Leagues</h1>

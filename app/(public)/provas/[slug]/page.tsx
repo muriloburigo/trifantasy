@@ -5,6 +5,7 @@ import { formatDate, daysUntil } from '~/lib/utils'
 import type { Race, RaceAthlete, Team } from '~/lib/types'
 import { MapPin, Calendar, Users, Lock } from 'lucide-react'
 import TeamBuilder from './TeamBuilder'
+import BackLink from '~/app/components/BackLink'
 
 export const revalidate = 3600
 
@@ -65,6 +66,7 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
+      <BackLink href="/provas" label="Calendário de Provas" />
       {/* Race header */}
       <div className="mb-8">
         <span className="text-xs font-semibold text-[var(--color-orange)] uppercase tracking-wider">

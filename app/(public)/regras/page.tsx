@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import BackLink from '~/app/components/BackLink'
 
 export const metadata: Metadata = {
   title: 'Regras do Jogo',
@@ -9,9 +9,7 @@ export const metadata: Metadata = {
 export default function RegrasPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <div className="mb-8">
-        <Link href="/" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors">← Início</Link>
-      </div>
+      <BackLink href="/" label="Início" />
 
       <h1 className="text-3xl font-extrabold mb-2">Regras do Jogo</h1>
       <p className="text-[var(--color-muted)] mb-10">Tudo que você precisa saber para jogar o Trixer.</p>

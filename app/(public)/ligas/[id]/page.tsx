@@ -4,6 +4,7 @@ import { createClient } from '~/lib/supabase/server'
 import { formatDate } from '~/lib/utils'
 import { Trophy, Copy, Users, Medal } from 'lucide-react'
 import CopyButton from './CopyButton'
+import BackLink from '~/app/components/BackLink'
 
 export default async function LeaguePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -63,7 +64,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
     <div className="max-w-4xl mx-auto px-4 py-10">
       {/* Header */}
       <div className="mb-8">
-        <Link href="/ligas" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors">← Minhas Ligas</Link>
+        <BackLink href="/ligas" label="Minhas Ligas" />
         <div className="flex items-start justify-between mt-3 gap-4">
           <div>
             <h1 className="text-2xl font-bold">{league.name}</h1>
