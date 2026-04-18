@@ -40,7 +40,7 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
   // Fetch race athletes with athlete data
   const { data: raceAthletes } = await supabase
     .from('race_athletes')
-    .select('*, athlete:athletes(*)')
+    .select('*, athlete:athletes(*, price_change, current_price)')
     .eq('race_id', race.id)
     .order('price', { ascending: false })
 
