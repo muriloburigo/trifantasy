@@ -40,7 +40,7 @@ function AthleteCard({ a, rank }: { a: any; rank?: number }) {
   const price = Number(a.current_price ?? 0)
 
   return (
-    <div className="relative flex-shrink-0 w-[130px] bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-3 flex flex-col items-center gap-2 hover:border-[var(--color-orange)]/50 transition-all cursor-default select-none">
+    <Link href={`/atletas/${a.id}`} className="relative flex-shrink-0 w-[130px] bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-3 flex flex-col items-center gap-2 hover:border-[var(--color-orange)]/50 transition-all">
       {/* Type badge */}
       <span className={`absolute top-2.5 left-2.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
         isPro
@@ -91,7 +91,7 @@ function AthleteCard({ a, rank }: { a: any; rank?: number }) {
         )}
         <span className="text-sm font-black text-[var(--color-orange)]">T${price.toFixed(0)}</span>
       </div>
-    </div>
+    </Link>
   )
 }
 
@@ -271,7 +271,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-3 gap-3 md:w-64 w-full">
             {[
               { label: 'Atletas', value: athleteCount ?? 0, icon: Zap,    color: 'text-[var(--color-orange)]', href: '/atletas' },
-              { label: 'Trixers', value: trixerCount ?? 0,  icon: Users,  color: 'text-[var(--color-purple)]', href: '/rank' },
+              { label: 'Trixers', value: trixerCount ?? 0,  icon: Users,  color: 'text-[var(--color-purple)]', href: '/trixers' },
               { label: 'Ligas',   value: leagueCount ?? 0,  icon: Trophy, color: 'text-yellow-400',            href: '/ligas' },
             ].map(({ label, value, icon: Icon, color, href }) => (
               <Link key={label} href={href}
