@@ -184,21 +184,21 @@ export default async function HomePage() {
   ] = await Promise.all([
     // Market: rising
     pub.from('athletes')
-      .select('id, name, type, gender, age_group, country, current_price, price_change')
+      .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url')
       .gt('price_change', 0)
       .order('price_change', { ascending: false })
       .limit(12),
 
     // Market: falling
     pub.from('athletes')
-      .select('id, name, type, gender, age_group, country, current_price, price_change')
+      .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url')
       .lt('price_change', 0)
       .order('price_change', { ascending: true })
       .limit(12),
 
     // Top athletes by price (all, for featured section)
     pub.from('athletes')
-      .select('id, name, type, gender, age_group, country, current_price, price_change')
+      .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url')
       .eq('type', 'pro')
       .order('current_price', { ascending: false })
       .limit(16),
