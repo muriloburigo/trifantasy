@@ -28,6 +28,57 @@ function Trend({ change }: { change: number }) {
   return <span className="flex items-center gap-0.5 text-[var(--color-muted)] text-xs"><Minus size={11} />0</span>
 }
 
+function AthleteRow({ a }: { a: any }) {
+  const isPro = a.type === 'pro'
+  return (
+    <Link href={`/atletas/${a.id}`} className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-navy-border)] last:border-0 hover:bg-[var(--color-navy-elevated)]/30 transition-colors">
+      {/* Avatar */}
+      <div className={`w-9 h-9 rounded-full overflow-hidden shrink-0 flex items-center justify-center text-xs font-black text-white ${
+        !a.photo_url
+          ? isPro
+            ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)]'
+            : 'bg-gradient-to-br from-[var(--color-purple)] to-[#3B1F8C]'
+          : ''
+      }`}>
+        {a.photo_url
+          ? <img src={a.photo_url} alt={a.name} className="w-full h-full object-cover" loading="lazy" />
+          : initials(a.name)
+        }
+      </div>
+
+      {/* Badge */}
+      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
+        isPro
+          ? 'bg-[var(--color-orange)]/15 text-[var(--color-orange)]'
+          : 'bg-[var(--color-purple)]/15 text-[var(--color-purple)]'
+      }`}>
+        {isPro ? 'PRO' : a.age_group ?? 'AG'}
+      </span>
+
+      {/* Name + country */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold truncate">{a.name}</p>
+        <p className="text-[11px] text-[var(--color-muted)]">{flag(a.country)} {a.country}</p>
+      </div>
+
+      {/* PTO rank */}
+      {a.pto_rank && (
+        <span className="text-[11px] text-[var(--color-muted)] shrink-0 hidden sm:block">#{a.pto_rank} PTO</span>
+      )}
+
+      {/* Trend */}
+      <div className="shrink-0 w-14 flex justify-end">
+        <Trend change={Number(a.price_change ?? 0)} />
+      </div>
+
+      {/* Price */}
+      <span className="text-sm font-black text-[var(--color-orange)] w-14 text-right shrink-0">
+        T${Number(a.current_price).toFixed(0)}
+      </span>
+    </Link>
+  )
+}
+
 export default async function AtletasPage() {
   const pub = createPublicClient()
 
@@ -41,57 +92,6 @@ export default async function AtletasPage() {
 
   const rising  = [...(athletes ?? [])].filter(a => Number(a.price_change) > 0).sort((a, b) => Number(b.price_change) - Number(a.price_change))
   const falling = [...(athletes ?? [])].filter(a => Number(a.price_change) < 0).sort((a, b) => Number(a.price_change) - Number(b.price_change))
-
-  function AthleteRow({ a }: { a: any }) {
-    const isPro = a.type === 'pro'
-    return (
-      <Link href={`/atletas/${a.id}`} className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-navy-border)] last:border-0 hover:bg-[var(--color-navy-elevated)]/30 transition-colors cursor-pointer">
-        {/* Avatar */}
-        <div className={`w-9 h-9 rounded-full overflow-hidden shrink-0 flex items-center justify-center text-xs font-black text-white ${
-          !a.photo_url
-            ? isPro
-              ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)]'
-              : 'bg-gradient-to-br from-[var(--color-purple)] to-[#3B1F8C]'
-            : ''
-        }`}>
-          {a.photo_url
-            ? <img src={a.photo_url} alt={a.name} className="w-full h-full object-cover" loading="lazy" />
-            : initials(a.name)
-          }
-        </div>
-
-        {/* Badge */}
-        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
-          isPro
-            ? 'bg-[var(--color-orange)]/15 text-[var(--color-orange)]'
-            : 'bg-[var(--color-purple)]/15 text-[var(--color-purple)]'
-        }`}>
-          {isPro ? 'PRO' : a.age_group ?? 'AG'}
-        </span>
-
-        {/* Name + country */}
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate">{a.name}</p>
-          <p className="text-[11px] text-[var(--color-muted)]">{flag(a.country)} {a.country}</p>
-        </div>
-
-        {/* PTO rank */}
-        {a.pto_rank && (
-          <span className="text-[11px] text-[var(--color-muted)] shrink-0 hidden sm:block">#{a.pto_rank} PTO</span>
-        )}
-
-        {/* Trend */}
-        <div className="shrink-0 w-14 flex justify-end">
-          <Trend change={Number(a.price_change ?? 0)} />
-        </div>
-
-        {/* Price */}
-        <span className="text-sm font-black text-[var(--color-orange)] w-14 text-right shrink-0">
-          T${Number(a.current_price).toFixed(0)}
-        </span>
-      </Link>
-    )
-  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">

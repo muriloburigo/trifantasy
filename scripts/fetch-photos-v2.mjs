@@ -17,6 +17,7 @@ const sb = createClient(get('NEXT_PUBLIC_SUPABASE_URL'), get('SUPABASE_SERVICE_R
 // Known placeholder UUIDs to skip
 const SKIP_UUIDS = new Set([
   '1450267a-3a96-42c0-8e44-6f41aabc65ce',
+  '027aaf17-2108-4a10-b182-06a7e5b91745', // Danilo Pimentel's UUID incorrectly assigned to others
   '8e5f3d2a-1234-5678-abcd-placeholder000',
 ])
 
