@@ -1,8 +1,10 @@
 'use client'
 import { useState, useTransition } from 'react'
 import { joinLeague } from './actions'
+import { useTranslations } from 'next-intl'
 
 export default function JoinForm() {
+  const t = useTranslations('leagues')
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -21,7 +23,7 @@ export default function JoinForm() {
       <input
         value={code}
         onChange={e => setCode(e.target.value.toUpperCase())}
-        placeholder="Código (ex: AB12CD)"
+        placeholder={t('joinPlaceholder')}
         maxLength={8}
         required
         className="flex-1 bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-[var(--color-orange)] uppercase"
@@ -30,7 +32,7 @@ export default function JoinForm() {
         type="submit" disabled={isPending || code.length < 4}
         className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)] text-sm px-4 py-2 rounded-lg transition-colors disabled:opacity-40"
       >
-        {isPending ? '...' : 'Entrar'}
+        {isPending ? t('joining') : t('joinSubmit')}
       </button>
       {error && <p className="text-[var(--color-danger)] text-xs mt-2 col-span-2">{error}</p>}
     </form>

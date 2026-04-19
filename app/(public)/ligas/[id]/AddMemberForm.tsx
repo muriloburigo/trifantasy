@@ -2,8 +2,10 @@
 import { useState, useTransition } from 'react'
 import { addMemberByUsername } from '../criar/actions'
 import { UserPlus, Check } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function AddMemberForm({ leagueId }: { leagueId: string }) {
+  const t = useTranslations('leagues')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -26,7 +28,7 @@ export default function AddMemberForm({ leagueId }: { leagueId: string }) {
     <form onSubmit={handle} className="flex gap-2">
       <input
         name="username"
-        placeholder="Nome do usuário"
+        placeholder={t('addMemberPlaceholder')}
         required
         className="flex-1 bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-orange)]"
       />
@@ -36,7 +38,7 @@ export default function AddMemberForm({ leagueId }: { leagueId: string }) {
         className="flex items-center gap-1.5 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] disabled:opacity-50 text-white font-semibold rounded-lg px-3 py-2 text-sm transition-colors shrink-0"
       >
         <UserPlus size={14} />
-        {isPending ? '...' : 'Adicionar'}
+        {isPending ? t('adding') : t('addMemberButton')}
       </button>
       {error && <p className="absolute mt-10 text-xs text-[var(--color-danger)]">{error}</p>}
       {success && <p className="absolute mt-10 text-xs text-[var(--color-success)] flex items-center gap-1"><Check size={11} />{success}</p>}

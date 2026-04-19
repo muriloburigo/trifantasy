@@ -6,10 +6,12 @@ import MarketBanner from '~/app/components/MarketBanner'
 import { getMarketStatus } from '~/lib/market'
 import { timeAgo } from '~/lib/utils'
 import { Wallet, Activity } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
 export const revalidate = 0
 
 export default async function AtletasPage() {
+  const t = await getTranslations('market')
   const pub = createPublicClient()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -47,9 +49,9 @@ export default async function AtletasPage() {
       <BackLink href="/" />
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Mercado de Atletas</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-[var(--color-muted)] mt-1">
-            {athletes.length} atletas PRO · preços em Trix Coin (T$)
+            {t('subtitle', { n: athletes.length })}
           </p>
         </div>
         {user && wallet !== null && (
@@ -68,15 +70,15 @@ export default async function AtletasPage() {
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2 text-xs font-bold uppercase tracking-wider text-[var(--color-muted)]">
             <Activity size={11} />
-            Últimas movimentações
+            {t('feedTitle')}
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {feed.map((entry: any) => {
               const change = Number(entry.change)
               const isUp = change > 0
               const reason = entry.reason === 'race_result'
-                ? (entry.race?.name ?? 'prova').replace('IRONMAN ', '').replace('70.3 ', '')
-                : 'ranking PTO'
+                ? (entry.race?.name ?? t('feedRace')).replace('IRONMAN ', '').replace('70.3 ', '')
+                : t('feedPto')
               return (
                 <Link
                   key={entry.id}
@@ -102,22 +104,22 @@ export default async function AtletasPage() {
       <div className="grid grid-cols-3 gap-3 mb-8">
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4 text-center">
           <p className="text-2xl font-black text-[var(--color-success)]">{rising.length}</p>
-          <p className="text-xs text-[var(--color-muted)] mt-1">Em alta ↑</p>
+          <p className="text-xs text-[var(--color-muted)] mt-1">{t('rising')}</p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4 text-center">
           <p className="text-2xl font-black text-[var(--color-danger)]">{falling.length}</p>
-          <p className="text-xs text-[var(--color-muted)] mt-1">Em queda ↓</p>
+          <p className="text-xs text-[var(--color-muted)] mt-1">{t('falling')}</p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4 text-center">
           <p className="text-2xl font-black">{athletes.length}</p>
-          <p className="text-xs text-[var(--color-muted)] mt-1">Total</p>
+          <p className="text-xs text-[var(--color-muted)] mt-1">{t('total')}</p>
         </div>
       </div>
 
       <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
         <div className="px-4 py-3 border-b border-[var(--color-navy-border)] flex items-center justify-between">
-          <span className="text-sm font-bold">Atletas PRO</span>
-          <span className="text-xs text-[var(--color-muted)]">{athletes.length} atletas</span>
+          <span className="text-sm font-bold">{t('tableTitle')}</span>
+          <span className="text-xs text-[var(--color-muted)]">{athletes.length}</span>
         </div>
         <div className="max-h-[700px] overflow-y-auto">
           {athletes.map(a => (

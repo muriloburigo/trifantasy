@@ -2,8 +2,10 @@
 import { useState, useTransition } from 'react'
 import { createLeague } from './actions'
 import { Globe, Lock } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function CreateLeagueForm() {
+  const t = useTranslations('leagues')
   const [error, setError] = useState('')
   const [isPublic, setIsPublic] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -26,17 +28,17 @@ export default function CreateLeagueForm() {
       )}
 
       <div>
-        <label className="block text-sm text-[var(--color-muted)] mb-1">Nome da liga</label>
+        <label className="block text-sm text-[var(--color-muted)] mb-1">{t('nameLabel')}</label>
         <input
           name="name" required
-          placeholder="Ex: Amigos do Grupo MT"
+          placeholder={t('namePlaceholder')}
           className="w-full bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-orange)]"
         />
       </div>
 
       {/* Public / Private toggle */}
       <div>
-        <label className="block text-sm text-[var(--color-muted)] mb-2">Visibilidade</label>
+        <label className="block text-sm text-[var(--color-muted)] mb-2">{t('visibilityLabel')}</label>
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
@@ -49,8 +51,8 @@ export default function CreateLeagueForm() {
           >
             <Lock size={15} className={!isPublic ? 'text-[var(--color-orange)]' : ''} />
             <div className="text-left">
-              <p className="font-semibold leading-tight">Privada</p>
-              <p className="text-[11px] opacity-70 leading-tight">Apenas por convite</p>
+              <p className="font-semibold leading-tight">{t('privateLabel')}</p>
+              <p className="text-[11px] opacity-70 leading-tight">{t('privateDesc')}</p>
             </div>
           </button>
           <button
@@ -64,8 +66,8 @@ export default function CreateLeagueForm() {
           >
             <Globe size={15} className={isPublic ? 'text-[var(--color-orange)]' : ''} />
             <div className="text-left">
-              <p className="font-semibold leading-tight">Pública</p>
-              <p className="text-[11px] opacity-70 leading-tight">Qualquer um pode entrar</p>
+              <p className="font-semibold leading-tight">{t('publicLabel')}</p>
+              <p className="text-[11px] opacity-70 leading-tight">{t('publicDesc')}</p>
             </div>
           </button>
         </div>
@@ -75,7 +77,7 @@ export default function CreateLeagueForm() {
         type="submit" disabled={isPending}
         className="w-full bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] disabled:opacity-50 text-white font-semibold rounded-lg py-2.5 text-sm transition-colors"
       >
-        {isPending ? 'Criando...' : 'Criar Liga'}
+        {isPending ? t('creating') : t('createSubmit')}
       </button>
     </form>
   )

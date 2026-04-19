@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '~/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { ChevronDown, LogOut, User as UserIcon, BarChart2, Wallet, Users } from 'lucide-react'
+import LocaleSwitcher from '~/app/components/LocaleSwitcher'
 
 export default function UserMenu({ user, wallet }: { user: User | null; wallet?: number | null }) {
   const router = useRouter()
@@ -19,7 +20,8 @@ export default function UserMenu({ user, wallet }: { user: User | null; wallet?:
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        <LocaleSwitcher />
         <Link href="/login" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors">Entrar</Link>
         <Link
           href="/register"
@@ -53,6 +55,9 @@ export default function UserMenu({ user, wallet }: { user: User | null; wallet?:
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-10 z-20 w-44 bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-xl shadow-xl py-1">
+            <div className="px-4 py-2 border-b border-[var(--color-navy-border)]">
+              <LocaleSwitcher />
+            </div>
             <Link
               href="/elenco"
               onClick={() => setOpen(false)}

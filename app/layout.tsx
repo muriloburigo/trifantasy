@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Sora } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 import './globals.css'
 
 const inter = Inter({
@@ -20,14 +22,12 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://trixer.com.br'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Trixer — Jogo de escalação do endurance',
+    default: 'Trixer — Endurance Fantasy Game',
     template: '%s | Trixer',
   },
-  description:
-    'Monte seu time com atletas reais do circuito de triathlon — PROs e age-groupers — e pontue pelo desempenho deles nas provas. Onde inteligência vence.',
+  description: 'Build your roster with real athletes from the triathlon circuit — PROs — and score based on their race performance.',
   openGraph: {
     type: 'website',
-    locale: 'pt_BR',
     siteName: 'Trixer',
     url: SITE_URL,
   },
@@ -35,10 +35,17 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${sora.variable}`}>
-      <body className="min-h-screen flex flex-col">{children}</body>
+    <html lang={locale} className={`${inter.variable} ${sora.variable}`}>
+      <body className="min-h-screen flex flex-col">
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
     </html>
   )
 }

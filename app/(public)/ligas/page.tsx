@@ -2,10 +2,12 @@ import Link from 'next/link'
 import { createClient, createPublicClient } from '~/lib/supabase/server'
 import { Plus, Trophy, Users, Lock, Globe } from 'lucide-react'
 import BackLink from '~/app/components/BackLink'
+import { getTranslations } from 'next-intl/server'
 
 export const revalidate = 0
 
 export default async function LigasPage() {
+  const t = await getTranslations('leagues')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const pub = createPublicClient()
@@ -33,9 +35,9 @@ export default async function LigasPage() {
       <BackLink href="/" />
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Trix Leagues</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-[var(--color-muted)] mt-1">
-            {totalLeagues ?? 0} ligas criadas · {totalTeams ?? 0} times montados
+            {t('subtitle', { leagues: totalLeagues ?? 0, teams: totalTeams ?? 0 })}
           </p>
         </div>
         {user && (
@@ -44,7 +46,7 @@ export default async function LigasPage() {
             className="flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
           >
             <Plus size={16} />
-            Criar liga
+            {t('createButton')}
           </Link>
         )}
       </div>
@@ -53,16 +55,16 @@ export default async function LigasPage() {
       {!user && (
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-orange)]/30 rounded-2xl p-8 mb-8 text-center">
           <Trophy size={36} className="mx-auto mb-3 text-[var(--color-orange)] opacity-80" />
-          <h2 className="text-lg font-bold mb-2">Crie sua Trix League</h2>
+          <h2 className="text-lg font-bold mb-2">{t('notLoggedTitle')}</h2>
           <p className="text-sm text-[var(--color-muted)] max-w-md mx-auto mb-6">
-            Crie uma liga, convide seus amigos e disputem quem monta o melhor time em cada prova.
+            {t('notLoggedDesc')}
           </p>
           <div className="flex items-center justify-center gap-3">
             <Link href="/register" className="bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors">
-              Criar conta grátis
+              {t('notLoggedCta')}
             </Link>
             <Link href="/login" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors">
-              Já tenho conta →
+              {t('notLoggedLogin')}
             </Link>
           </div>
         </div>
@@ -71,14 +73,14 @@ export default async function LigasPage() {
       {/* My leagues */}
       {user && (
         <section className="mb-10">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-muted)] mb-4">Minhas ligas</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-muted)] mb-4">{t('myLeaguesTitle')}</h2>
           {myLeagues.length === 0 ? (
             <div className="text-center py-14 text-[var(--color-muted)] bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl">
               <Trophy size={36} className="mx-auto mb-3 opacity-20" />
-              <p className="font-medium">Você não participa de nenhuma liga ainda.</p>
-              <p className="text-sm mt-1 mb-5">Crie uma liga ou entre com código de convite.</p>
+              <p className="font-medium">{t('myLeaguesEmpty')}</p>
+              <p className="text-sm mt-1 mb-5">{t('myLeaguesEmptyDesc')}</p>
               <Link href="/ligas/criar" className="inline-flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
-                <Plus size={15} />Criar primeira liga
+                <Plus size={15} />{t('myLeaguesEmptyCta')}
               </Link>
             </div>
           ) : (
@@ -95,11 +97,11 @@ export default async function LigasPage() {
                   </div>
                   <div className="flex items-center gap-3 text-xs text-[var(--color-muted)]">
                     {league.is_public
-                      ? <span className="flex items-center gap-1"><Globe size={10} />Pública</span>
-                      : <span className="flex items-center gap-1"><Lock size={10} />Privada</span>}
+                      ? <span className="flex items-center gap-1"><Globe size={10} />{t('public')}</span>
+                      : <span className="flex items-center gap-1"><Lock size={10} />{t('private')}</span>}
                     {!league.is_public && (
                       <span className="flex items-center gap-1.5">
-                        Código: <span className="font-mono text-[var(--color-text)]">{league.invite_code}</span>
+                        {t('code')} <span className="font-mono text-[var(--color-text)]">{league.invite_code}</span>
                       </span>
                     )}
                   </div>
@@ -113,7 +115,7 @@ export default async function LigasPage() {
       {/* Public leagues */}
       {publicLeagues.length > 0 && (
         <section className="mb-10">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-muted)] mb-4">Ligas públicas</h2>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-muted)] mb-4">{t('publicTitle')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {publicLeagues.map((league: any) => (
               <Link
@@ -125,7 +127,7 @@ export default async function LigasPage() {
                   <h3 className="font-bold leading-tight">{league.name}</h3>
                   <Globe size={14} className="text-[var(--color-muted)] shrink-0 ml-2" />
                 </div>
-                <span className="text-xs text-[var(--color-success)]">Aberta para participar →</span>
+                <span className="text-xs text-[var(--color-success)]">{t('publicJoin')}</span>
               </Link>
             ))}
           </div>
@@ -134,15 +136,15 @@ export default async function LigasPage() {
 
       {/* Join by invite code */}
       <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-6">
-        <h2 className="font-bold mb-1">Tem um código de convite?</h2>
-        <p className="text-sm text-[var(--color-muted)] mb-3">Entre em uma liga privada com o código enviado por um amigo.</p>
+        <h2 className="font-bold mb-1">{t('inviteTitle')}</h2>
+        <p className="text-sm text-[var(--color-muted)] mb-3">{t('inviteDesc')}</p>
         {user ? (
           <Link href="/ligas/criar" className="text-sm text-[var(--color-orange)] hover:underline">
-            Entrar com código →
+            {t('inviteLoggedCta')}
           </Link>
         ) : (
           <Link href="/register" className="text-sm text-[var(--color-orange)] hover:underline">
-            Crie uma conta para entrar →
+            {t('inviteNotLoggedCta')}
           </Link>
         )}
       </div>
