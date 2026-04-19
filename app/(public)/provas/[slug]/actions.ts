@@ -37,7 +37,7 @@ export async function saveTeam(raceId: string, athleteIds: string[]) {
   // Upsert team
   const { data: team, error: teamError } = await supabase
     .from('teams')
-    .upsert({ user_id: user.id, race_id: raceId }, { onConflict: 'user_id,race_id' })
+    .upsert({ user_id: user.id, race_id: raceId, updated_at: new Date().toISOString() }, { onConflict: 'user_id,race_id' })
     .select('id')
     .single()
 

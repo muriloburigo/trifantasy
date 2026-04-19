@@ -34,12 +34,22 @@ export async function buyAthlete(athleteId: string) {
     .maybeSingle()
   if (existing) return { error: 'Atleta já está no seu elenco.' }
 
+  const walletAfter = wallet - price
   const [p1, p2] = await Promise.all([
     supabase.from('portfolio').insert({ user_id: user.id, athlete_id: athleteId, bought_price: price }),
-    supabase.from('profiles').update({ wallet: wallet - price }).eq('id', user.id),
+    supabase.from('profiles').update({ wallet: walletAfter }).eq('id', user.id),
   ])
 
   if (p1.error || p2.error) return { error: 'Erro ao comprar atleta. Tente novamente.' }
+
+  await supabase.from('market_transactions').insert({
+    user_id: user.id,
+    athlete_id: athleteId,
+    type: 'buy',
+    price,
+    wallet_before: wallet,
+    wallet_after: walletAfter,
+  })
 
   revalidatePath('/atletas')
   revalidatePath('/elenco')
@@ -67,12 +77,22 @@ export async function sellAthlete(athleteId: string) {
   const price = Number(athleteRes.data.current_price)
   const wallet = Number(profileRes.data.wallet)
 
+  const walletAfter = wallet + price
   const [p1, p2] = await Promise.all([
     supabase.from('portfolio').delete().eq('user_id', user.id).eq('athlete_id', athleteId),
-    supabase.from('profiles').update({ wallet: wallet + price }).eq('id', user.id),
+    supabase.from('profiles').update({ wallet: walletAfter }).eq('id', user.id),
   ])
 
   if (p1.error || p2.error) return { error: 'Erro ao vender atleta. Tente novamente.' }
+
+  await supabase.from('market_transactions').insert({
+    user_id: user.id,
+    athlete_id: athleteId,
+    type: 'sell',
+    price,
+    wallet_before: wallet,
+    wallet_after: walletAfter,
+  })
 
   revalidatePath('/atletas')
   revalidatePath('/elenco')
