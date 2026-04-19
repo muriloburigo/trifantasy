@@ -94,7 +94,21 @@
     "alreadyOwned": "Already in roster",
     "notOwns": "Not in roster",
     "errorBuy": "Error buying. Please try again.",
-    "errorSell": "Error selling. Please try again."
+    "errorSell": "Error selling. Please try again.",
+    "searchPlaceholder": "Search by name or country...",
+    "filterClear": "Clear",
+    "filterAll": "All",
+    "filterMen": "Men",
+    "filterWomen": "Women",
+    "filterRising": "Rising",
+    "filterFalling": "Falling",
+    "filterOwned": "In roster",
+    "filterAvailable": "Available",
+    "sortPrice": "Price ↓",
+    "sortName": "Name A-Z",
+    "sortPto": "PTO Rank",
+    "sortTrend": "Movement",
+    "filterEmpty": "No athletes found."
   },
   "team": {
     "title": "My Roster",
@@ -141,7 +155,16 @@
     "sectionFinished": "Finished",
     "openSummary": "{n} open for selection · ",
     "upcomingSummary": "{n} coming soon · ",
-    "finishedSummary": "{n} finished"
+    "finishedSummary": "{n} finished",
+    "searchPlaceholder": "Search by name or location...",
+    "filterAll": "All",
+    "filterOpen": "Open",
+    "filterUpcoming": "Upcoming",
+    "filterFinished": "Finished",
+    "filterFull": "Full Distance",
+    "filterMiddle": "70.3",
+    "filterEmpty": "No races found.",
+    "filterClear": "Clear"
   },
   "teamBuilder": {
     "lockedTitle": "Team selection is not open yet",
@@ -219,7 +242,14 @@
     "joinTitle": "Join with invite code",
     "joinPlaceholder": "Invite code",
     "joinSubmit": "Join League",
-    "joining": "Joining..."
+    "joining": "Joining...",
+    "searchPlaceholder": "Search league...",
+    "filterAll": "All",
+    "filterPublic": "Public",
+    "filterPrivate": "Private",
+    "filterEmpty": "No leagues found.",
+    "filterClear": "Clear",
+    "publicCount": "{n} public leagues"
   },
   "auth": {
     "loginTitle": "Sign in to your account",

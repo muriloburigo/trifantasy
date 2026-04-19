@@ -94,7 +94,21 @@
     "alreadyOwned": "Já está no elenco",
     "notOwns": "Não está no elenco",
     "errorBuy": "Erro ao comprar. Tente novamente.",
-    "errorSell": "Erro ao vender. Tente novamente."
+    "errorSell": "Erro ao vender. Tente novamente.",
+    "searchPlaceholder": "Buscar por nome ou país...",
+    "filterClear": "Limpar",
+    "filterAll": "Todos",
+    "filterMen": "Homens",
+    "filterWomen": "Mulheres",
+    "filterRising": "Em alta",
+    "filterFalling": "Em queda",
+    "filterOwned": "No elenco",
+    "filterAvailable": "Disponíveis",
+    "sortPrice": "Preço ↓",
+    "sortName": "Nome A-Z",
+    "sortPto": "Rank PTO",
+    "sortTrend": "Variação",
+    "filterEmpty": "Nenhum atleta encontrado."
   },
   "team": {
     "title": "Meu Elenco",
@@ -141,7 +155,16 @@
     "sectionFinished": "Encerradas",
     "openSummary": "{n} abertas para escalação · ",
     "upcomingSummary": "{n} em breve · ",
-    "finishedSummary": "{n} encerradas"
+    "finishedSummary": "{n} encerradas",
+    "searchPlaceholder": "Buscar por nome ou local...",
+    "filterAll": "Todas",
+    "filterOpen": "Abertas",
+    "filterUpcoming": "Em breve",
+    "filterFinished": "Encerradas",
+    "filterFull": "Full Distance",
+    "filterMiddle": "70.3",
+    "filterEmpty": "Nenhuma prova encontrada.",
+    "filterClear": "Limpar"
   },
   "teamBuilder": {
     "lockedTitle": "Montagem de time ainda não está aberta",
@@ -219,7 +242,14 @@
     "joinTitle": "Entrar com código de convite",
     "joinPlaceholder": "Código de convite",
     "joinSubmit": "Entrar na Liga",
-    "joining": "Entrando..."
+    "joining": "Entrando...",
+    "searchPlaceholder": "Buscar liga...",
+    "filterAll": "Todas",
+    "filterPublic": "Públicas",
+    "filterPrivate": "Privadas",
+    "filterEmpty": "Nenhuma liga encontrada.",
+    "filterClear": "Limpar",
+    "publicCount": "{n} ligas públicas"
   },
   "auth": {
     "loginTitle": "Entrar na sua conta",

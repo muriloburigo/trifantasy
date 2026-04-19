@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createPublicClient, createClient } from '~/lib/supabase/server'
 import BackLink from '~/app/components/BackLink'
-import AthleteRow from './AthleteRow'
+import AthleteList from './AthleteList'
 import MarketBanner from '~/app/components/MarketBanner'
 import { getMarketStatus } from '~/lib/market'
 import { timeAgo } from '~/lib/utils'
@@ -39,7 +39,7 @@ export default async function AtletasPage() {
   const wallet: number | null = user ? Number(profileRes.data?.wallet ?? 0) : null
   const feed = feedRes.data ?? []
 
-  const ownedMap = new Map(portfolio.map((p: any) => [p.athlete_id, Number(p.bought_price)]))
+  const ownedMap = Object.fromEntries((portfolio ?? []).map((p: any) => [p.athlete_id, Number(p.bought_price)]))
 
   const rising  = athletes.filter(a => Number(a.price_change) > 0)
   const falling = athletes.filter(a => Number(a.price_change) < 0)
@@ -58,7 +58,7 @@ export default async function AtletasPage() {
           <Link href="/elenco" className="flex items-center gap-2 bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/50 text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
             <Wallet size={14} className="text-[var(--color-orange)]" />
             <span>T${wallet.toFixed(0)}</span>
-            <span className="text-[var(--color-muted)] text-xs">· {ownedMap.size} atletas</span>
+            <span className="text-[var(--color-muted)] text-xs">· {Object.keys(ownedMap).length} atletas</span>
           </Link>
         )}
       </div>
@@ -116,24 +116,12 @@ export default async function AtletasPage() {
         </div>
       </div>
 
-      <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-[var(--color-navy-border)] flex items-center justify-between">
-          <span className="text-sm font-bold">{t('tableTitle')}</span>
-          <span className="text-xs text-[var(--color-muted)]">{athletes.length}</span>
-        </div>
-        <div className="max-h-[700px] overflow-y-auto">
-          {athletes.map(a => (
-            <AthleteRow
-              key={a.id}
-              a={a}
-              owned={ownedMap.has(a.id)}
-              boughtPrice={ownedMap.get(a.id) ?? null}
-              wallet={wallet}
-              marketLocked={market.locked}
-            />
-          ))}
-        </div>
-      </div>
+      <AthleteList
+        athletes={athletes}
+        ownedMap={ownedMap}
+        wallet={wallet}
+        marketLocked={market.locked}
+      />
     </div>
   )
 }

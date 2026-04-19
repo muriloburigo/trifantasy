@@ -94,7 +94,21 @@
     "alreadyOwned": "Ya está en la plantilla",
     "notOwns": "No está en la plantilla",
     "errorBuy": "Error al comprar. Inténtalo de nuevo.",
-    "errorSell": "Error al vender. Inténtalo de nuevo."
+    "errorSell": "Error al vender. Inténtalo de nuevo.",
+    "searchPlaceholder": "Buscar por nombre o país...",
+    "filterClear": "Limpiar",
+    "filterAll": "Todos",
+    "filterMen": "Hombres",
+    "filterWomen": "Mujeres",
+    "filterRising": "En alza",
+    "filterFalling": "En baja",
+    "filterOwned": "En plantilla",
+    "filterAvailable": "Disponibles",
+    "sortPrice": "Precio ↓",
+    "sortName": "Nombre A-Z",
+    "sortPto": "Ranking PTO",
+    "sortTrend": "Variación",
+    "filterEmpty": "Sin atletas encontrados."
   },
   "team": {
     "title": "Mi Plantilla",
@@ -141,7 +155,16 @@
     "sectionFinished": "Terminadas",
     "openSummary": "{n} abiertas para selección · ",
     "upcomingSummary": "{n} próximamente · ",
-    "finishedSummary": "{n} terminadas"
+    "finishedSummary": "{n} terminadas",
+    "searchPlaceholder": "Buscar por nombre o lugar...",
+    "filterAll": "Todas",
+    "filterOpen": "Abiertas",
+    "filterUpcoming": "Próximamente",
+    "filterFinished": "Terminadas",
+    "filterFull": "Distancia Completa",
+    "filterMiddle": "70.3",
+    "filterEmpty": "Sin carreras encontradas.",
+    "filterClear": "Limpiar"
   },
   "teamBuilder": {
     "lockedTitle": "La selección de equipo aún no está abierta",
@@ -219,7 +242,14 @@
     "joinTitle": "Unirse con código de invitación",
     "joinPlaceholder": "Código de invitación",
     "joinSubmit": "Unirse a la Liga",
-    "joining": "Uniéndose..."
+    "joining": "Uniéndose...",
+    "searchPlaceholder": "Buscar liga...",
+    "filterAll": "Todas",
+    "filterPublic": "Públicas",
+    "filterPrivate": "Privadas",
+    "filterEmpty": "Sin ligas encontradas.",
+    "filterClear": "Limpiar",
+    "publicCount": "{n} ligas públicas"
   },
   "auth": {
     "loginTitle": "Iniciar sesión en tu cuenta",

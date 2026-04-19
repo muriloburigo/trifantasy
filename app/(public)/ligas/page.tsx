@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { createClient, createPublicClient } from '~/lib/supabase/server'
-import { Plus, Trophy, Users, Lock, Globe } from 'lucide-react'
+import { Plus, Trophy } from 'lucide-react'
 import BackLink from '~/app/components/BackLink'
 import { getTranslations } from 'next-intl/server'
+import LeagueSearch from './LeagueSearch'
 
 export const revalidate = 0
 
@@ -70,68 +71,25 @@ export default async function LigasPage() {
         </div>
       )}
 
-      {/* My leagues */}
-      {user && (
-        <section className="mb-10">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-muted)] mb-4">{t('myLeaguesTitle')}</h2>
-          {myLeagues.length === 0 ? (
-            <div className="text-center py-14 text-[var(--color-muted)] bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl">
-              <Trophy size={36} className="mx-auto mb-3 opacity-20" />
-              <p className="font-medium">{t('myLeaguesEmpty')}</p>
-              <p className="text-sm mt-1 mb-5">{t('myLeaguesEmptyDesc')}</p>
-              <Link href="/ligas/criar" className="inline-flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
-                <Plus size={15} />{t('myLeaguesEmptyCta')}
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {myLeagues.map((league: any) => (
-                <Link
-                  key={league.id}
-                  href={`/ligas/${league.id}`}
-                  className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/50 rounded-2xl p-5 transition-all"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="font-bold leading-tight">{league.name}</h3>
-                    <Trophy size={16} className="text-[var(--color-orange)] opacity-60 shrink-0 ml-2" />
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-[var(--color-muted)]">
-                    {league.is_public
-                      ? <span className="flex items-center gap-1"><Globe size={10} />{t('public')}</span>
-                      : <span className="flex items-center gap-1"><Lock size={10} />{t('private')}</span>}
-                    {!league.is_public && (
-                      <span className="flex items-center gap-1.5">
-                        {t('code')} <span className="font-mono text-[var(--color-text)]">{league.invite_code}</span>
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
+      {/* My leagues + Public leagues with search/filter */}
+      {(user || publicLeagues.length > 0) && (
+        <LeagueSearch
+          myLeagues={myLeagues}
+          publicLeagues={publicLeagues}
+          isLoggedIn={!!user}
+        />
       )}
 
-      {/* Public leagues */}
-      {publicLeagues.length > 0 && (
-        <section className="mb-10">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-muted)] mb-4">{t('publicTitle')}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {publicLeagues.map((league: any) => (
-              <Link
-                key={league.id}
-                href={`/ligas/${league.id}`}
-                className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/50 rounded-2xl p-5 transition-all"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-bold leading-tight">{league.name}</h3>
-                  <Globe size={14} className="text-[var(--color-muted)] shrink-0 ml-2" />
-                </div>
-                <span className="text-xs text-[var(--color-success)]">{t('publicJoin')}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
+      {/* Empty state for logged-in users with no leagues and no public leagues */}
+      {user && myLeagues.length === 0 && publicLeagues.length === 0 && (
+        <div className="text-center py-14 text-[var(--color-muted)] bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl mb-8">
+          <Trophy size={36} className="mx-auto mb-3 opacity-20" />
+          <p className="font-medium">{t('myLeaguesEmpty')}</p>
+          <p className="text-sm mt-1 mb-5">{t('myLeaguesEmptyDesc')}</p>
+          <Link href="/ligas/criar" className="inline-flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+            <Plus size={15} />{t('myLeaguesEmptyCta')}
+          </Link>
+        </div>
       )}
 
       {/* Join by invite code */}
