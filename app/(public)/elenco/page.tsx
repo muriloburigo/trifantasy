@@ -69,7 +69,7 @@ export default async function ElencoPage() {
         </Link>
       </div>
 
-      <MarketBanner locked={market.locked} reason={market.reason} lockRace={market.lockRace} />
+      <MarketBanner locked={market.locked} reasonKey={market.reasonKey} lockRace={market.lockRace} />
 
       {/* Stats bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

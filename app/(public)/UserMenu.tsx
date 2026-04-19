@@ -6,10 +6,12 @@ import { createClient } from '~/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { ChevronDown, LogOut, User as UserIcon, BarChart2, Wallet, Users } from 'lucide-react'
 import LocaleSwitcher from '~/app/components/LocaleSwitcher'
+import { useTranslations } from 'next-intl'
 
 export default function UserMenu({ user, wallet }: { user: User | null; wallet?: number | null }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const t = useTranslations('nav')
 
   async function handleLogout() {
     const supabase = createClient()
@@ -22,12 +24,12 @@ export default function UserMenu({ user, wallet }: { user: User | null; wallet?:
     return (
       <div className="flex items-center gap-3">
         <LocaleSwitcher />
-        <Link href="/login" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors">Entrar</Link>
+        <Link href="/login" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors">{t('login')}</Link>
         <Link
           href="/register"
           className="text-sm bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
         >
-          Criar conta
+          {t('createAccount')}
         </Link>
       </div>
     )
@@ -64,7 +66,7 @@ export default function UserMenu({ user, wallet }: { user: User | null; wallet?:
               className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--color-navy-border)]/40 transition-colors"
             >
               <Wallet size={14} className="text-[var(--color-orange)]" />
-              <span>Meu Elenco</span>
+              <span>{t('team')}</span>
               {wallet != null && <span className="ml-auto text-xs text-[var(--color-orange)] font-bold">T${wallet.toFixed(0)}</span>}
             </Link>
             <Link
@@ -73,7 +75,7 @@ export default function UserMenu({ user, wallet }: { user: User | null; wallet?:
               className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--color-navy-border)]/40 transition-colors"
             >
               <Users size={14} className="text-[var(--color-muted)]" />
-              Minhas Ligas
+              {t('myLeagues')}
             </Link>
             <hr className="border-[var(--color-navy-border)] my-1" />
             <button
@@ -81,7 +83,7 @@ export default function UserMenu({ user, wallet }: { user: User | null; wallet?:
               className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[var(--color-danger)] hover:bg-[var(--color-navy-border)]/40 transition-colors"
             >
               <LogOut size={14} />
-              Sair
+              {t('logout')}
             </button>
           </div>
         </>

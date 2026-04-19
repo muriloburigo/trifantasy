@@ -7,6 +7,7 @@ import {
   Users, ChevronRight, Zap, ArrowRight, Star, Lock,
 } from 'lucide-react'
 import PublicShell from './(public)/PublicShell'
+import { getTranslations } from 'next-intl/server'
 
 export const revalidate = 600
 
@@ -97,7 +98,7 @@ function AthleteCard({ a, rank }: { a: any; rank?: number }) {
 
 // ─── race card (sidebar) ──────────────────────────────────────────────────────
 
-function RaceCard({ race, athleteCount }: { race: Race; athleteCount?: number }) {
+function RaceCard({ race, athleteCount, t }: { race: Race; athleteCount?: number; t: (key: string, params?: any) => string }) {
   const days = daysUntil(race.date)
   const isOpen = race.status === 'open'
   return (
@@ -108,7 +109,7 @@ function RaceCard({ race, athleteCount }: { race: Race; athleteCount?: number })
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex-1 min-w-0">
           <span className={`text-[10px] font-bold uppercase tracking-wider ${isOpen ? 'text-[var(--color-success)]' : 'text-[var(--color-muted)]'}`}>
-            {race.distance === 'full' ? 'Full · ' : '70.3 · '}{isOpen ? '● Aberto' : 'Em breve'}
+            {race.distance === 'full' ? 'Full · ' : '70.3 · '}{isOpen ? t('raceOpen') : t('raceUpcoming')}
           </span>
           <h3 className="font-bold text-sm mt-0.5 leading-tight group-hover:text-[var(--color-orange)] transition-colors line-clamp-2">
             {race.name}
@@ -121,14 +122,14 @@ function RaceCard({ race, athleteCount }: { race: Race; athleteCount?: number })
           <Calendar size={11} />{formatDate(race.date)}
           {days > 0 && days <= 30 && <span className="text-[var(--color-orange)] font-semibold ml-1">{days}d</span>}
         </div>
-        {athleteCount && <div className="flex items-center gap-1.5"><Users size={11} />{athleteCount} atletas disponíveis</div>}
+        {athleteCount && <div className="flex items-center gap-1.5"><Users size={11} />{athleteCount} {t('raceAthletes')}</div>}
       </div>
       <div className={`w-full text-center text-xs font-semibold py-2 rounded-lg transition-colors ${
         isOpen
           ? 'bg-[var(--color-orange)]/10 text-[var(--color-orange)] group-hover:bg-[var(--color-orange)]/20'
           : 'bg-[var(--color-navy-elevated)] text-[var(--color-muted)]'
       }`}>
-        Ver campo PRO →
+        {t('raceCta')}
       </div>
     </Link>
   )
@@ -169,6 +170,7 @@ function RankRow({ entry, pos }: { entry: any; pos: number }) {
 // ─── page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
+  const t = await getTranslations('home')
   const pub   = createPublicClient()
   const admin = createAdminClient()
 
@@ -245,24 +247,24 @@ export default async function HomePage() {
           {/* Left */}
           <div className="flex-1">
             <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[var(--color-orange)] mb-3">
-              Jogo de escalação do endurance
+              {t('tagline')}
             </p>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight tracking-tight mb-4">
-              Três modalidades.<br />
-              Cinco escolhas.<br />
+              {t('title1')}<br />
+              {t('title2')}<br />
               <span className="bg-gradient-to-r from-[var(--color-orange)] to-[var(--color-purple)] bg-clip-text text-transparent">
-                Uma Trix League.
+                {t('titleHighlight')}
               </span>
             </h1>
             <p className="text-[var(--color-muted)] text-sm max-w-md leading-relaxed mb-6">
-              Monte seu elenco com atletas PRO reais. Pontue pelo desempenho na prova. Dispute a Trix League.
+              {t('description')}
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               <Link href="/register" className="bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-colors">
-                Entrar no jogo — grátis
+                {t('ctaPrimary')}
               </Link>
               <Link href="/regras" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors flex items-center gap-1">
-                Como funciona <ArrowRight size={12} />
+                {t('ctaSecondary')} <ArrowRight size={12} />
               </Link>
             </div>
           </div>
@@ -270,9 +272,9 @@ export default async function HomePage() {
           {/* Right: stats */}
           <div className="grid grid-cols-3 gap-3 md:w-64 w-full">
             {[
-              { label: 'Atletas', value: athleteCount ?? 0, icon: Zap,    color: 'text-[var(--color-orange)]', href: '/atletas' },
-              { label: 'Trixers', value: trixerCount ?? 0,  icon: Users,  color: 'text-[var(--color-purple)]', href: '/trixers' },
-              { label: 'Ligas',   value: leagueCount ?? 0,  icon: Trophy, color: 'text-yellow-400',            href: '/ligas' },
+              { label: t('statsAthletes'), value: athleteCount ?? 0, icon: Zap,    color: 'text-[var(--color-orange)]', href: '/atletas' },
+              { label: t('statsTrixers'), value: trixerCount ?? 0,  icon: Users,  color: 'text-[var(--color-purple)]', href: '/trixers' },
+              { label: t('statsLeagues'),   value: leagueCount ?? 0,  icon: Trophy, color: 'text-yellow-400',            href: '/ligas' },
             ].map(({ label, value, icon: Icon, color, href }) => (
               <Link key={label} href={href}
                 className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/40 rounded-xl p-3 text-center transition-all hover:bg-[var(--color-navy-card)] group">
@@ -294,8 +296,8 @@ export default async function HomePage() {
               <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-success)] animate-pulse" />
               <span className="text-sm font-bold text-[var(--color-success)]">
                 {openRaces.length > 0
-                  ? `${openRaces.length} ${openRaces.length === 1 ? 'prova aberta' : 'provas abertas'} para escalação`
-                  : `${next7Races.length} ${next7Races.length === 1 ? 'prova' : 'provas'} nos próximos 7 dias`
+                  ? openRaces.length === 1 ? t('openRaceSingular', { n: openRaces.length }) : t('openRacePlural', { n: openRaces.length })
+                  : next7Races.length === 1 ? t('upcomingRace', { n: next7Races.length }) : t('upcomingRacePlural', { n: next7Races.length })
                 }
               </span>
             </div>
@@ -309,7 +311,7 @@ export default async function HomePage() {
             </div>
             {remainingCount > 0 && (
               <Link href="/provas" className="text-xs text-[var(--color-muted)] hover:text-white ml-auto shrink-0 flex items-center gap-1">
-                +{remainingCount} mais <ChevronRight size={12} />
+                {t('moreRaces', { n: remainingCount })} <ChevronRight size={12} />
               </Link>
             )}
           </div>
@@ -327,9 +329,9 @@ export default async function HomePage() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-bold flex items-center gap-2 text-base">
                     <TrendingUp size={16} className="text-[var(--color-success)]" />
-                    Em alta no mercado
+                    {t('risingMarket')}
                   </h2>
-                  <span className="text-xs text-[var(--color-muted)]">Trix Coin (T$)</span>
+                  <span className="text-xs text-[var(--color-muted)]">{t('trixCoin')}</span>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
                   {rising.map(a => <AthleteCard key={a.id} a={a} />)}
@@ -343,7 +345,7 @@ export default async function HomePage() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-bold flex items-center gap-2 text-base">
                     <TrendingDown size={16} className="text-[var(--color-danger)]" />
-                    Em queda no mercado
+                    {t('fallingMarket')}
                   </h2>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
@@ -358,8 +360,8 @@ export default async function HomePage() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-bold flex items-center gap-2 text-base">
                     <Star size={16} className="text-yellow-400" />
-                    Atletas disponíveis
-                    <span className="text-xs text-[var(--color-muted)] font-normal">provas abertas</span>
+                    {t('availableAthletes')}
+                    <span className="text-xs text-[var(--color-muted)] font-normal">{t('availableSubtitle')}</span>
                   </h2>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
@@ -372,8 +374,8 @@ export default async function HomePage() {
             {!hasMarket && featuredAthletes.length === 0 && (
               <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-10 text-center text-[var(--color-muted)]">
                 <Zap size={32} className="mx-auto mb-3 opacity-20" />
-                <p className="font-medium">Mercado sendo montado...</p>
-                <p className="text-sm mt-1">Atletas aparecerão aqui assim que as provas forem configuradas.</p>
+                <p className="font-medium">{t('marketLoading')}</p>
+                <p className="text-sm mt-1">{t('marketLoadingDesc')}</p>
               </div>
             )}
 
@@ -382,10 +384,10 @@ export default async function HomePage() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-bold flex items-center gap-2 text-base">
                   <Trophy size={16} className="text-yellow-400" />
-                  Trix League Global
+                  {t('rankingTitle')}
                 </h2>
                 <Link href="/ligas" className="text-xs text-[var(--color-muted)] hover:text-[var(--color-orange)] flex items-center gap-1 transition-colors">
-                  Ver ligas <ArrowRight size={11} />
+                  {t('rankingViewAll')} <ArrowRight size={11} />
                 </Link>
               </div>
               <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
@@ -394,8 +396,8 @@ export default async function HomePage() {
                 ) : (
                   <div className="py-14 text-center text-[var(--color-muted)]">
                     <Trophy size={28} className="mx-auto mb-3 opacity-20" />
-                    <p className="text-sm">Nenhuma pontuação ainda.</p>
-                    <Link href="/register" className="text-xs text-[var(--color-orange)] mt-2 inline-block">Seja o primeiro →</Link>
+                    <p className="text-sm">{t('rankingEmpty')}</p>
+                    <Link href="/register" className="text-xs text-[var(--color-orange)] mt-2 inline-block">{t('rankingEmptyCta')}</Link>
                   </div>
                 )}
               </div>
@@ -410,10 +412,10 @@ export default async function HomePage() {
               <section>
                 <h2 className="font-bold text-sm mb-3 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[var(--color-success)] animate-pulse" />
-                  Próximos 7 dias
+                  {t('next7Days')}
                 </h2>
                 <div className="space-y-3">
-                  {next7Races.map(r => <RaceCard key={r.id} race={r} />)}
+                  {next7Races.map(r => <RaceCard key={r.id} race={r} t={t} />)}
                 </div>
               </section>
             )}
@@ -424,7 +426,7 @@ export default async function HomePage() {
                 href="/provas"
                 className="flex items-center justify-between w-full bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/40 rounded-xl px-4 py-3 text-sm text-[var(--color-muted)] hover:text-white transition-all"
               >
-                <span>Ver mais {remainingCount} {remainingCount === 1 ? 'prova' : 'provas'}</span>
+                <span>{t('moreRacesCount', { n: remainingCount })}</span>
                 <ChevronRight size={14} />
               </Link>
             )}
@@ -432,16 +434,16 @@ export default async function HomePage() {
             {/* Liga CTA */}
             <div className="bg-gradient-to-br from-[var(--color-orange)]/10 to-[var(--color-purple)]/10 border border-[var(--color-orange)]/20 rounded-2xl p-5 text-center">
               <Trophy size={24} className="mx-auto mb-2 text-yellow-400 opacity-80" />
-              <h3 className="font-bold text-sm mb-1">Crie sua Trix League</h3>
+              <h3 className="font-bold text-sm mb-1">{t('leagueCta')}</h3>
               <p className="text-[11px] text-[var(--color-muted)] mb-4 leading-relaxed">
-                Convide amigos, montem times e disputem quem conhece melhor o pelotão.
+                {t('leagueCtaDesc')}
               </p>
               <Link href="/register"
                 className="block w-full text-center bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-xs font-bold py-2.5 rounded-lg transition-colors mb-2">
-                Criar conta grátis
+                {t('leagueCtaButton')}
               </Link>
               <Link href="/login" className="block w-full text-center text-xs text-[var(--color-muted)] hover:text-white border border-[var(--color-navy-border)] py-2.5 rounded-lg transition-colors">
-                Já tenho conta
+                {t('leagueCtaLogin')}
               </Link>
             </div>
 
@@ -449,11 +451,11 @@ export default async function HomePage() {
             <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-1">
                 <Lock size={13} className="text-[var(--color-muted)]" />
-                <h3 className="text-sm font-semibold">Tem um código de convite?</h3>
+                <h3 className="text-sm font-semibold">{t('inviteTitle')}</h3>
               </div>
-              <p className="text-[11px] text-[var(--color-muted)] mb-3">Entre em uma liga privada com o código enviado por um amigo.</p>
+              <p className="text-[11px] text-[var(--color-muted)] mb-3">{t('inviteDesc')}</p>
               <Link href="/register" className="text-xs text-[var(--color-orange)] hover:underline">
-                Criar conta para entrar →
+                {t('inviteLoginCta')}
               </Link>
             </div>
           </div>

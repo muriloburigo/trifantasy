@@ -6,6 +6,7 @@ import type { Race, RaceAthlete, Team } from '~/lib/types'
 import { MapPin, Calendar, Users, Lock, Timer } from 'lucide-react'
 import TeamBuilder from './TeamBuilder'
 import BackLink from '~/app/components/BackLink'
+import { getTranslations } from 'next-intl/server'
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'Brazil': '🇧🇷', 'Norway': '🇳🇴', 'Germany': '🇩🇪', 'Belgium': '🇧🇪',
@@ -39,6 +40,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function RacePage({ params }: { params: Promise<{ slug: string }> }) {
+  const t = await getTranslations('races')
   const { slug } = await params
   const supabase = createPublicClient()
 
@@ -112,21 +114,21 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
       {/* Race header */}
       <div className="mb-8">
         <span className="text-xs font-semibold text-[var(--color-orange)] uppercase tracking-wider">
-          {race.distance === 'full' ? 'Full Triathlon' : 'Middle Distance'}
+          {race.distance === 'full' ? t('full') : t('middle')}
         </span>
         <h1 className="text-3xl md:text-4xl font-extrabold mt-1 mb-3">{race.name}</h1>
         <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-muted)]">
           <span className="flex items-center gap-1.5"><MapPin size={14} />{race.location}, {race.country}</span>
           <span className="flex items-center gap-1.5">
             <Calendar size={14} />{formatDate(race.date)}
-            {days > 0 && <span className="text-[var(--color-orange)] ml-1">{days} dias</span>}
+            {days > 0 && <span className="text-[var(--color-orange)] ml-1">{t('seeDays', { n: days })}</span>}
           </span>
           <span className="flex items-center gap-1.5">
-            <Users size={14} />{raceAthletes?.length ?? 0} atletas cadastrados
+            <Users size={14} />{t('athletes', { n: raceAthletes?.length ?? 0 })}
           </span>
           {!isOpen && !isFinished && (
             <span className="flex items-center gap-1.5 text-yellow-400">
-              <Lock size={14} />Montagem de time em breve
+              <Lock size={14} />{t('lockSoon')}
             </span>
           )}
         </div>
@@ -137,18 +139,18 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
         <div className="space-y-6">
           <div className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
             <span className="text-xl">🏁</span>
-            <span>Prova encerrada</span>
+            <span>{t('finished')}</span>
           </div>
 
           {proResults.length === 0 ? (
             <div className="text-center py-16 text-[var(--color-muted)] bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl">
               <p className="text-3xl mb-3">⏳</p>
-              <p className="font-medium">Resultados em processamento...</p>
-              <p className="text-sm mt-1">Volte em breve para ver o resultado oficial.</p>
+              <p className="font-medium">{t('resultsProcessing')}</p>
+              <p className="text-sm mt-1">{t('resultsProcessingDesc')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[{ label: 'MPRO — Masculino', data: menResults }, { label: 'FPRO — Feminino', data: womenResults }].map(({ label, data }) => (
+              {[{ label: t('mproLabel'), data: menResults }, { label: t('fproLabel'), data: womenResults }].map(({ label, data }) => (
                 data.length > 0 && (
                   <div key={label} className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
                     <div className="px-4 py-3 border-b border-[var(--color-navy-border)]">
