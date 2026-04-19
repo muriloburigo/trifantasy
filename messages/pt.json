@@ -22,7 +22,10 @@
     "rules": "Como funciona",
     "login": "Entrar",
     "logout": "Sair",
-    "admin": "Admin"
+    "admin": "Admin",
+    "createAccount": "Criar conta",
+    "myLeagues": "Minhas Ligas",
+    "home": "Home"
   },
   "home": {
     "tagline": "Jogo de escalação do endurance",
@@ -62,7 +65,9 @@
     "inviteDesc": "Entre em uma liga privada com o código enviado por um amigo.",
     "inviteLoginCta": "Criar conta para entrar →",
     "marketLoading": "Mercado sendo montado...",
-    "marketLoadingDesc": "Atletas aparecerão aqui assim que as provas forem configuradas."
+    "marketLoadingDesc": "Atletas aparecerão aqui assim que as provas forem configuradas.",
+    "moreRacesCount": "Ver mais {n} {n, plural, one {prova} other {provas}}",
+    "athleteAvailable": "atletas disponíveis"
   },
   "market": {
     "title": "Mercado de Atletas",
@@ -129,7 +134,14 @@
     "resultsProcessingDesc": "Volte em breve para ver o resultado oficial.",
     "mproLabel": "MPRO — Masculino",
     "fproLabel": "FPRO — Feminino",
-    "lockSoon": "Montagem de time em breve"
+    "lockSoon": "Montagem de time em breve",
+    "calendar": "Calendário de Provas",
+    "sectionOpen": "Abertas para escalação",
+    "sectionUpcoming": "Em breve",
+    "sectionFinished": "Encerradas",
+    "openSummary": "{n} abertas para escalação · ",
+    "upcomingSummary": "{n} em breve · ",
+    "finishedSummary": "{n} encerradas"
   },
   "teamBuilder": {
     "lockedTitle": "Montagem de time ainda não está aberta",
@@ -233,12 +245,34 @@
     "lockedUntil": "Mercado fechado até o fim da prova.",
     "closingSoon": "Mercado fecha em breve",
     "closingDesc": "O mercado fecha 24h antes de {race}.",
-    "open": "Mercado aberto"
+    "open": "Mercado aberto",
+    "openFull": "Mercado aberto — você pode comprar e vender atletas livremente.",
+    "ongoingRace": "Prova em andamento: {race}",
+    "closingSoonDesc": "Mercado fechado — menos de 24h para {race}",
+    "reopens": "reabre após os resultados serem publicados."
   },
   "locale": {
     "label": "Idioma",
     "pt": "Português",
     "en": "English",
     "es": "Español"
+  },
+  "athlete": {
+    "racesLabel": "Provas",
+    "bestPos": "Melhor pos.",
+    "teamsLabel": "Times",
+    "dnfCount": "DNFs",
+    "raceHistory": "Histórico de Provas",
+    "noRaces": "Nenhuma prova registrada.",
+    "priceAtRace": "Preço na prova",
+    "dnfLabel": "DNF — Não finalizou",
+    "dnsLabel": "DNS — Não largou",
+    "openLabel": "● Aberto para escalação",
+    "lockedLabel": "Encerrado para escalação",
+    "upcomingLabel": "Em breve",
+    "priceChangeLabel": "Variação de preço após esta prova:",
+    "noResult": "Resultado não disponível",
+    "fantasyTitle": "Melhor Performance no TriFantasy",
+    "fantasyContributed": "Contribuiu em {n} times ao total"
   }
 }

@@ -63,7 +63,7 @@ export default async function AtletasPage() {
         )}
       </div>
 
-      <MarketBanner locked={market.locked} reason={market.reason} lockRace={market.lockRace} />
+      <MarketBanner locked={market.locked} reasonKey={market.reasonKey} lockRace={market.lockRace} />
 
       {/* Price movement feed */}
       {feed.length > 0 && (

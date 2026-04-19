@@ -22,7 +22,10 @@
     "rules": "How it works",
     "login": "Sign in",
     "logout": "Sign out",
-    "admin": "Admin"
+    "admin": "Admin",
+    "createAccount": "Create account",
+    "myLeagues": "My Leagues",
+    "home": "Home"
   },
   "home": {
     "tagline": "Endurance fantasy game",
@@ -62,7 +65,9 @@
     "inviteDesc": "Join a private league with the code sent by a friend.",
     "inviteLoginCta": "Create account to join →",
     "marketLoading": "Market is being set up...",
-    "marketLoadingDesc": "Athletes will appear here once races are configured."
+    "marketLoadingDesc": "Athletes will appear here once races are configured.",
+    "moreRacesCount": "View {n} more",
+    "athleteAvailable": "athletes available"
   },
   "market": {
     "title": "Athlete Market",
@@ -129,7 +134,14 @@
     "resultsProcessingDesc": "Check back soon for official results.",
     "mproLabel": "MPRO — Men",
     "fproLabel": "FPRO — Women",
-    "lockSoon": "Team selection coming soon"
+    "lockSoon": "Team selection coming soon",
+    "calendar": "Race Calendar",
+    "sectionOpen": "Open for selection",
+    "sectionUpcoming": "Coming soon",
+    "sectionFinished": "Finished",
+    "openSummary": "{n} open for selection · ",
+    "upcomingSummary": "{n} coming soon · ",
+    "finishedSummary": "{n} finished"
   },
   "teamBuilder": {
     "lockedTitle": "Team selection is not open yet",
@@ -233,12 +245,34 @@
     "lockedUntil": "Market closed until the end of the race.",
     "closingSoon": "Market closing soon",
     "closingDesc": "The market closes 24h before {race}.",
-    "open": "Market open"
+    "open": "Market open",
+    "openFull": "Market open — you can buy and sell athletes freely.",
+    "ongoingRace": "Race underway: {race}",
+    "closingSoonDesc": "Market closed — less than 24h until {race}",
+    "reopens": "reopens after results are published."
   },
   "locale": {
     "label": "Language",
     "pt": "Português",
     "en": "English",
     "es": "Español"
+  },
+  "athlete": {
+    "racesLabel": "Races",
+    "bestPos": "Best pos.",
+    "teamsLabel": "Teams",
+    "dnfCount": "DNFs",
+    "raceHistory": "Race History",
+    "noRaces": "No races registered.",
+    "priceAtRace": "Race price",
+    "dnfLabel": "DNF — Did not finish",
+    "dnsLabel": "DNS — Did not start",
+    "openLabel": "● Open for selection",
+    "lockedLabel": "Selection closed",
+    "upcomingLabel": "Coming soon",
+    "priceChangeLabel": "Price change after this race:",
+    "noResult": "Result not available",
+    "fantasyTitle": "Best TriFantasy Performance",
+    "fantasyContributed": "Contributed in {n} teams total"
   }
 }

@@ -5,6 +5,7 @@ import { formatDate, formatTime } from '~/lib/utils'
 import { TrendingUp, TrendingDown, Minus, Trophy, Flag, Timer, Bike, PersonStanding, Waves } from 'lucide-react'
 import { BuyButton, SellButton } from '~/app/(public)/elenco/TradeButton'
 import { getMarketStatus } from '~/lib/market'
+import { getTranslations } from 'next-intl/server'
 
 export const revalidate = 0
 
@@ -44,6 +45,7 @@ function PriceTrend({ change }: { change: number }) {
 }
 
 export default async function AthleteDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await getTranslations('athlete')
   const { id } = await params
   const pub    = createPublicClient()
   const admin  = createAdminClient()
@@ -195,32 +197,32 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
       <div className="grid grid-cols-4 gap-3 mb-6">
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-3 text-center">
           <p className="text-xl font-black">{(raceAthletes ?? []).length}</p>
-          <p className="text-[11px] text-[var(--color-muted)] mt-0.5">Provas</p>
+          <p className="text-[11px] text-[var(--color-muted)] mt-0.5">{t('racesLabel')}</p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-3 text-center">
           <p className="text-xl font-black text-[var(--color-success)]">
             {bestPos ? `#${bestPos}` : '—'}
           </p>
-          <p className="text-[11px] text-[var(--color-muted)] mt-0.5">Melhor pos.</p>
+          <p className="text-[11px] text-[var(--color-muted)] mt-0.5">{t('bestPos')}</p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-3 text-center">
           <p className="text-xl font-black text-[var(--color-orange)]">{pickedCount ?? 0}</p>
-          <p className="text-[11px] text-[var(--color-muted)] mt-0.5">Times</p>
+          <p className="text-[11px] text-[var(--color-muted)] mt-0.5">{t('teamsLabel')}</p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-3 text-center">
           <p className="text-xl font-black">{dnfCount > 0 ? dnfCount : '—'}</p>
-          <p className="text-[11px] text-[var(--color-muted)] mt-0.5">DNFs</p>
+          <p className="text-[11px] text-[var(--color-muted)] mt-0.5">{t('dnfCount')}</p>
         </div>
       </div>
 
       {/* Race history */}
       <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden mb-6">
         <div className="px-4 py-3 border-b border-[var(--color-navy-border)]">
-          <h2 className="text-sm font-bold">Histórico de Provas</h2>
+          <h2 className="text-sm font-bold">{t('raceHistory')}</h2>
         </div>
 
         {(raceAthletes ?? []).length === 0 ? (
-          <p className="text-center py-10 text-sm text-[var(--color-muted)]">Nenhuma prova registrada.</p>
+          <p className="text-center py-10 text-sm text-[var(--color-muted)]">{t('noRaces')}</p>
         ) : (
           <div>
             {(raceAthletes ?? []).map((ra: any) => {
@@ -247,7 +249,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-xs text-[var(--color-muted)]">Preço na prova</p>
+                      <p className="text-xs text-[var(--color-muted)]">{t('priceAtRace')}</p>
                       <p className="font-black text-[var(--color-orange)]">T${Number(ra.price).toFixed(0)}</p>
                     </div>
                   </div>
@@ -257,12 +259,12 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
                     <div>
                       {isDNF && (
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[var(--color-danger)]/15 text-[var(--color-danger)] text-xs font-bold">
-                          DNF — Não finalizou
+                          {t('dnfLabel')}
                         </span>
                       )}
                       {isDNS && (
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[var(--color-muted)]/15 text-[var(--color-muted)] text-xs font-bold">
-                          DNS — Não largou
+                          {t('dnsLabel')}
                         </span>
                       )}
                       {!isDNF && !isDNS && (
@@ -302,18 +304,18 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
                     </div>
                   )}
                   {isFinished && !hasResult && (
-                    <span className="text-[11px] text-[var(--color-muted)]">Resultado não disponível</span>
+                    <span className="text-[11px] text-[var(--color-muted)]">{t('noResult')}</span>
                   )}
                   {!isFinished && (
                     <span className={`text-[11px] font-medium ${race.status === 'open' ? 'text-[var(--color-success)]' : 'text-[var(--color-muted)]'}`}>
-                      {race.status === 'open' ? '● Aberto para escalação' : race.status === 'locked' ? 'Encerrado para escalação' : 'Em breve'}
+                      {race.status === 'open' ? t('openLabel') : race.status === 'locked' ? t('lockedLabel') : t('upcomingLabel')}
                     </span>
                   )}
 
                   {/* Price change indicator */}
                   {priceChange !== 0 && isFinished && (
                     <div className="mt-2 pt-2 border-t border-[var(--color-navy-border)]/50">
-                      <span className="text-[11px] text-[var(--color-muted)]">Variação de preço após esta prova: </span>
+                      <span className="text-[11px] text-[var(--color-muted)]">{t('priceChangeLabel')} </span>
                       <span className={`text-[11px] font-bold ${priceChange > 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
                         {priceChange > 0 ? '+' : ''}{priceChange.toFixed(1)} T$
                       </span>
@@ -330,7 +332,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
       {bestContribution && (
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
           <div className="px-4 py-3 border-b border-[var(--color-navy-border)]">
-            <h2 className="text-sm font-bold">Melhor Performance no TriFantasy</h2>
+            <h2 className="text-sm font-bold">{t('fantasyTitle')}</h2>
           </div>
           <div className="px-4 py-4">
             <div className="flex items-center justify-between mb-2">
@@ -348,7 +350,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
             )}
             {contributions.length > 1 && (
               <p className="text-[11px] text-[var(--color-muted)] mt-3">
-                Contribuiu em {contributions.length} time{contributions.length > 1 ? 's' : ''} ao total
+                {t('fantasyContributed', { n: contributions.length })}
               </p>
             )}
           </div>

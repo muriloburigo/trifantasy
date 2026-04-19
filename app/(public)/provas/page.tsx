@@ -4,20 +4,21 @@ import BackLink from '~/app/components/BackLink'
 import { formatDate, daysUntil } from '~/lib/utils'
 import type { Race } from '~/lib/types'
 import { MapPin, Calendar, ChevronRight } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
 export const revalidate = 900
 
-const STATUS: Record<string, { label: string; color: string }> = {
-  open:     { label: '● Aberto',    color: 'text-[var(--color-success)]' },
-  upcoming: { label: 'Em breve',    color: 'text-[var(--color-muted)]' },
-  locked:   { label: 'Encerrado',   color: 'text-yellow-400' },
-  finished: { label: 'Finalizado',  color: 'text-[var(--color-muted)]' },
-}
-
-function RaceCard({ race }: { race: Race }) {
+function RaceCard({ race, t }: { race: Race; t: (key: string, params?: any) => string }) {
   const days = daysUntil(race.date)
-  const st = STATUS[race.status]
   const isOpen = race.status === 'open'
+
+  const statusMap: Record<string, { label: string; color: string }> = {
+    open:     { label: t('statusOpen'),     color: 'text-[var(--color-success)]' },
+    upcoming: { label: t('statusUpcoming'), color: 'text-[var(--color-muted)]' },
+    locked:   { label: t('statusLocked'),   color: 'text-yellow-400' },
+    finished: { label: t('statusFinished'), color: 'text-[var(--color-muted)]' },
+  }
+  const st = statusMap[race.status] ?? statusMap.upcoming
 
   return (
     <Link
@@ -46,7 +47,7 @@ function RaceCard({ race }: { race: Race }) {
 
       <div className="flex items-center justify-between mt-auto pt-3 border-t border-[var(--color-navy-border)]">
         <span className={`text-xs font-semibold ${isOpen ? 'text-[var(--color-orange)]' : 'text-[var(--color-muted)]'}`}>
-          Ver campo PRO →
+          {t('cta')}
         </span>
         <ChevronRight size={14} className="text-[var(--color-muted)] group-hover:text-[var(--color-orange)] transition-colors" />
       </div>
@@ -55,6 +56,7 @@ function RaceCard({ race }: { race: Race }) {
 }
 
 export default async function ProvasPage() {
+  const t = await getTranslations('races')
   const pub = createPublicClient()
 
   const { data: races } = await pub
@@ -70,10 +72,10 @@ export default async function ProvasPage() {
     <div className="max-w-6xl mx-auto px-4 py-10">
         <BackLink href="/" />
         <div className="mb-8">
-          <h1 className="text-2xl font-bold">Calendário de Provas</h1>
+          <h1 className="text-2xl font-bold">{t('calendar')}</h1>
           <p className="text-sm text-[var(--color-muted)] mt-1">
-            {open.length > 0 && <span className="text-[var(--color-success)] font-semibold">{open.length} aberta{open.length > 1 ? 's' : ''} para escalação · </span>}
-            {upcoming.length} em breve · {finished.length} encerradas
+            {open.length > 0 && <span className="text-[var(--color-success)] font-semibold">{t('openSummary', { n: open.length })}</span>}
+            {t('upcomingSummary', { n: upcoming.length })}{t('finishedSummary', { n: finished.length })}
           </p>
         </div>
 
@@ -81,28 +83,28 @@ export default async function ProvasPage() {
           <section className="mb-10">
             <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-success)] mb-4 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[var(--color-success)] animate-pulse inline-block" />
-              Abertas para escalação
+              {t('sectionOpen')}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {open.map(r => <RaceCard key={r.id} race={r} />)}
+              {open.map(r => <RaceCard key={r.id} race={r} t={t} />)}
             </div>
           </section>
         )}
 
         {upcoming.length > 0 && (
           <section className="mb-10">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-muted)] mb-4">Em breve</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-muted)] mb-4">{t('sectionUpcoming')}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {upcoming.map(r => <RaceCard key={r.id} race={r} />)}
+              {upcoming.map(r => <RaceCard key={r.id} race={r} t={t} />)}
             </div>
           </section>
         )}
 
         {finished.length > 0 && (
           <section>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-muted)] mb-4">Encerradas</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--color-muted)] mb-4">{t('sectionFinished')}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 opacity-60">
-              {finished.map(r => <RaceCard key={r.id} race={r} />)}
+              {finished.map(r => <RaceCard key={r.id} race={r} t={t} />)}
             </div>
           </section>
         )}

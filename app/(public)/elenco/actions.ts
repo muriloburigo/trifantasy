@@ -9,7 +9,7 @@ export async function buyAthlete(athleteId: string) {
   if (!user) return { error: 'Faça login para comprar atletas.' }
 
   const market = await getMarketStatus(supabase)
-  if (market.locked) return { error: market.reason ?? 'Mercado fechado.' }
+  if (market.locked) return { error: 'Mercado fechado.' }
 
   const [athleteRes, profileRes] = await Promise.all([
     supabase.from('athletes').select('current_price, name').eq('id', athleteId).single(),
@@ -63,7 +63,7 @@ export async function sellAthlete(athleteId: string) {
   if (!user) return { error: 'Faça login.' }
 
   const market = await getMarketStatus(supabase)
-  if (market.locked) return { error: market.reason ?? 'Mercado fechado.' }
+  if (market.locked) return { error: 'Mercado fechado.' }
 
   const [ownedRes, athleteRes, profileRes] = await Promise.all([
     supabase.from('portfolio').select('id').eq('user_id', user.id).eq('athlete_id', athleteId).maybeSingle(),

@@ -22,7 +22,10 @@
     "rules": "Cómo funciona",
     "login": "Iniciar sesión",
     "logout": "Cerrar sesión",
-    "admin": "Admin"
+    "admin": "Admin",
+    "createAccount": "Crear cuenta",
+    "myLeagues": "Mis Ligas",
+    "home": "Home"
   },
   "home": {
     "tagline": "Juego de selección de resistencia",
@@ -62,7 +65,9 @@
     "inviteDesc": "Únete a una liga privada con el código enviado por un amigo.",
     "inviteLoginCta": "Crear cuenta para unirse →",
     "marketLoading": "El mercado está siendo configurado...",
-    "marketLoadingDesc": "Los atletas aparecerán aquí cuando se configuren las carreras."
+    "marketLoadingDesc": "Los atletas aparecerán aquí cuando se configuren las carreras.",
+    "moreRacesCount": "Ver {n} más",
+    "athleteAvailable": "atletas disponibles"
   },
   "market": {
     "title": "Mercado de Atletas",
@@ -129,7 +134,14 @@
     "resultsProcessingDesc": "Vuelve pronto para ver el resultado oficial.",
     "mproLabel": "MPRO — Masculino",
     "fproLabel": "FPRO — Femenino",
-    "lockSoon": "Selección de equipo próximamente"
+    "lockSoon": "Selección de equipo próximamente",
+    "calendar": "Calendario de Carreras",
+    "sectionOpen": "Abiertas para selección",
+    "sectionUpcoming": "Próximamente",
+    "sectionFinished": "Terminadas",
+    "openSummary": "{n} abiertas para selección · ",
+    "upcomingSummary": "{n} próximamente · ",
+    "finishedSummary": "{n} terminadas"
   },
   "teamBuilder": {
     "lockedTitle": "La selección de equipo aún no está abierta",
@@ -233,12 +245,34 @@
     "lockedUntil": "Mercado cerrado hasta el fin de la carrera.",
     "closingSoon": "El mercado cierra pronto",
     "closingDesc": "El mercado cierra 24h antes de {race}.",
-    "open": "Mercado abierto"
+    "open": "Mercado abierto",
+    "openFull": "Mercado abierto — puedes comprar y vender atletas libremente.",
+    "ongoingRace": "Carrera en curso: {race}",
+    "closingSoonDesc": "Mercado cerrado — menos de 24h para {race}",
+    "reopens": "reabre después de publicar los resultados."
   },
   "locale": {
     "label": "Idioma",
     "pt": "Português",
     "en": "English",
     "es": "Español"
+  },
+  "athlete": {
+    "racesLabel": "Carreras",
+    "bestPos": "Mejor pos.",
+    "teamsLabel": "Equipos",
+    "dnfCount": "DNFs",
+    "raceHistory": "Historial de Carreras",
+    "noRaces": "Sin carreras registradas.",
+    "priceAtRace": "Precio en la carrera",
+    "dnfLabel": "DNF — No terminó",
+    "dnsLabel": "DNS — No largó",
+    "openLabel": "● Abierto para selección",
+    "lockedLabel": "Selección cerrada",
+    "upcomingLabel": "Próximamente",
+    "priceChangeLabel": "Variación de precio tras esta carrera:",
+    "noResult": "Resultado no disponible",
+    "fantasyTitle": "Mejor Rendimiento en TriFantasy",
+    "fantasyContributed": "Contribuyó en {n} equipos en total"
   }
 }

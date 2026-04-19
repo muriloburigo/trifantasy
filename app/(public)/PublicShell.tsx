@@ -1,10 +1,13 @@
 import Link from 'next/link'
 import { createClient } from '~/lib/supabase/server'
 import UserMenu from './UserMenu'
+import { getTranslations } from 'next-intl/server'
 
 export default async function PublicShell({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const t = await getTranslations('nav')
+  const tHome = await getTranslations('home')
 
   let wallet: number | null = null
   if (user) {
@@ -22,11 +25,11 @@ export default async function PublicShell({ children }: { children: React.ReactN
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-[var(--color-muted)]">
-            <Link href="/" className="hover:text-white transition-colors">Home</Link>
-            <Link href="/provas" className="hover:text-white transition-colors">Provas</Link>
-            <Link href="/atletas" className="hover:text-white transition-colors">Atletas</Link>
+            <Link href="/" className="hover:text-white transition-colors">{t('home')}</Link>
+            <Link href="/provas" className="hover:text-white transition-colors">{t('races')}</Link>
+            <Link href="/atletas" className="hover:text-white transition-colors">{t('athletes')}</Link>
             <Link href="/ligas" className="hover:text-white transition-colors">Trix Leagues</Link>
-            <Link href="/regras" className="hover:text-white transition-colors">Regras</Link>
+            <Link href="/regras" className="hover:text-white transition-colors">{t('rules')}</Link>
           </nav>
           <UserMenu user={user} wallet={wallet} />
         </div>
@@ -38,7 +41,7 @@ export default async function PublicShell({ children }: { children: React.ReactN
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-[var(--color-muted)]">
           <span style={{ fontFamily: 'var(--font-sora)' }}>
             <span className="text-[var(--color-orange)] font-bold">TRIX</span><span className="text-white font-bold">ER</span>
-            <span className="ml-2">— Jogo de escalação do endurance</span>
+            <span className="ml-2">— {tHome('tagline')}</span>
           </span>
           <div className="flex items-center gap-4">
             <Link href="/regras" className="hover:text-white transition-colors">Regras</Link>

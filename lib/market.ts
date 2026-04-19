@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 export interface MarketStatus {
   locked: boolean
-  reason?: string
+  reasonKey?: 'ongoing' | 'closingSoon'
   lockRace?: { id: string; name: string; date: string }
 }
 
@@ -33,9 +33,7 @@ export async function getMarketStatus(supabase: SupabaseClient): Promise<MarketS
   if (race.status === 'locked' || hoursUntil <= 24) {
     return {
       locked: true,
-      reason: hoursUntil <= 0
-        ? `Prova em andamento: ${race.name}`
-        : `Mercado fechado — menos de 24h para ${race.name}`,
+      reasonKey: hoursUntil <= 0 ? 'ongoing' : 'closingSoon',
       lockRace: race,
     }
   }
