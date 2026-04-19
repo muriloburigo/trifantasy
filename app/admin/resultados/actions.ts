@@ -30,7 +30,7 @@ export async function upsertResult(formData: FormData) {
     finish_time: n('finish_time'),
     dnf:         formData.get('dnf') === 'on',
     dns:         formData.get('dns') === 'on',
-    kona_slot:   formData.get('kona_slot') === 'on',
+    kona_slot:   false,
   }
 
   const { error } = await supabase
@@ -46,7 +46,7 @@ export async function upsertResult(formData: FormData) {
  * Bulk import results from JSON.
  * Each row: { bib?, athlete_name?, overall_pos, ag_pos, pro_pos,
  *             swim_time, t1_time, bike_time, t2_time, run_time, finish_time,
- *             dnf, dns, kona_slot }
+ *             dnf, dns }
  * Times in seconds.
  */
 export async function bulkImportResults(raceId: string, json: string) {
@@ -98,7 +98,7 @@ export async function bulkImportResults(raceId: string, json: string) {
       finish_time: row.finish_time ?? null,
       dnf:         row.dnf ?? false,
       dns:         row.dns ?? false,
-      kona_slot:   row.kona_slot ?? false,
+      kona_slot:   false,
     }, { onConflict: 'race_id,athlete_id' })
 
     if (error) { errors.push(`${row.athlete_name ?? row.bib}: ${error.message}`); continue }

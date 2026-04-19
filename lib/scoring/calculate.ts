@@ -66,9 +66,6 @@ export function scoreAthlete(a: AthleteForScoring): ScoreBreakdown {
     if (a.fastest_run_overall !== undefined && r.run_time === a.fastest_run_overall) {
       bonus += 6; detail.push('Melhor corrida geral +6')
     }
-    if (r.kona_slot) {
-      bonus += 10; detail.push('Course record +10')
-    }
   } else {
     // Age grouper
     const total = a.ag_total_finishers ?? 1
@@ -84,9 +81,6 @@ export function scoreAthlete(a: AthleteForScoring): ScoreBreakdown {
     }
     if (a.fastest_run_ag !== undefined && r.run_time === a.fastest_run_ag) {
       bonus += 4; detail.push('Melhor corrida no AG +4')
-    }
-    if (r.kona_slot) {
-      bonus += 8; detail.push('Classificado para Worlds +8')
     }
   }
 

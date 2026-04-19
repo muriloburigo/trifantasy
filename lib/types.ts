@@ -55,7 +55,7 @@ export interface Result {
   finish_time: number | null
   dnf: boolean
   dns: boolean
-  kona_slot: boolean
+  kona_slot?: boolean
 }
 
 export interface Profile {
