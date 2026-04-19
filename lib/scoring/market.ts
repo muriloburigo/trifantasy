@@ -8,7 +8,7 @@
  *
  *  AG   — 1st: +3 | 2nd-3rd: +2 | top 25%: +1 | 25-50%: 0
  *          50-75%: −1 | 75%+: −1 | DNF/DNS: −2
- *          Segment leader in AG: +1 each | Kona slot: +2
+ *          Segment leader in AG: +1 each
  *
  * Prices are clamped between T$1 and T$35.
  * After updating athletes.current_price, all open/upcoming
@@ -36,7 +36,7 @@ function proMarketDelta(
   swimFastest: boolean,
   bikeFastest: boolean,
   runFastest: boolean,
-  courseRecord: boolean,
+  courseRecord: boolean, // reserved, unused
 ): { delta: number; reasons: string[] } {
   const reasons: string[] = []
   let delta = 0
@@ -69,7 +69,6 @@ function agMarketDelta(
   swimFastest: boolean,
   bikeFastest: boolean,
   runFastest: boolean,
-  konaSlot: boolean,
 ): { delta: number; reasons: string[] } {
   const reasons: string[] = []
   let delta = 0
@@ -89,7 +88,6 @@ function agMarketDelta(
     if (swimFastest) { delta += 1; reasons.push('Melhor natação no AG +1') }
     if (bikeFastest) { delta += 1; reasons.push('Melhor bike no AG +1') }
     if (runFastest)  { delta += 1; reasons.push('Melhor corrida no AG +1') }
-    if (konaSlot)    { delta += 2; reasons.push('Kona slot +2') }
   }
 
   return { delta, reasons }
@@ -141,7 +139,7 @@ export async function updateMarket(raceId: string): Promise<MarketUpdate[]> {
         r.swim_time === bestSwimPro,
         r.bike_time === bestBikePro,
         r.run_time  === bestRunPro,
-        r.kona_slot ?? false,
+        false,
       )
       delta = res.delta; reasons = res.reasons
     } else {
@@ -152,7 +150,6 @@ export async function updateMarket(raceId: string): Promise<MarketUpdate[]> {
         r.swim_time === bestInAg(ag, 'swim_time'),
         r.bike_time === bestInAg(ag, 'bike_time'),
         r.run_time  === bestInAg(ag, 'run_time'),
-        r.kona_slot ?? false,
       )
       delta = res.delta; reasons = res.reasons
     }

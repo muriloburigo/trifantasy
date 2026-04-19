@@ -92,7 +92,7 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
   if (race.status === 'finished') {
     const { data: resultsData } = await supabase
       .from('results')
-      .select('pro_pos, finish_time, dnf, dns, kona_slot, athlete:athletes(id, name, country, gender, photo_url)')
+      .select('pro_pos, finish_time, dnf, dns, athlete:athletes(id, name, country, gender, photo_url)')
       .eq('race_id', race.id)
       .not('pro_pos', 'is', null)
       .order('pro_pos', { ascending: true })

@@ -89,7 +89,6 @@ export default async function AdminResultadosPage({
                         <div className="flex items-center justify-center gap-1">
                           {r.dnf && <span className="text-[var(--color-danger)] text-xs">DNF</span>}
                           {r.dns && <span className="text-[var(--color-muted)] text-xs">DNS</span>}
-                          {r.kona_slot && <CheckCircle size={11} className="text-[var(--color-success)]" />}
                         </div>
                       </td>
                     </tr>

@@ -88,7 +88,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
   const { data: results } = raceIds.length > 0
     ? await pub
         .from('results')
-        .select('race_id, overall_pos, pro_pos, ag_pos, swim_time, t1_time, bike_time, t2_time, run_time, finish_time, dnf, dns, kona_slot')
+        .select('race_id, overall_pos, pro_pos, ag_pos, swim_time, t1_time, bike_time, t2_time, run_time, finish_time, dnf, dns')
         .eq('athlete_id', id)
         .in('race_id', raceIds)
     : { data: [] }
@@ -134,7 +134,6 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
   // Summary stats
   const finishedRaces = (raceAthletes ?? []).filter((ra: any) => ra.races?.status === 'finished')
   const dnfCount = finishedRaces.filter((ra: any) => resultMap[ra.race_id]?.dnf).length
-  const konaSlots = (results ?? []).filter(r => r.kona_slot).length
   const bestPos = (results ?? [])
     .filter(r => !r.dnf && !r.dns)
     .map(r => isPro ? (r.pro_pos ?? r.overall_pos) : (r.ag_pos ?? r.overall_pos))
@@ -209,8 +208,8 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
           <p className="text-[11px] text-[var(--color-muted)] mt-0.5">Times</p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-3 text-center">
-          <p className="text-xl font-black">{konaSlots > 0 ? konaSlots : dnfCount > 0 ? dnfCount : '—'}</p>
-          <p className="text-[11px] text-[var(--color-muted)] mt-0.5">{konaSlots > 0 ? 'Kona slots' : dnfCount > 0 ? 'DNFs' : 'Kona slots'}</p>
+          <p className="text-xl font-black">{dnfCount > 0 ? dnfCount : '—'}</p>
+          <p className="text-[11px] text-[var(--color-muted)] mt-0.5">DNFs</p>
         </div>
       </div>
 
@@ -276,11 +275,6 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
                             )}
                             {result.finish_time && (
                               <span className="text-sm font-bold">{formatTime(result.finish_time)}</span>
-                            )}
-                            {result.kona_slot && (
-                              <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-yellow-400/15 text-yellow-400 text-xs font-bold">
-                                🌺 Kona Slot
-                              </span>
                             )}
                           </div>
                           {/* Segment times */}
