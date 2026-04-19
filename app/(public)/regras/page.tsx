@@ -90,8 +90,7 @@ export default function RegrasPage() {
                   ['≥ 80 pts (rank ~26–40)','T$18 — Competitivo'],
                   ['≥ 75 pts (rank ~41–60)','T$15 — Sólido'],
                   ['≥ 70 pts (rank ~61–80)','T$12 — Ranqueado'],
-                  ['Sem ranking PRO','T$10 — Base PRO'],
-                  ['Age Grouper','T$8 — Base AG'],
+                  ['Sem ranking PTO','T$10 — Base PRO'],
                 ].map(([r,p]) => (
                   <tr key={r}><td className="py-1.5 pr-4">{r}</td><td className="py-1.5 font-semibold text-white">{p}</td></tr>
                 ))}
@@ -159,30 +158,16 @@ export default function RegrasPage() {
         </Section>
 
         <Section n="6" title="Pontuação (Trix Score)">
-          <p>A pontuação é calculada pela posição no campo PRO e no grupo de idade (AG).</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <p className="font-semibold text-white text-xs mb-2">Atletas PRO</p>
-              <table className="w-full text-xs">
-                <tbody className="divide-y divide-[var(--color-navy-border)]">
-                  {[['1º','50'],['2º','40'],['3º','33'],['4º','27'],['5º','22'],['6º–10º','15'],['11º–15º','10'],['16º–20º','6'],['21º+','3'],['DNF/DNS','0']].map(([p,s]) => (
-                    <tr key={p}><td className="py-1 pr-3">{p}</td><td className="py-1 font-bold text-white">{s} pts</td></tr>
-                  ))}
-                </tbody>
-              </table>
-              <p className="text-[10px] mt-2 text-[var(--color-success)]">+6 pts segmento mais rápido (nado/bike/run)</p>
-            </div>
-            <div>
-              <p className="font-semibold text-white text-xs mb-2">Age Groupers</p>
-              <table className="w-full text-xs">
-                <tbody className="divide-y divide-[var(--color-navy-border)]">
-                  {[['1º no AG','30'],['2º no AG','24'],['3º no AG','19'],['4º–10º','13'],['Top 25%','8'],['25%–50%','5'],['50%–75%','2'],['Abaixo 75%','1'],['DNF/DNS','0']].map(([p,s]) => (
-                    <tr key={p}><td className="py-1 pr-3">{p}</td><td className="py-1 font-bold text-white">{s} pts</td></tr>
-                  ))}
-                </tbody>
-              </table>
-              <p className="text-[10px] mt-2 text-[var(--color-success)]">+4 pts seg. mais rápido · +8 pts vaga Kona</p>
-            </div>
+          <p>A pontuação é calculada pela posição no campo PRO da prova.</p>
+          <div className="max-w-xs">
+            <table className="w-full text-xs">
+              <tbody className="divide-y divide-[var(--color-navy-border)]">
+                {[['1º','50'],['2º','40'],['3º','33'],['4º','27'],['5º','22'],['6º–10º','15'],['11º–15º','10'],['16º–20º','6'],['21º+','3'],['DNF/DNS','0']].map(([p,s]) => (
+                  <tr key={p}><td className="py-1 pr-3">{p}</td><td className="py-1 font-bold text-white">{s} pts</td></tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="text-[10px] mt-2 text-[var(--color-success)]">+6 pts segmento mais rápido (nado/bike/run)</p>
           </div>
         </Section>
 
@@ -205,8 +190,8 @@ export default function RegrasPage() {
           <ul className="space-y-2 list-disc list-inside">
             <li><strong className="text-white">Compre antes das provas:</strong> atletas que vão bem sobem de preço. Compre cedo, venda depois.</li>
             <li><strong className="text-white">Fique de olho em DNS:</strong> acompanhe as prévias. Se um favorito desistiu, venda antes do fechamento do mercado.</li>
-            <li><strong className="text-white">Diversifique:</strong> não coloque tudo em atletas de uma única prova. Um mix de PROs e age groupers competitivos pode render mais.</li>
-            <li><strong className="text-white">Provas locais:</strong> atletas brasileiros custam T$10 mas podem surpreender em provas no Brasil e gerar bom retorno.</li>
+            <li><strong className="text-white">Diversifique:</strong> não coloque tudo em atletas de uma única prova. Um mix de homens e mulheres de provas diferentes pode render mais pontos.</li>
+            <li><strong className="text-white">Apostas de valor:</strong> atletas sem ranking PTO custam apenas T$10 — se performarem bem em uma prova local, o retorno pode surpreender.</li>
             <li><strong className="text-white">Patrimônio total = carteira + elenco:</strong> acompanhe no <Link href="/elenco" className="text-[var(--color-orange)] hover:underline">Meu Elenco</Link> o P&L de cada atleta.</li>
           </ul>
         </Section>
