@@ -27,7 +27,6 @@ export interface MarketUpdate {
 }
 
 const MIN_PRICE = 1
-const MAX_PRICE = 35
 
 function proMarketDelta(
   pos: number | null,
@@ -154,7 +153,7 @@ export async function updateMarket(raceId: string): Promise<MarketUpdate[]> {
       delta = res.delta; reasons = res.reasons
     }
 
-    const newPrice = Math.min(MAX_PRICE, Math.max(MIN_PRICE, oldPrice + delta))
+    const newPrice = Math.max(MIN_PRICE, oldPrice + delta)
     const actualDelta = newPrice - oldPrice
 
     // Update athlete current_price

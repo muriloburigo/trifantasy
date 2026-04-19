@@ -20,7 +20,6 @@ const sb = createClient(get('NEXT_PUBLIC_SUPABASE_URL'), get('SUPABASE_SERVICE_R
 
 const RACE_SLUG = 'ironman-texas-2026'
 const MIN_PRICE = 1
-const MAX_PRICE = 35
 
 function normalize(name) {
   return name.toLowerCase()
@@ -118,7 +117,7 @@ for (const r of results) {
   )
 
   // 3. Correct price and price_change
-  const correctPrice  = Math.min(MAX_PRICE, Math.max(MIN_PRICE, ptoBase + delta))
+  const correctPrice  = Math.max(MIN_PRICE, ptoBase + delta)
   const correctChange = delta  // show the race-earned delta, not the capped actual
   const currentPrice  = Number(ath.current_price)
 
