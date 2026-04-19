@@ -2,14 +2,14 @@
  * Reprice athletes based on PTO world ranking points.
  *
  * Pricing tiers (budget is T$100 for 5 athletes):
- *   ≥ 95 pts  (rank ~1-7)  → T$35  ← elite stars
- *   ≥ 90 pts  (rank ~8-15) → T$28  ← established pros
- *   ≥ 85 pts  (rank ~16-25)→ T$22  ← strong pros
- *   ≥ 80 pts  (rank ~26-40)→ T$18  ← competitive
- *   ≥ 75 pts  (rank ~41-60)→ T$15  ← solid
- *   ≥ 70 pts  (rank ~61-80)→ T$12  ← ranked
- *   unranked PRO           → T$10  ← base
- *   age_grouper            → T$8   ← base AG
+ *   ≥ 95 pts  (rank ~1-7)   → T$35  ← elite stars
+ *   ≥ 90 pts  (rank ~8-15)  → T$28  ← established pros
+ *   ≥ 85 pts  (rank ~16-25) → T$22  ← strong pros
+ *   ≥ 80 pts  (rank ~26-40) → T$18  ← competitive
+ *   ≥ 75 pts  (rank ~41-60) → T$15  ← solid
+ *   ≥ 70 pts  (rank ~61-80) → T$12  ← ranked
+ *   ≥ 60 pts  (rank ~81-120)→ T$11  ← lower ranked
+ *   unranked PRO            → T$10  ← base
  *
  * Run: node scripts/reprice-athletes.mjs
  */
@@ -24,7 +24,7 @@ const sb = createClient(get('NEXT_PUBLIC_SUPABASE_URL'), get('SUPABASE_SERVICE_R
 // ─── Fetch PTO rankings ───────────────────────────────────────────────────────
 
 async function fetchPtoRankings(gender) {
-  const url = `https://stats.protriathletes.org/api/rankings/${gender === 'M' ? 'men' : 'women'}`
+  const url = `https://stats.protriathletes.org/api/rankings/${gender === 'M' ? 'men' : 'women'}?limit=1000`
   const res = await fetch(url, { headers: { 'Accept': 'application/json' } })
   if (!res.ok) throw new Error(`PTO ${gender} rankings failed: ${res.status}`)
   const data = await res.json()
@@ -54,6 +54,7 @@ function priceFromPoints(pts) {
   if (pts >= 80) return 18
   if (pts >= 75) return 15
   if (pts >= 70) return 12
+  if (pts >= 60) return 11
   return 10
 }
 
@@ -90,8 +91,8 @@ const unmatched = []
 
 for (const athlete of athletes) {
   if (athlete.type === 'age_grouper') {
-    await sb.from('athletes').update({ current_price: 8, price_change: 0 }).eq('id', athlete.id)
-    stats.updated++
+    // age groupers no longer in use — skip
+    stats.unchanged++
     continue
   }
 
@@ -167,7 +168,9 @@ if (openRaces?.length) {
     .select('id, athlete_id, price')
     .in('race_id', openRaceIds)
 
-  const priceMap = new Map(athletes.map(a => [a.id, Number(a.current_price)]))
+  // Re-fetch prices from DB after updates
+  const { data: freshAthletes } = await sb.from('athletes').select('id, current_price')
+  const priceMap = new Map((freshAthletes ?? []).map(a => [a.id, Number(a.current_price)]))
 
   let synced = 0
   for (const ra of raceAthletes ?? []) {

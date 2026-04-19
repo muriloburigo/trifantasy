@@ -90,6 +90,7 @@ export default function RegrasPage() {
                   ['≥ 80 pts (rank ~26–40)','T$18 — Competitivo'],
                   ['≥ 75 pts (rank ~41–60)','T$15 — Sólido'],
                   ['≥ 70 pts (rank ~61–80)','T$12 — Ranqueado'],
+                  ['≥ 60 pts (rank ~81–120)','T$11 — Ranqueado'],
                   ['Sem ranking PTO','T$10 — Base PRO'],
                 ].map(([r,p]) => (
                   <tr key={r}><td className="py-1.5 pr-4">{r}</td><td className="py-1.5 font-semibold text-white">{p}</td></tr>

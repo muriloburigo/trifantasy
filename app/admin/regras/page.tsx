@@ -56,7 +56,7 @@ export default async function AdminRegrasPage() {
                   {[
                     ['≥ 95','~1–7','T$35'],['≥ 90','~8–15','T$28'],['≥ 85','~16–25','T$22'],
                     ['≥ 80','~26–40','T$18'],['≥ 75','~41–60','T$15'],['≥ 70','~61–80','T$12'],
-                    ['Unranked PRO','—','T$10'],['Age Grouper','—','T$8'],
+                    ['≥ 60','~81–120','T$11'],['Sem ranking PTO','—','T$10'],
                   ].map(([pts,rank,price]) => (
                     <tr key={pts}><td className="py-1 pr-6">{pts}</td><td className="py-1 pr-6">{rank}</td><td className="py-1 font-semibold text-white">{price}</td></tr>
                   ))}
@@ -100,29 +100,16 @@ export default async function AdminRegrasPage() {
           <h2 className="text-base font-bold text-[var(--color-orange)] uppercase tracking-wider mb-3">Pontuação (Trix Score)</h2>
           <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl divide-y divide-[var(--color-navy-border)]">
 
-            <div className="px-4 py-3 grid grid-cols-2 gap-6">
-              <div>
-                <p className="text-xs font-bold text-white mb-2">PRO (por posição no campo PRO)</p>
-                <table className="w-full text-xs text-[var(--color-muted)]">
-                  <tbody className="divide-y divide-[var(--color-navy-border)]">
-                    {[['1º','50'],['2º','40'],['3º','33'],['4º','27'],['5º','22'],['6–10','15'],['11–15','10'],['16–20','6'],['21+','3'],['DNF/DNS','0']].map(([p,s])=>(
-                      <tr key={p}><td className="py-1 pr-4">{p}</td><td className="py-1 font-semibold text-white">{s} pts</td></tr>
-                    ))}
-                  </tbody>
-                </table>
-                <p className="text-[10px] text-[var(--color-success)] mt-1.5">+6 pts segmento mais rápido (nado/bike/run)</p>
-              </div>
-              <div>
-                <p className="text-xs font-bold text-white mb-2">Age Grouper (por posição no AG)</p>
-                <table className="w-full text-xs text-[var(--color-muted)]">
-                  <tbody className="divide-y divide-[var(--color-navy-border)]">
-                    {[['1º AG','30'],['2º AG','24'],['3º AG','19'],['4–10','13'],['Top 25%','8'],['25–50%','5'],['50–75%','2'],['Abaixo 75%','1'],['DNF/DNS','0']].map(([p,s])=>(
-                      <tr key={p}><td className="py-1 pr-4">{p}</td><td className="py-1 font-semibold text-white">{s} pts</td></tr>
-                    ))}
-                  </tbody>
-                </table>
-                <p className="text-[10px] text-[var(--color-success)] mt-1.5">+4 pts seg. mais rápido · +8 pts vaga Kona</p>
-              </div>
+            <div className="px-4 py-3">
+              <p className="text-xs font-bold text-white mb-2">PRO (por posição no campo PRO)</p>
+              <table className="w-full text-xs text-[var(--color-muted)]">
+                <tbody className="divide-y divide-[var(--color-navy-border)]">
+                  {[['1º','50'],['2º','40'],['3º','33'],['4º','27'],['5º','22'],['6–10','15'],['11–15','10'],['16–20','6'],['21+','3'],['DNF/DNS','0']].map(([p,s])=>(
+                    <tr key={p}><td className="py-1 pr-4">{p}</td><td className="py-1 font-semibold text-white">{s} pts</td></tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="text-[10px] text-[var(--color-success)] mt-1.5">+6 pts segmento mais rápido (nado/bike/run)</p>
             </div>
 
             <Row label="Cálculo" value="Trigger manual: admin/pontuacao → calcula scores para todos os teams de uma prova após inserir resultados" />
