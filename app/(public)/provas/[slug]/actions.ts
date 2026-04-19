@@ -1,7 +1,7 @@
 'use server'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '~/lib/supabase/server'
-import { TEAM_SIZE, TEAM_BUDGET } from '~/lib/types'
+import { TEAM_SIZE } from '~/lib/types'
 
 export async function saveTeam(raceId: string, athleteIds: string[]) {
   if (athleteIds.length !== TEAM_SIZE) {
@@ -12,20 +12,26 @@ export async function saveTeam(raceId: string, athleteIds: string[]) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Faça login para salvar seu time.' }
 
-  // Validate budget
+  // Validate that user owns all selected athletes
+  const { data: owned } = await supabase
+    .from('portfolio')
+    .select('athlete_id')
+    .eq('user_id', user.id)
+    .in('athlete_id', athleteIds)
+
+  if (!owned || owned.length !== TEAM_SIZE) {
+    return { error: 'Você precisa possuir todos os atletas selecionados. Compre-os no mercado primeiro.' }
+  }
+
+  // Validate athletes are in the race
   const { data: raceAthletes } = await supabase
     .from('race_athletes')
-    .select('athlete_id, price')
+    .select('athlete_id')
     .eq('race_id', raceId)
     .in('athlete_id', athleteIds)
 
   if (!raceAthletes || raceAthletes.length !== TEAM_SIZE) {
-    return { error: 'Atletas inválidos para esta prova.' }
-  }
-
-  const total = raceAthletes.reduce((sum, ra) => sum + Number(ra.price), 0)
-  if (total > TEAM_BUDGET) {
-    return { error: `Orçamento excedido. Total: T$${total.toFixed(2)} (limite: T$${TEAM_BUDGET}).` }
+    return { error: 'Alguns atletas não estão inscritos nesta prova.' }
   }
 
   // Upsert team

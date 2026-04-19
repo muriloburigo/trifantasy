@@ -128,7 +128,7 @@ function RaceCard({ race, athleteCount }: { race: Race; athleteCount?: number })
           ? 'bg-[var(--color-orange)]/10 text-[var(--color-orange)] group-hover:bg-[var(--color-orange)]/20'
           : 'bg-[var(--color-navy-elevated)] text-[var(--color-muted)]'
       }`}>
-        {isOpen ? 'Monte seu time →' : 'Ver detalhes →'}
+        Ver campo PRO →
       </div>
     </Link>
   )
@@ -255,7 +255,7 @@ export default async function HomePage() {
               </span>
             </h1>
             <p className="text-[var(--color-muted)] text-sm max-w-md leading-relaxed mb-6">
-              Escale atletas PRO e age-groupers reais. Pontue pelo desempenho na prova. Dispute a Trix League.
+              Monte seu elenco com atletas PRO reais. Pontue pelo desempenho na prova. Dispute a Trix League.
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               <Link href="/register" className="bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-colors">

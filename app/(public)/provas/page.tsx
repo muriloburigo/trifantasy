@@ -46,7 +46,7 @@ function RaceCard({ race }: { race: Race }) {
 
       <div className="flex items-center justify-between mt-auto pt-3 border-t border-[var(--color-navy-border)]">
         <span className={`text-xs font-semibold ${isOpen ? 'text-[var(--color-orange)]' : 'text-[var(--color-muted)]'}`}>
-          {isOpen ? 'Monte seu time →' : 'Ver detalhes →'}
+          Ver campo PRO →
         </span>
         <ChevronRight size={14} className="text-[var(--color-muted)] group-hover:text-[var(--color-orange)] transition-colors" />
       </div>
