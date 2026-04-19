@@ -69,11 +69,10 @@ export interface Profile {
 export interface Team {
   id: string
   user_id: string
-  race_id: string
   created_at: string
+  updated_at?: string
   athletes?: TeamAthleteRow[]
   score?: Score
-  race?: Race
   profile?: Profile
 }
 
@@ -105,11 +104,10 @@ export interface ScoreBreakdown {
 export interface League {
   id: string
   name: string
-  race_id: string
   invite_code: string
   owner_id: string
+  is_public: boolean
   created_at: string
-  race?: Race
   member_count?: number
 }
 
