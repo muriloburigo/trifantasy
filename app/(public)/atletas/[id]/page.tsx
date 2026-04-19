@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation'
-import { createPublicClient, createAdminClient } from '~/lib/supabase/server'
+import { createPublicClient, createAdminClient, createClient } from '~/lib/supabase/server'
 import BackLink from '~/app/components/BackLink'
 import { formatDate, formatTime } from '~/lib/utils'
 import { TrendingUp, TrendingDown, Minus, Trophy, Flag, Timer, Bike, PersonStanding, Waves } from 'lucide-react'
+import { BuyButton, SellButton } from '~/app/(public)/elenco/TradeButton'
+import { getMarketStatus } from '~/lib/market'
 
-export const revalidate = 600
+export const revalidate = 0
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'Brazil': '🇧🇷', 'Norway': '🇳🇴', 'Germany': '🇩🇪', 'Belgium': '🇧🇪',
@@ -43,8 +45,11 @@ function PriceTrend({ change }: { change: number }) {
 
 export default async function AthleteDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const pub   = createPublicClient()
-  const admin = createAdminClient()
+  const pub    = createPublicClient()
+  const admin  = createAdminClient()
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
 
   // Fetch athlete
   const { data: athlete } = await pub
@@ -54,6 +59,21 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
     .single()
 
   if (!athlete) notFound()
+
+  // Fetch user portfolio + wallet + market status in parallel
+  const [market, portfolioRes, profileRes] = await Promise.all([
+    getMarketStatus(supabase),
+    user
+      ? supabase.from('portfolio').select('bought_price').eq('user_id', user.id).eq('athlete_id', id).maybeSingle()
+      : { data: null },
+    user
+      ? supabase.from('profiles').select('wallet').eq('id', user.id).single()
+      : { data: null },
+  ])
+
+  const owned = !!portfolioRes.data
+  const boughtPrice = portfolioRes.data ? Number(portfolioRes.data.bought_price) : null
+  const wallet: number | null = user ? Number(profileRes.data?.wallet ?? 0) : null
 
   // Fetch race history: races this athlete is registered for + results
   const { data: raceAthletes } = await pub
@@ -161,11 +181,14 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
         </div>
 
         {/* Price block */}
-        <div className="text-right shrink-0">
+        <div className="text-right shrink-0 flex flex-col items-end gap-2">
           <p className="text-3xl font-black text-[var(--color-orange)]">T${Number(athlete.current_price).toFixed(0)}</p>
-          <div className="mt-1">
-            <PriceTrend change={priceChange} />
-          </div>
+          <PriceTrend change={priceChange} />
+          {owned ? (
+            <SellButton athleteId={id} price={Number(athlete.current_price)} boughtPrice={boughtPrice!} marketLocked={market.locked} />
+          ) : (
+            <BuyButton athleteId={id} price={Number(athlete.current_price)} wallet={wallet} marketLocked={market.locked} />
+          )}
         </div>
       </div>
 

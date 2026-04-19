@@ -6,6 +6,12 @@ export default async function PublicShell({ children }: { children: React.ReactN
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  let wallet: number | null = null
+  if (user) {
+    const { data } = await supabase.from('profiles').select('wallet').eq('id', user.id).single()
+    wallet = data?.wallet != null ? Number(data.wallet) : null
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b border-[var(--color-navy-border)] bg-[var(--color-navy-card)]/90 backdrop-blur sticky top-0 z-50">
@@ -22,7 +28,7 @@ export default async function PublicShell({ children }: { children: React.ReactN
             <Link href="/ligas" className="hover:text-white transition-colors">Trix Leagues</Link>
             <Link href="/regras" className="hover:text-white transition-colors">Regras</Link>
           </nav>
-          <UserMenu user={user} />
+          <UserMenu user={user} wallet={wallet} />
         </div>
       </header>
 
