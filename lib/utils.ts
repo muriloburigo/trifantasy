@@ -29,3 +29,16 @@ export function cn(...classes: (string | false | null | undefined)[]) {
 export function generateInviteCode(): string {
   return Math.random().toString(36).slice(2, 8).toUpperCase()
 }
+
+/** Relative time: "há 2 dias", "há 3h", "agora" */
+export function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins  = Math.floor(diff / 60_000)
+  const hours = Math.floor(diff / 3_600_000)
+  const days  = Math.floor(diff / 86_400_000)
+  if (mins < 2)   return 'agora'
+  if (mins < 60)  return `há ${mins}min`
+  if (hours < 24) return `há ${hours}h`
+  if (days === 1) return 'ontem'
+  return `há ${days} dias`
+}
