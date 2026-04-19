@@ -166,6 +166,15 @@ export async function updateMarket(raceId: string): Promise<MarketUpdate[]> {
       .update({ current_price: newPrice, price_change: actualDelta })
       .eq('id', athlete.id)
 
+    // Log price change to history
+    await supabase.from('athlete_price_history').insert({
+      athlete_id: athlete.id,
+      price: newPrice,
+      change: actualDelta,
+      reason: 'race_result',
+      race_id: raceId,
+    })
+
     // Propagate to open/upcoming races
     const { data: futurePart } = await supabase
       .from('race_athletes')
