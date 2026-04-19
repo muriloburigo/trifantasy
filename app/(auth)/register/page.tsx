@@ -84,6 +84,14 @@ export default function RegisterPage() {
           >
             {loading ? 'Criando conta...' : 'Criar conta'}
           </button>
+
+          <p className="text-xs text-[var(--color-muted)] text-center">
+            Ao criar sua conta, você concorda com nossa{' '}
+            <Link href="/privacidade" className="text-[var(--color-orange)] hover:underline">
+              Política de Privacidade
+            </Link>
+            .
+          </p>
         </form>
 
         <p className="text-center text-sm text-[var(--color-muted)] mt-4">
