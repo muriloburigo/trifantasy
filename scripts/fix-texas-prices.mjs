@@ -6,7 +6,7 @@
  *   2. Fetch Texas results from DB
  *   3. Compute correct updateMarket delta (same logic as lib/scoring/market.ts)
  *   4. Final price = clamp(ptoBase + delta, 1, 35)
- *   5. Update athletes + log to athlete_price_history
+ *   5. Update athletes.current_price AND price_change for ALL result athletes
  *
  * Run: node scripts/fix-texas-prices.mjs
  */
@@ -22,7 +22,6 @@ const RACE_SLUG = 'ironman-texas-2026'
 const MIN_PRICE = 1
 const MAX_PRICE = 35
 
-// ── PTO pricing tiers (same as reprice-athletes.mjs) ─────────────────────────
 function normalize(name) {
   return name.toLowerCase()
     .replace(/ø/g, 'o').replace(/æ/g, 'ae').replace(/å/g, 'a')
@@ -46,7 +45,6 @@ function priceFromPoints(pts) {
   return 10
 }
 
-// ── Market delta (same rules as lib/scoring/market.ts) ────────────────────────
 function proMarketDelta(pos, dnf, dns, swimFastest, bikeFastest, runFastest) {
   if (dns) return -2
   if (dnf) return -2
@@ -87,16 +85,14 @@ const { data: results } = await sb
 if (!results?.length) { console.error('Sem resultados.'); process.exit(1) }
 console.log(`\n→ ${results.length} resultados encontrados para ${RACE_SLUG}`)
 
-// ── Best times for segment bonuses ───────────────────────────────────────────
 const finishers = results.filter(r => !r.dnf && !r.dns)
 const best = (field) => Math.min(...finishers.map(r => r[field] ?? Infinity))
 const bestSwim = best('swim_time')
 const bestBike = best('bike_time')
 const bestRun  = best('run_time')
 
-// ── Fix each athlete ──────────────────────────────────────────────────────────
-console.log('\n Atleta                              PTO base  Delta  Correto  Atual   Status')
-console.log(' ' + '─'.repeat(82))
+console.log('\n Atleta                              PTO base  Delta  Correto  Atual   price_change')
+console.log(' ' + '─'.repeat(86))
 
 let fixed = 0
 
@@ -104,19 +100,16 @@ for (const r of results) {
   const ath = r.athlete
   if (!ath) continue
 
-  // 1. Find PTO base price
+  // 1. PTO base price
   const key = normalize(ath.name)
   let pto = rankMap.get(key)
   if (!pto) {
     const parts = key.split(' ')
-    if (parts.length >= 2) {
-      const rev = parts.slice(1).join(' ') + ' ' + parts[0]
-      pto = rankMap.get(rev)
-    }
+    if (parts.length >= 2) pto = rankMap.get(parts.slice(1).join(' ') + ' ' + parts[0])
   }
   const ptoBase = pto ? priceFromPoints(pto.points) : 10
 
-  // 2. Compute correct delta
+  // 2. Correct delta
   const delta = proMarketDelta(
     r.pro_pos, r.dnf, r.dns,
     r.swim_time === bestSwim,
@@ -124,45 +117,32 @@ for (const r of results) {
     r.run_time  === bestRun,
   )
 
-  // 3. Correct final price
-  const correctPrice = Math.min(MAX_PRICE, Math.max(MIN_PRICE, ptoBase + delta))
-  const currentPrice = Number(ath.current_price)
-  const status = correctPrice === currentPrice ? '✓ ok' : `✗ era ${currentPrice}`
+  // 3. Correct price and price_change
+  const correctPrice  = Math.min(MAX_PRICE, Math.max(MIN_PRICE, ptoBase + delta))
+  const correctChange = delta  // show the race-earned delta, not the capped actual
+  const currentPrice  = Number(ath.current_price)
 
   const name = ath.name.padEnd(36)
-  console.log(` ${name} T$${String(ptoBase).padStart(2)}      ${delta >= 0 ? '+' : ''}${delta}     T$${String(correctPrice).padStart(2)}     T$${String(currentPrice).padStart(2)}   ${status}`)
+  console.log(` ${name} T$${String(ptoBase).padStart(2)}      ${delta >= 0 ? '+' : ''}${delta}     T$${String(correctPrice).padStart(2)}     T$${String(currentPrice).padStart(2)}   → price_change = ${correctChange >= 0 ? '+' : ''}${correctChange}`)
 
-  if (correctPrice !== currentPrice) {
-    const actualChange = correctPrice - ptoBase
+  // Always update both current_price and price_change
+  const { error } = await sb.from('athletes')
+    .update({ current_price: correctPrice, price_change: correctChange })
+    .eq('id', ath.id)
 
-    const { error } = await sb.from('athletes')
-      .update({ current_price: correctPrice, price_change: actualChange })
-      .eq('id', ath.id)
+  if (!error) {
+    // Sync race_athletes for open/upcoming races
+    const { data: futurePart } = await sb
+      .from('race_athletes')
+      .select('id, races!inner(status)')
+      .eq('athlete_id', ath.id)
+      .in('races.status', ['open', 'upcoming'])
 
-    if (!error) {
-      // Log correction to price history
-      await sb.from('athlete_price_history').insert({
-        athlete_id: ath.id,
-        price: correctPrice,
-        change: actualChange,
-        reason: 'race_result',
-        race_id: race.id,
-      })
-
-      // Sync race_athletes for open/upcoming races
-      const { data: futurePart } = await sb
-        .from('race_athletes')
-        .select('id, race_id, races!inner(status)')
-        .eq('athlete_id', ath.id)
-        .in('races.status', ['open', 'upcoming'])
-
-      if (futurePart?.length) {
-        await sb.from('race_athletes').update({ price: correctPrice }).in('id', futurePart.map(rp => rp.id))
-      }
-
-      fixed++
+    if (futurePart?.length) {
+      await sb.from('race_athletes').update({ price: correctPrice }).in('id', futurePart.map(rp => rp.id))
     }
+    fixed++
   }
 }
 
-console.log(`\n✅ ${fixed} atletas corrigidos.`)
+console.log(`\n✅ ${fixed} atletas atualizados.`)
