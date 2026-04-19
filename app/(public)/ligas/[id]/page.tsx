@@ -48,20 +48,21 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
   // For each member, sum all their team scores
   const memberIds = (members ?? []).map((m: any) => m.user_id)
 
-  // Fetch teams for all members, then get their scores
+  // Fetch teams for all members
   const { data: memberTeams } = memberIds.length > 0
     ? await supabase
         .from('teams')
-        .select('id, user_id, races(name, slug)')
+        .select('id, user_id')
         .in('user_id', memberIds)
     : { data: [] }
 
   const teamIds = (memberTeams ?? []).map((t: any) => t.id)
 
+  // Fetch scores with race info
   const { data: allScores } = teamIds.length > 0
     ? await supabase
         .from('scores')
-        .select('total_points, team_id')
+        .select('total_points, team_id, race_id, race:races(name, slug)')
         .in('team_id', teamIds)
     : { data: [] }
 
@@ -76,8 +77,8 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
     if (!scoresByUser[uid]) scoresByUser[uid] = { total: 0, races: [] }
     scoresByUser[uid].total += Number(score.total_points ?? 0)
     scoresByUser[uid].races.push({
-      name: (team.races as any)?.name ?? '—',
-      slug: (team.races as any)?.slug ?? '',
+      name: (score as any).race?.name ?? '—',
+      slug: (score as any).race?.slug ?? '',
       pts: Number(score.total_points ?? 0),
     })
   }

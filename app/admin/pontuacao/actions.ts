@@ -77,15 +77,14 @@ export async function calculateScores(raceId: string): Promise<{
     breakdownByAthlete[input.athlete_id] = scoreAthlete(input)
   }
 
-  // 5. Fetch all teams for this race
+  // 5. Fetch all teams (global — not race-specific)
   const { data: teams } = await supabase
     .from('teams')
     .select('id, team_athletes(athlete_id)')
-    .eq('race_id', raceId)
 
-  if (!teams?.length) return { error: 'Nenhum time encontrado para esta prova.' }
+  if (!teams?.length) return { error: 'Nenhum time encontrado.' }
 
-  // 6. Calculate and upsert scores for each team
+  // 6. Calculate and upsert scores for each team (only athletes in this race count)
   let teamsScored = 0
   for (const team of teams) {
     const athleteIds = (team.team_athletes as any[]).map((ta: any) => ta.athlete_id)
@@ -93,8 +92,8 @@ export async function calculateScores(raceId: string): Promise<{
     const total = breakdown.reduce((sum, b) => sum + (b?.total ?? 0), 0)
 
     await supabase.from('scores').upsert(
-      { team_id: team.id, total_points: total, breakdown, calculated_at: new Date().toISOString() },
-      { onConflict: 'team_id' }
+      { team_id: team.id, race_id: raceId, total_points: total, breakdown, calculated_at: new Date().toISOString() },
+      { onConflict: 'team_id,race_id' }
     )
     teamsScored++
   }
