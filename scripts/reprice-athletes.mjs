@@ -139,6 +139,15 @@ for (const athlete of athletes) {
       const arrow = newPrice > Number(athlete.current_price) ? '↑' : newPrice < Number(athlete.current_price) ? '↓' : '→'
       const rankStr = pto ? `#${pto.rank} (${pto.points.toFixed(1)}pts)` : 'unranked'
       console.log(`  ${arrow} ${athlete.name.padEnd(35)} T$${String(athlete.current_price).padStart(2)} → T$${String(newPrice).padStart(2)}  ${rankStr}`)
+
+      if (priceChanged) {
+        await sb.from('athlete_price_history').insert({
+          athlete_id: athlete.id,
+          price: newPrice,
+          change: newPrice - Number(athlete.current_price),
+          reason: 'reprice_pto',
+        })
+      }
     }
   } else {
     stats.unchanged++
