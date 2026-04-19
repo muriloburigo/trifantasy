@@ -149,3 +149,35 @@ for (const athlete of athletes) {
 console.log(`\n✅ Atualizado: ${stats.updated}  |  Sem mudança: ${stats.unchanged}`)
 console.log(`\n⚠ Atletas PROs sem ranking PTO (${unmatched.length}):`)
 unmatched.slice(0, 30).forEach(n => console.log(`   - ${n}`))
+
+// ─── Sync race_athletes.price for non-finished races ─────────────────────────
+
+console.log('\n→ Sincronizando race_athletes.price para provas não finalizadas...')
+
+const { data: openRaces } = await sb
+  .from('races')
+  .select('id')
+  .not('status', 'eq', 'finished')
+
+if (openRaces?.length) {
+  const openRaceIds = openRaces.map(r => r.id)
+
+  const { data: raceAthletes } = await sb
+    .from('race_athletes')
+    .select('id, athlete_id, price')
+    .in('race_id', openRaceIds)
+
+  const priceMap = new Map(athletes.map(a => [a.id, Number(a.current_price)]))
+
+  let synced = 0
+  for (const ra of raceAthletes ?? []) {
+    const currentPrice = priceMap.get(ra.athlete_id)
+    if (currentPrice !== undefined && currentPrice !== Number(ra.price)) {
+      await sb.from('race_athletes').update({ price: currentPrice }).eq('id', ra.id)
+      synced++
+    }
+  }
+  console.log(`  ✅ ${synced} entradas de race_athletes sincronizadas.`)
+} else {
+  console.log('  Nenhuma prova não-finalizada encontrada.')
+}
