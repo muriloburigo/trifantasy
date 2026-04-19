@@ -71,7 +71,6 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
         .from('teams')
         .select('*, team_athletes(athlete_id)')
         .eq('user_id', user.id)
-        .eq('race_id', race.id)
         .maybeSingle(),
       authSupabase
         .from('portfolio')
@@ -214,6 +213,7 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
           userId={user?.id ?? null}
           isOpen={isOpen}
           ownedAthleteIds={Array.from(ownedAthleteIds)}
+          raceAthleteIds={(raceAthletes ?? []).map(ra => ra.athlete_id)}
           wallet={wallet}
         />
       )}

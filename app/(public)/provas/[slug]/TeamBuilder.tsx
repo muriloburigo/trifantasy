@@ -16,9 +16,9 @@ function PriceTrend({ change }: { change: number | null }) {
 }
 
 function AthleteCard({
-  ra, selected, onToggle, canAdd, owned,
+  ra, selected, onToggle, canAdd, owned, inRace,
 }: {
-  ra: RaceAthlete; selected: boolean; onToggle: () => void; canAdd: boolean; owned: boolean
+  ra: RaceAthlete; selected: boolean; onToggle: () => void; canAdd: boolean; owned: boolean; inRace: boolean
 }) {
   const a = ra.athlete!
 
@@ -68,7 +68,7 @@ function AthleteCard({
 }
 
 export default function TeamBuilder({
-  race, raceAthletes, myTeam, userId, isOpen, ownedAthleteIds, wallet,
+  race, raceAthletes, myTeam, userId, isOpen, ownedAthleteIds, raceAthleteIds, wallet,
 }: {
   race: Race
   raceAthletes: RaceAthlete[]
@@ -76,12 +76,14 @@ export default function TeamBuilder({
   userId: string | null
   isOpen: boolean
   ownedAthleteIds: string[]
+  raceAthleteIds: string[]
   wallet: number
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
-  const ownedSet = useMemo(() => new Set(ownedAthleteIds), [ownedAthleteIds])
+  const ownedSet    = useMemo(() => new Set(ownedAthleteIds), [ownedAthleteIds])
+  const inRaceSet   = useMemo(() => new Set(raceAthleteIds), [raceAthleteIds])
 
   const savedIds = useMemo(() => {
     if (!myTeam) return new Set<string>()
@@ -94,10 +96,8 @@ export default function TeamBuilder({
   const [saveError, setSaveError] = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
 
-  // Filter to owned athletes in this race
   const ownedInRace = useMemo(() => raceAthletes.filter(ra => ownedSet.has(ra.athlete_id)), [raceAthletes, ownedSet])
   const notOwned    = useMemo(() => raceAthletes.filter(ra => !ownedSet.has(ra.athlete_id)), [raceAthletes, ownedSet])
-
   const allRaceAthletes = useMemo(() => [...ownedInRace, ...notOwned], [ownedInRace, notOwned])
 
   const filtered = useMemo(() => allRaceAthletes.filter(ra => {
@@ -105,9 +105,12 @@ export default function TeamBuilder({
     return true
   }), [allRaceAthletes, filter])
 
-  const selectedAthletes = useMemo(() =>
-    raceAthletes.filter(ra => selected.has(ra.athlete_id)),
-  [raceAthletes, selected])
+  // Full selected list: race athletes selected + owned athletes selected but not in this race
+  const selectedInRace    = useMemo(() => raceAthletes.filter(ra => selected.has(ra.athlete_id)), [raceAthletes, selected])
+  const selectedNotInRace = useMemo(() => {
+    const inRaceSelected = new Set(selectedInRace.map(ra => ra.athlete_id))
+    return Array.from(selected).filter(id => !inRaceSelected.has(id))
+  }, [selected, selectedInRace])
 
   function canAddAthlete(ra: RaceAthlete): boolean {
     if (!ownedSet.has(ra.athlete_id)) return false
@@ -130,7 +133,7 @@ export default function TeamBuilder({
     if (!userId) { router.push('/login'); return }
     setSaveError('')
     startTransition(async () => {
-      const result = await saveTeam(race.id, Array.from(selected))
+      const result = await saveTeam(Array.from(selected))
       if (result.error) { setSaveError(result.error) }
       else { setSaveSuccess(true); router.refresh() }
     })
@@ -146,7 +149,6 @@ export default function TeamBuilder({
     )
   }
 
-  // Not logged in
   if (!userId) {
     return (
       <div className="text-center py-20 text-[var(--color-muted)]">
@@ -159,7 +161,6 @@ export default function TeamBuilder({
     )
   }
 
-  // Has no athletes in this race
   if (ownedInRace.length === 0) {
     return (
       <div className="text-center py-20 text-[var(--color-muted)]">
@@ -181,7 +182,6 @@ export default function TeamBuilder({
     <div className="flex flex-col lg:flex-row gap-6">
       {/* Athletes list */}
       <div className="flex-1 min-w-0">
-        {/* Wallet info */}
         <div className="flex items-center gap-3 mb-4 text-sm text-[var(--color-muted)]">
           <Wallet size={13} />
           <span>Carteira: <span className="font-bold text-white">T${wallet}</span></span>
@@ -211,6 +211,7 @@ export default function TeamBuilder({
               onToggle={() => toggleAthlete(ra)}
               canAdd={canAddAthlete(ra)}
               owned={ownedSet.has(ra.athlete_id)}
+              inRace={inRaceSet.has(ra.athlete_id)}
             />
           ))}
           {filtered.length === 0 && (
@@ -227,32 +228,42 @@ export default function TeamBuilder({
           <h2 className="font-bold mb-3">Meu Time</h2>
 
           <div className="space-y-1.5 mb-4 min-h-[120px]">
-            {selectedAthletes.length === 0 && (
+            {selected.size === 0 && (
               <p className="text-xs text-[var(--color-muted)] text-center py-4">
-                Clique nos seus atletas para adicionar ao time.
+                Clique nos atletas desta prova para montar seu time.
               </p>
             )}
-            {selectedAthletes.map(ra => (
+            {selectedInRace.map(ra => (
               <div key={ra.athlete_id} className="flex items-center justify-between bg-[var(--color-navy-elevated)] rounded-lg px-2.5 py-1.5">
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate">{ra.athlete?.name}</p>
-                  <p className="text-xs text-[var(--color-muted)]">
-                    PRO · T${ra.price}
-                  </p>
+                  <p className="text-xs text-[var(--color-success)]">nesta prova · T${ra.price}</p>
                 </div>
-                <button
-                  onClick={() => toggleAthlete(ra)}
-                  className="text-[var(--color-muted)] hover:text-[var(--color-danger)] ml-2 shrink-0"
-                >
+                <button onClick={() => toggleAthlete(ra)} className="text-[var(--color-muted)] hover:text-[var(--color-danger)] ml-2 shrink-0">
                   <X size={12} />
                 </button>
               </div>
             ))}
+            {selectedNotInRace.map(id => (
+              <div key={id} className="flex items-center justify-between bg-[var(--color-navy-elevated)] rounded-lg px-2.5 py-1.5 opacity-60">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate text-[var(--color-muted)]">atleta no elenco</p>
+                  <p className="text-xs text-yellow-500">fora desta prova</p>
+                </div>
+              </div>
+            ))}
           </div>
+
+          {selectedNotInRace.length > 0 && (
+            <div className="flex items-start gap-1.5 text-xs text-yellow-500 bg-yellow-950/30 rounded-lg p-2 mb-3">
+              <AlertCircle size={11} className="mt-0.5 shrink-0" />
+              <span>{selectedNotInRace.length} atleta{selectedNotInRace.length !== 1 ? 's' : ''} do seu time não está nesta prova e não pontuará.</span>
+            </div>
+          )}
 
           <div className="flex items-start gap-1.5 text-xs text-[var(--color-muted)] mb-4">
             <Info size={11} className="mt-0.5 shrink-0" />
-            <span>Selecione {TEAM_SIZE} atletas do seu elenco para escalar.</span>
+            <span>Selecione {TEAM_SIZE} atletas. Seu time vale para todas as provas.</span>
           </div>
 
           {saveError && (
