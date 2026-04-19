@@ -74,6 +74,16 @@ for (const r of RESULTS) {
   if (!priceErr) {
     const arrow = boost > 0 ? '↑' : '→'
     console.log(`  ${arrow} ${r.name.padEnd(30)} T$${oldPrice} → T$${newPrice}  (pos #${r.pro_pos}, +${boost})`)
+
+    if (boost !== 0) {
+      await sb.from('athlete_price_history').insert({
+        athlete_id: r.athlete_id,
+        price: newPrice,
+        change: boost,
+        reason: 'race_result',
+        race_id: RACE_ID,
+      })
+    }
   }
 }
 
