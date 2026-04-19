@@ -26,7 +26,10 @@ FROM (
 ) keep
 JOIN teams del ON del.user_id = keep.user_id AND del.id != keep.id
 WHERE s.team_id = del.id
-ON CONFLICT (team_id, race_id) DO NOTHING;
+  AND NOT EXISTS (
+    SELECT 1 FROM scores s2
+    WHERE s2.team_id = keep.id AND s2.race_id = s.race_id
+  );
 
 -- Delete duplicate (non-latest) teams; team_athletes cascade automatically
 DELETE FROM teams del
