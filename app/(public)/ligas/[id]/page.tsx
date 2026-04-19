@@ -48,24 +48,36 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
   // For each member, sum all their team scores
   const memberIds = (members ?? []).map((m: any) => m.user_id)
 
-  const { data: allScores } = memberIds.length > 0
+  // Fetch teams for all members, then get their scores
+  const { data: memberTeams } = memberIds.length > 0
+    ? await supabase
+        .from('teams')
+        .select('id, user_id, races(name, slug)')
+        .in('user_id', memberIds)
+    : { data: [] }
+
+  const teamIds = (memberTeams ?? []).map((t: any) => t.id)
+
+  const { data: allScores } = teamIds.length > 0
     ? await supabase
         .from('scores')
-        .select('total_points, teams!inner(user_id, race_id, races(name, slug, date))')
-        .in('teams.user_id', memberIds)
+        .select('total_points, team_id')
+        .in('team_id', teamIds)
     : { data: [] }
+
+  const teamMap = new Map((memberTeams ?? []).map((t: any) => [t.id, t]))
 
   // Aggregate scores per user
   const scoresByUser: Record<string, { total: number; races: { name: string; slug: string; pts: number }[] }> = {}
   for (const score of allScores ?? []) {
-    const team = (score as any).teams
+    const team = teamMap.get((score as any).team_id)
     if (!team) continue
     const uid = team.user_id
     if (!scoresByUser[uid]) scoresByUser[uid] = { total: 0, races: [] }
     scoresByUser[uid].total += Number(score.total_points ?? 0)
     scoresByUser[uid].races.push({
-      name: team.races?.name ?? '—',
-      slug: team.races?.slug ?? '',
+      name: (team.races as any)?.name ?? '—',
+      slug: (team.races as any)?.slug ?? '',
       pts: Number(score.total_points ?? 0),
     })
   }

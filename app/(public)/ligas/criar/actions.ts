@@ -105,5 +105,5 @@ export async function addMemberByUsername(leagueId: string, username: string) {
   if (error?.code === '23505') return { error: `${profile.name} já está na liga.` }
   if (error) return { error: 'Erro ao adicionar membro.' }
 
-  return { success: `${profile.name} adicionado à liga!` }
+  return { success: `${profile.name} adicionado à liga!`, error: undefined }
 }
