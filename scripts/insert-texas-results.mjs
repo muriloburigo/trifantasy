@@ -28,8 +28,6 @@ const RESULTS = [
   { athlete_id: '4b1c941f-6719-424d-9c56-24d2d331f518', name: 'Marta Sánchez',   pro_pos: 3, finish_time: 30666 }, // 8:31:06
 ]
 
-// Price change for podium finishers (in T$ coins, 1 = +T$1 market value change)
-const PRICE_BOOST = { 1: 5, 2: 3, 3: 2 }
 
 // ── Insert results
 console.log('→ Inserting results for IRONMAN Texas 2026...')
@@ -55,36 +53,5 @@ const { error: raceErr } = await sb.from('races').update({ status: 'finished' })
 if (raceErr) { console.error('Race update error:', raceErr) }
 else console.log('  ✅ Race marked as finished')
 
-// ── Update athlete prices for podium
-console.log('\n→ Updating athlete prices...')
-for (const r of RESULTS) {
-  const boost = PRICE_BOOST[r.pro_pos] ?? 0
-
-  // Get current price
-  const { data: ath } = await sb.from('athletes').select('current_price').eq('id', r.athlete_id).single()
-  if (!ath) continue
-
-  const oldPrice = Number(ath.current_price)
-  const newPrice = oldPrice + boost
-
-  const { error: priceErr } = await sb.from('athletes')
-    .update({ current_price: newPrice, price_change: boost })
-    .eq('id', r.athlete_id)
-
-  if (!priceErr) {
-    const arrow = boost > 0 ? '↑' : '→'
-    console.log(`  ${arrow} ${r.name.padEnd(30)} T$${oldPrice} → T$${newPrice}  (pos #${r.pro_pos}, +${boost})`)
-
-    if (boost !== 0) {
-      await sb.from('athlete_price_history').insert({
-        athlete_id: r.athlete_id,
-        price: newPrice,
-        change: boost,
-        reason: 'race_result',
-        race_id: RACE_ID,
-      })
-    }
-  }
-}
-
 console.log('\n✅ Done! IRONMAN Texas 2026 results saved.')
+console.log('   → Agora calcule a pontuação no admin para atualizar os preços via updateMarket.')
