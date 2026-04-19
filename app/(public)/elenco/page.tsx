@@ -79,7 +79,7 @@ export default async function ElencoPage() {
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4">
           <p className="text-xs text-[var(--color-muted)] mb-1">Atletas</p>
-          <p className="text-xl font-black">{portfolio.length}</p>
+          <p className="text-xl font-black">{portfolio.length}<span className="text-sm font-normal text-[var(--color-muted)]">/5</span></p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4">
           <p className="text-xs text-[var(--color-muted)] mb-1">Valor do elenco</p>

@@ -382,7 +382,7 @@ export default async function HomePage() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-bold flex items-center gap-2 text-base">
                   <Trophy size={16} className="text-yellow-400" />
-                  Trix Rank Global
+                  Trix League Global
                 </h2>
                 <Link href="/ligas" className="text-xs text-[var(--color-muted)] hover:text-[var(--color-orange)] flex items-center gap-1 transition-colors">
                   Ver ligas <ArrowRight size={11} />
