@@ -5,10 +5,12 @@ import { Trophy, Users, Medal, Globe, Lock } from 'lucide-react'
 import CopyButton from './CopyButton'
 import AddMemberForm from './AddMemberForm'
 import BackLink from '~/app/components/BackLink'
+import { getTranslations } from 'next-intl/server'
 
 export const revalidate = 0
 
 export default async function LeaguePage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await getTranslations('leagues')
   const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -106,16 +108,16 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
             {league.is_public
               ? <Globe size={13} className="text-[var(--color-muted)]" />
               : <Lock size={13} className="text-[var(--color-muted)]" />}
-            <span className="text-xs text-[var(--color-muted)]">{league.is_public ? 'Liga pública' : 'Liga privada'}</span>
+            <span className="text-xs text-[var(--color-muted)]">{league.is_public ? t('public') : t('private')}</span>
           </div>
           <h1 className="text-2xl font-bold">{league.name}</h1>
           <p className="text-sm text-[var(--color-muted)] mt-0.5 flex items-center gap-1">
-            <Users size={12} />{ranked.length} participante{ranked.length !== 1 ? 's' : ''}
+            <Users size={12} />{ranked.length !== 1 ? t('participantsPlural', { n: ranked.length }) : t('participants', { n: ranked.length })}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <div className="text-xs text-[var(--color-muted)] text-right">
-            <p className="mb-0.5">Código de convite</p>
+            <p className="mb-0.5">{t('inviteCode')}</p>
             <span className="font-mono text-sm text-white font-semibold">{league.invite_code}</span>
           </div>
           <CopyButton code={league.invite_code} />
@@ -129,7 +131,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
             href={`/ligas/${id}/entrar`}
             className="inline-flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors"
           >
-            Participar desta liga
+            {t('joinButton')}
           </Link>
         </form>
       )}
@@ -138,12 +140,12 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
       <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden mb-6">
         <div className="p-4 border-b border-[var(--color-navy-border)] flex items-center gap-2">
           <Trophy size={16} className="text-[var(--color-orange)]" />
-          <h2 className="font-bold">Ranking Acumulado</h2>
-          <span className="text-xs text-[var(--color-muted)] ml-auto">pontos de todas as provas</span>
+          <h2 className="font-bold">{t('rankingTitle')}</h2>
+          <span className="text-xs text-[var(--color-muted)] ml-auto">{t('rankingSubtitle')}</span>
         </div>
 
         {ranked.length === 0 ? (
-          <div className="text-center py-12 text-[var(--color-muted)] text-sm">Nenhum membro ainda.</div>
+          <div className="text-center py-12 text-[var(--color-muted)] text-sm">{t('rankingEmpty')}</div>
         ) : (
           <div className="divide-y divide-[var(--color-navy-border)]">
             {ranked.map((member: any, i: number) => {
@@ -165,7 +167,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm">
                       {member.profile?.name ?? 'Usuário'}
-                      {isMe && <span className="text-[var(--color-orange)] ml-1 text-xs">(você)</span>}
+                      {isMe && <span className="text-[var(--color-orange)] ml-1 text-xs">{t('youLabel')}</span>}
                     </p>
                     {member.races.length > 0 && (
                       <p className="text-[11px] text-[var(--color-muted)] truncate">
@@ -177,7 +179,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
                       </p>
                     )}
                     {member.races.length === 0 && (
-                      <p className="text-[11px] text-[var(--color-muted)]">Sem pontuação ainda</p>
+                      <p className="text-[11px] text-[var(--color-muted)]">{t('noScore')}</p>
                     )}
                   </div>
 
@@ -199,8 +201,8 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
       {/* Owner: add member by name */}
       {isOwner && (
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-5">
-          <h3 className="font-bold text-sm mb-1">Adicionar membro</h3>
-          <p className="text-xs text-[var(--color-muted)] mb-3">Digite o nome de usuário cadastrado no Trixer.</p>
+          <h3 className="font-bold text-sm mb-1">{t('addMemberTitle')}</h3>
+          <p className="text-xs text-[var(--color-muted)] mb-3">{t('addMemberDesc')}</p>
           <AddMemberForm leagueId={id} />
         </div>
       )}

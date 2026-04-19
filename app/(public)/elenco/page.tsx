@@ -6,6 +6,7 @@ import MarketBanner from '~/app/components/MarketBanner'
 import { SellButton } from './TradeButton'
 import { getMarketStatus } from '~/lib/market'
 import { TrendingUp, TrendingDown, Minus, Wallet, ShoppingBag } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
 export const revalidate = 0
 
@@ -20,6 +21,7 @@ const COUNTRY_FLAGS: Record<string, string> = {
 function flag(country: string | null) { return COUNTRY_FLAGS[country ?? ''] ?? '' }
 
 export default async function ElencoPage() {
+  const t = await getTranslations('team')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -55,15 +57,15 @@ export default async function ElencoPage() {
       <BackLink href="/" />
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Meu Elenco</h1>
-          <p className="text-sm text-[var(--color-muted)] mt-1">Gerencie seus atletas e carteira</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-sm text-[var(--color-muted)] mt-1">{t('subtitle')}</p>
         </div>
         <Link
           href="/atletas"
           className="flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
         >
           <ShoppingBag size={15} />
-          Mercado
+          {t('marketButton')}
         </Link>
       </div>
 
@@ -73,20 +75,20 @@ export default async function ElencoPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4">
           <div className="flex items-center gap-2 text-[var(--color-muted)] text-xs mb-1">
-            <Wallet size={12} />Carteira
+            <Wallet size={12} />{t('walletStat')}
           </div>
           <p className="text-xl font-black text-[var(--color-orange)]">T${wallet.toFixed(0)}</p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4">
-          <p className="text-xs text-[var(--color-muted)] mb-1">Atletas</p>
+          <p className="text-xs text-[var(--color-muted)] mb-1">{t('athletesStat')}</p>
           <p className="text-xl font-black">{portfolio.length}<span className="text-sm font-normal text-[var(--color-muted)]">/5</span></p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4">
-          <p className="text-xs text-[var(--color-muted)] mb-1">Valor do elenco</p>
+          <p className="text-xs text-[var(--color-muted)] mb-1">{t('teamValueStat')}</p>
           <p className="text-xl font-black">T${totalNow.toFixed(0)}</p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4">
-          <p className="text-xs text-[var(--color-muted)] mb-1">P&L total</p>
+          <p className="text-xs text-[var(--color-muted)] mb-1">{t('plStat')}</p>
           <p className={`text-xl font-black ${totalPL > 0 ? 'text-[var(--color-success)]' : totalPL < 0 ? 'text-[var(--color-danger)]' : ''}`}>
             {totalPL > 0 ? '+' : ''}{totalPL.toFixed(0)}
           </p>
@@ -97,14 +99,14 @@ export default async function ElencoPage() {
       {nextRace && portfolio.length > 0 && (
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-orange)]/30 rounded-xl px-4 py-3 mb-6 flex items-center justify-between gap-4">
           <p className="text-sm">
-            <span className="text-[var(--color-muted)]">Próxima prova: </span>
+            <span className="text-[var(--color-muted)]">{t('nextRace')}</span>
             <span className="font-semibold">{nextRace.name}</span>
           </p>
           <Link
             href={`/provas/${nextRace.slug}`}
             className="text-xs font-semibold text-[var(--color-orange)] hover:underline shrink-0"
           >
-            Escalar time →
+            {t('selectTeam')}
           </Link>
         </div>
       )}
@@ -113,24 +115,24 @@ export default async function ElencoPage() {
       {portfolio.length === 0 ? (
         <div className="text-center py-20 text-[var(--color-muted)] bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl">
           <p className="text-4xl mb-4">🏊</p>
-          <p className="font-medium text-white">Seu elenco está vazio</p>
-          <p className="text-sm mt-1 mb-6">Você tem T${wallet.toFixed(0)} para investir. Vá ao mercado e compre seus atletas.</p>
+          <p className="font-medium text-white">{t('emptyTitle')}</p>
+          <p className="text-sm mt-1 mb-6">{t('emptyDesc', { wallet: wallet.toFixed(0) })}</p>
           <Link
             href="/atletas"
             className="inline-flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
           >
             <ShoppingBag size={15} />
-            Ir ao Mercado
+            {t('emptyCta')}
           </Link>
         </div>
       ) : (
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
           <div className="grid grid-cols-[1fr_70px_70px_70px_120px] gap-2 px-4 py-2.5 border-b border-[var(--color-navy-border)] text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
-            <span>Atleta</span>
-            <span className="text-right">Compra</span>
-            <span className="text-right">Atual</span>
-            <span className="text-right">P&L</span>
-            <span className="text-right">Ação</span>
+            <span>{t('colAthlete')}</span>
+            <span className="text-right">{t('colBought')}</span>
+            <span className="text-right">{t('colCurrent')}</span>
+            <span className="text-right">{t('colPL')}</span>
+            <span className="text-right">{t('colAction')}</span>
           </div>
 
           {portfolio.map((p) => {
@@ -200,7 +202,7 @@ export default async function ElencoPage() {
       {/* Net worth footer */}
       {portfolio.length > 0 && (
         <div className="mt-4 flex items-center justify-between px-1 text-sm text-[var(--color-muted)]">
-          <span>Patrimônio total (carteira + elenco)</span>
+          <span>{t('netWorth')}</span>
           <span className="font-bold text-white">T${netWorth.toFixed(0)}</span>
         </div>
       )}

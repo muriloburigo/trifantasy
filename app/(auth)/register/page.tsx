@@ -3,9 +3,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '~/lib/supabase/client'
+import { useTranslations } from 'next-intl'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const t = useTranslations('auth')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -14,7 +16,7 @@ export default function RegisterPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (password.length < 6) { setError('Senha deve ter ao menos 6 caracteres.'); return }
+    if (password.length < 6) { setError(t('passwordMinLength')); return }
     setLoading(true)
     setError('')
 
@@ -43,7 +45,7 @@ export default function RegisterPage() {
           <Link href="/" className="text-2xl font-bold" style={{ fontFamily: 'var(--font-sora)' }}>
             <span className="text-[var(--color-orange)]">TRIX</span><span className="text-white">ER</span>
           </Link>
-          <p className="text-[var(--color-muted)] mt-2 text-sm">Criar conta — é grátis</p>
+          <p className="text-[var(--color-muted)] mt-2 text-sm">{t('registerTitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-[var(--color-navy-card)] rounded-2xl p-6 space-y-4 border border-[var(--color-navy-border)]">
@@ -52,7 +54,7 @@ export default function RegisterPage() {
           )}
 
           <div>
-            <label className="block text-sm text-[var(--color-muted)] mb-1">Nome</label>
+            <label className="block text-sm text-[var(--color-muted)] mb-1">{t('nameLabel')}</label>
             <input
               type="text" required
               value={name} onChange={e => setName(e.target.value)}
@@ -61,7 +63,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-[var(--color-muted)] mb-1">Email</label>
+            <label className="block text-sm text-[var(--color-muted)] mb-1">{t('emailLabel')}</label>
             <input
               type="email" required
               value={email} onChange={e => setEmail(e.target.value)}
@@ -70,7 +72,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-[var(--color-muted)] mb-1">Senha</label>
+            <label className="block text-sm text-[var(--color-muted)] mb-1">{t('passwordLabel')}</label>
             <input
               type="password" required minLength={6}
               value={password} onChange={e => setPassword(e.target.value)}
@@ -82,21 +84,21 @@ export default function RegisterPage() {
             type="submit" disabled={loading}
             className="w-full bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] disabled:opacity-50 text-white font-semibold rounded-lg py-2.5 text-sm transition-colors"
           >
-            {loading ? 'Criando conta...' : 'Criar conta'}
+            {loading ? t('registering') : t('registerButton')}
           </button>
 
           <p className="text-xs text-[var(--color-muted)] text-center">
-            Ao criar sua conta, você concorda com nossa{' '}
+            {t('privacyConsent')}{' '}
             <Link href="/privacidade" className="text-[var(--color-orange)] hover:underline">
-              Política de Privacidade
+              {t('privacyLink')}
             </Link>
             .
           </p>
         </form>
 
         <p className="text-center text-sm text-[var(--color-muted)] mt-4">
-          Já tem conta?{' '}
-          <Link href="/login" className="text-[var(--color-orange)] hover:underline">Entrar</Link>
+          {t('hasAccount')}
+          <Link href="/login" className="text-[var(--color-orange)] hover:underline">{t('signIn')}</Link>
         </p>
       </div>
     </div>
