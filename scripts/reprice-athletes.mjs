@@ -153,20 +153,12 @@ unmatched.slice(0, 30).forEach(n => console.log(`   - ${n}`))
 
 // ─── Sync race_athletes.price for non-finished races ─────────────────────────
 
-console.log('\n→ Sincronizando race_athletes.price para provas não finalizadas...')
+console.log('\n→ Sincronizando race_athletes.price (todas as provas)...')
 
-const { data: openRaces } = await sb
-  .from('races')
-  .select('id')
-  .not('status', 'eq', 'finished')
-
-if (openRaces?.length) {
-  const openRaceIds = openRaces.map(r => r.id)
-
+{
   const { data: raceAthletes } = await sb
     .from('race_athletes')
     .select('id, athlete_id, price')
-    .in('race_id', openRaceIds)
 
   // Re-fetch prices from DB after updates
   const { data: freshAthletes } = await sb.from('athletes').select('id, current_price')
@@ -181,6 +173,4 @@ if (openRaces?.length) {
     }
   }
   console.log(`  ✅ ${synced} entradas de race_athletes sincronizadas.`)
-} else {
-  console.log('  Nenhuma prova não-finalizada encontrada.')
 }
