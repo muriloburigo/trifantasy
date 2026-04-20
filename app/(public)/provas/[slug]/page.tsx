@@ -63,14 +63,14 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
   const authSupabase = await createClient()
   const { data: { user } } = await authSupabase.auth.getUser()
 
-  let ownedAthleteIds: Set<string> = new Set()
+  let ownedMap: Record<string, number> = {}
   let wallet: number = 0
 
   if (user) {
     const [portfolioRes, profileRes] = await Promise.all([
       authSupabase
         .from('portfolio')
-        .select('athlete_id')
+        .select('athlete_id, bought_price')
         .eq('user_id', user.id),
       authSupabase
         .from('profiles')
@@ -78,7 +78,7 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
         .eq('id', user.id)
         .single(),
     ])
-    ownedAthleteIds = new Set((portfolioRes.data ?? []).map((p: any) => p.athlete_id))
+    ownedMap = Object.fromEntries((portfolioRes.data ?? []).map((p: any) => [p.athlete_id, Number(p.bought_price)]))
     wallet = Number(profileRes.data?.wallet ?? 0)
   }
 
@@ -253,7 +253,7 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
           raceAthletes={(raceAthletes ?? []) as RaceAthlete[]}
           userId={user?.id ?? null}
           isOpen={isOpen}
-          ownedAthleteIds={Array.from(ownedAthleteIds)}
+          ownedMap={ownedMap}
           wallet={wallet}
         />
       )}

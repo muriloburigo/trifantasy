@@ -5,6 +5,7 @@ import { Search, Wallet, ShoppingBag, AlertCircle, Info, CheckCircle2 } from 'lu
 import type { Race, RaceAthlete } from '~/lib/types'
 import { TEAM_SIZE } from '~/lib/types'
 import { useTranslations } from 'next-intl'
+import { BuyButton, SellButton } from '../../elenco/TradeButton'
 
 type Filter = { search: string }
 
@@ -15,31 +16,48 @@ function PriceTrend({ change }: { change: number | null }) {
 }
 
 function AthleteCard({
-  ra, owned,
+  ra, owned, boughtPrice, wallet, rosterCount,
 }: {
   ra: RaceAthlete
   owned: boolean
+  boughtPrice: number | null
+  wallet: number
+  rosterCount: number
 }) {
   const t = useTranslations('teamBuilder')
   const a = ra.athlete!
+  const price = Number(ra.price)
 
   return (
     <div className={`w-full text-left p-3 rounded-xl border transition-all ${
       owned
         ? 'bg-[var(--color-orange-dim)] border-[var(--color-orange)]/50'
-        : 'bg-[var(--color-navy-card)] border-[var(--color-navy-border)] opacity-45'
+        : 'bg-[var(--color-navy-card)] border-[var(--color-navy-border)]'
     }`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-sm mt-0.5 truncate">{a.name}</p>
           {a.pto_rank && <p className="text-xs text-[var(--color-muted)]">PTO #{a.pto_rank}</p>}
           {a.club && <p className="text-xs text-[var(--color-muted)] truncate">{a.club}</p>}
+          <div className="mt-2">
+             <PriceTrend change={(a as any).price_change ?? null} />
+          </div>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
-          <span className="font-bold text-sm text-[var(--color-orange)]">T${ra.price}</span>
-          <PriceTrend change={(a as any).price_change ?? null} />
-          {owned && <CheckCircle2 size={14} className="text-[var(--color-success)]" />}
-          {!owned && <span className="text-[10px] text-[var(--color-muted)]">{t('notOwned')}</span>}
+          {owned ? (
+            <SellButton 
+              athleteId={a.id} 
+              price={price} 
+              boughtPrice={boughtPrice!} 
+            />
+          ) : (
+            <BuyButton 
+              athleteId={a.id} 
+              price={price} 
+              wallet={wallet} 
+              rosterCount={rosterCount}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -47,21 +65,23 @@ function AthleteCard({
 }
 
 export default function TeamBuilder({
-  race, raceAthletes, userId, isOpen, ownedAthleteIds, wallet,
+  race, raceAthletes, userId, isOpen, ownedMap, wallet,
 }: {
   race: Race
   raceAthletes: RaceAthlete[]
   userId: string | null
   isOpen: boolean
-  ownedAthleteIds: string[]
+  ownedMap: Record<string, number>
   wallet: number
 }) {
   const t = useTranslations('teamBuilder')
+  const ownedAthleteIds = useMemo(() => Object.keys(ownedMap), [ownedMap])
   const ownedSet = useMemo(() => new Set(ownedAthleteIds), [ownedAthleteIds])
   const [filter, setFilter] = useState<Filter>({ search: '' })
 
   const ownedRoster = useMemo(() => raceAthletes.filter(ra => ownedSet.has(ra.athlete_id)), [raceAthletes, ownedSet])
   const marketField = useMemo(() => raceAthletes.filter(ra => !ownedSet.has(ra.athlete_id)), [raceAthletes, ownedSet])
+  
   const filtered = useMemo(() => {
     const list = [...ownedRoster, ...marketField]
     return list.filter(ra => !filter.search || ra.athlete!.name.toLowerCase().includes(filter.search.toLowerCase()))
@@ -91,23 +111,6 @@ export default function TeamBuilder({
     )
   }
 
-  if (ownedAthleteIds.length === 0) {
-    return (
-      <div className="text-center py-20 text-[var(--color-muted)]">
-        <p className="text-4xl mb-4">🛒</p>
-        <p className="text-lg font-medium text-white">{t('noAthletesTitle')}</p>
-        <p className="text-sm mt-1 mb-6">{t('noAthletesDesc', { wallet, size: TEAM_SIZE })}</p>
-        <Link
-          href="/atletas"
-          className="inline-flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
-        >
-          <ShoppingBag size={15} />
-          {t('noAthletesCta')}
-        </Link>
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       <div className="flex-1 min-w-0">
@@ -131,12 +134,22 @@ export default function TeamBuilder({
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[600px] overflow-y-auto pr-1">
+        {ownedAthleteIds.length === 0 && (
+          <div className="text-center py-12 mb-6 bg-[var(--color-navy-card)] border border-dashed border-[var(--color-navy-border)] rounded-2xl">
+            <p className="text-sm text-[var(--color-muted)] mb-2">{t('noAthletesTitle')}</p>
+            <p className="text-xs text-[var(--color-muted)]/60">{t('noAthletesDesc', { wallet, size: TEAM_SIZE })}</p>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[700px] overflow-y-auto pr-1">
           {filtered.map(ra => (
             <AthleteCard
               key={ra.id}
               ra={ra}
               owned={ownedSet.has(ra.athlete_id)}
+              boughtPrice={ownedMap[ra.athlete_id] ?? null}
+              wallet={wallet}
+              rosterCount={ownedAthleteIds.length}
             />
           ))}
           {filtered.length === 0 && (
@@ -165,6 +178,11 @@ export default function TeamBuilder({
                 </div>
               </div>
             ))}
+            {ownedRoster.length === 0 && ownedAthleteIds.length > 0 && (
+              <div className="py-4 text-center">
+                 <p className="text-xs text-[var(--color-muted)]">Nenhum atleta do seu elenco está nesta prova.</p>
+              </div>
+            )}
           </div>
 
           {missingFromRace > 0 && (
@@ -181,7 +199,7 @@ export default function TeamBuilder({
 
           <Link
             href="/elenco"
-            className="w-full inline-flex items-center justify-center bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-semibold rounded-lg py-2.5 text-sm transition-colors"
+            className="w-full inline-flex items-center justify-center bg-[var(--color-navy-elevated)] hover:bg-[var(--color-navy-border)] text-white font-semibold rounded-lg py-2.5 text-sm transition-colors"
           >
             {t('manageRosterButton')}
           </Link>
