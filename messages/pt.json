@@ -195,6 +195,8 @@
     "rosterTitle": "Meu Time para esta Prova",
     "teamHint": "Seu time é composto pelos 5 atletas do seu elenco.",
     "inRace": "nesta prova · T${price}",
+    "available": "DISPONÍVEL",
+    "inRoster": "NO ELENCO",
     "notOwned": "não possui",
     "alertNotInRace": "{n} atleta do seu elenco não está nesta prova e não pontuará.",
     "alertNotInRacePlural": "{n} atletas do seu elenco não estão nesta prova e não pontuarão.",
