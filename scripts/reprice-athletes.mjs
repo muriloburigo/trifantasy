@@ -143,9 +143,30 @@ for (const athlete of athletes) {
       if (priceChanged) {
         await sb.from('athlete_price_history').insert({
           athlete_id: athlete.id,
+          old_price: Number(athlete.current_price),
           price: newPrice,
+          new_price: newPrice,
           change: newPrice - Number(athlete.current_price),
           reason: 'reprice_pto',
+          breakdown: [
+            {
+              code: 'pto_reprice',
+              label: `Repricing PTO ${newPrice - Number(athlete.current_price) >= 0 ? '+' : ''}${newPrice - Number(athlete.current_price)}`,
+              delta: newPrice - Number(athlete.current_price),
+              category: 'ranking',
+              metadata: {
+                previous_rank: athlete.pto_rank,
+                new_rank: newRank,
+                pto_points: pto?.points ?? null,
+              },
+            },
+          ],
+          context: {
+            source: 'reprice_pto',
+            previous_rank: athlete.pto_rank,
+            new_rank: newRank,
+            pto_points: pto?.points ?? null,
+          },
         })
       }
     }
