@@ -74,7 +74,7 @@ function AthleteCard({
 
         <div className="flex flex-col items-end shrink-0">
           <span className="font-black text-sm text-[var(--color-orange)]">T${price}</span>
-          <Trend change={Number((a as any).price_change ?? 0)} />
+          <Trend change={Number(a.price_change ?? 0)} />
         </div>
       </div>
 
