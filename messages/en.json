@@ -195,6 +195,8 @@
     "rosterTitle": "My Team for this Race",
     "teamHint": "Your team consists of the 5 athletes in your roster.",
     "inRace": "in this race · T${price}",
+    "available": "AVAILABLE",
+    "inRoster": "IN ROSTER",
     "notOwned": "not owned",
     "alertNotInRace": "{n} athlete in your roster is not competing in this race and won't score.",
     "alertNotInRacePlural": "{n} athletes in your roster are not competing in this race and won't score.",
