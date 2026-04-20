@@ -30,7 +30,7 @@ export default async function TrixersPage() {
   const [scoresRes, profilesRes, teamsRes] = await Promise.all([
     admin
       .from('scores')
-      .select('total_points, teams(user_id, races(name, date), profiles(name, country))')
+      .select('total_points, race:races(name, date), teams(user_id, profiles(name, country))')
       .order('total_points', { ascending: false })
       .limit(500),
     pub.from('profiles').select('id', { count: 'exact', head: true }),
@@ -58,14 +58,14 @@ export default async function TrixersPage() {
         name: t.profiles?.name ?? 'Trixter',
         country: t.profiles?.country ?? null,
         bestScore: pts,
-        bestRace: t.races?.name ?? '—',
+        bestRace: (s as any).race?.name ?? '—',
         racesPlayed: 1,
       }
     } else {
       byUser[uid].racesPlayed++
       if (pts > byUser[uid].bestScore) {
         byUser[uid].bestScore = pts
-        byUser[uid].bestRace = t.races?.name ?? '—'
+        byUser[uid].bestRace = (s as any).race?.name ?? '—'
       }
     }
   }

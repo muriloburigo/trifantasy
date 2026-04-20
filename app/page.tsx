@@ -139,7 +139,7 @@ function RaceCard({ race, athleteCount, t }: { race: Race; athleteCount?: number
 
 function RankRow({ entry, pos }: { entry: any; pos: number }) {
   const name: string = entry.teams?.profiles?.name ?? 'Trixter'
-  const race: string = entry.teams?.races?.name ?? '—'
+  const race: string = entry.race?.name ?? '—'
   const pts = Number(entry.total_points ?? 0)
   const medals = ['🥇', '🥈', '🥉']
 
@@ -207,7 +207,7 @@ export default async function HomePage() {
 
     // Trix Rank
     admin.from('scores')
-      .select('total_points, teams(user_id, races(name), profiles(name, country))')
+      .select('total_points, race:races(name), teams(user_id, profiles(name, country))')
       .order('total_points', { ascending: false })
       .limit(10),
 

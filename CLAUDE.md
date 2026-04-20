@@ -89,7 +89,7 @@ app/
 | `race_athletes` | Atletas inscritos por prova + preço em Tricoins |
 | `results` | Resultados por atleta por prova (splits + posições) |
 | `profiles` | Extensão de auth.users (name, is_admin) |
-| `teams` | Um time por usuário por prova |
+| `teams` | Cache do elenco de 5 atletas (espelho do `portfolio`) |
 | `team_athletes` | Atletas no time (máx. 5) |
 | `scores` | Pontuação calculada por time |
 | `leagues` | Ligas privadas por prova |
@@ -99,9 +99,11 @@ app/
 
 ## Mecânicas do jogo
 
-- **Orçamento:** T$100 por prova
-- **Time:** 5 atletas (livre mix PRO + age-grouper)
-- **Restrição:** máx. 2 atletas do mesmo clube
+- **Orçamento Inicial:** T$60 (vitalício, aumenta conforme lucro nas vendas)
+- **Elenco:** Exatamente 5 atletas no total (PRO + age-groupers)
+- **Escalação:** Automática — seu elenco atual de 5 atletas é o seu time para todas as provas.
+- **Restrição:** Sem limite de atletas por clube.
+- **Mercado:** Abre após cada prova, fecha 24h antes da próxima.
 - **PRO:** pontos por posição no campo PRO + bônus de melhor segmento
 - **Age-grouper:** pontos por posição no AG + bônus de segmento + Kona slot (+8)
 - **Sem capitão**

@@ -7,6 +7,7 @@ import { SellButton } from './TradeButton'
 import { getMarketStatus } from '~/lib/market'
 import { TrendingUp, TrendingDown, Minus, Wallet, ShoppingBag } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
+import { TEAM_SIZE } from '~/lib/types'
 
 export const revalidate = 0
 
@@ -81,7 +82,7 @@ export default async function ElencoPage() {
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4">
           <p className="text-xs text-[var(--color-muted)] mb-1">{t('athletesStat')}</p>
-          <p className="text-xl font-black">{portfolio.length}<span className="text-sm font-normal text-[var(--color-muted)]">/5</span></p>
+          <p className="text-xl font-black">{portfolio.length}<span className="text-sm font-normal text-[var(--color-muted)]">/{TEAM_SIZE}</span></p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4">
           <p className="text-xs text-[var(--color-muted)] mb-1">{t('teamValueStat')}</p>
@@ -101,12 +102,13 @@ export default async function ElencoPage() {
           <p className="text-sm">
             <span className="text-[var(--color-muted)]">{t('nextRace')}</span>
             <span className="font-semibold">{nextRace.name}</span>
+            <span className="block text-xs text-[var(--color-muted)] mt-0.5">Seu elenco atual será usado automaticamente quando a prova acontecer.</span>
           </p>
           <Link
             href={`/provas/${nextRace.slug}`}
             className="text-xs font-semibold text-[var(--color-orange)] hover:underline shrink-0"
           >
-            {t('selectTeam')}
+            Ver prova →
           </Link>
         </div>
       )}
