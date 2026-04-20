@@ -17,6 +17,14 @@
 
 import { createAdminClient } from '~/lib/supabase/server'
 
+export interface MarketBreakdownItem {
+  code: string
+  label: string
+  delta: number
+  category: 'position' | 'segment' | 'status' | 'ranking' | 'manual'
+  metadata?: Record<string, unknown>
+}
+
 export interface MarketUpdate {
   athlete_id: string
   athlete_name: string
@@ -24,9 +32,25 @@ export interface MarketUpdate {
   new_price: number
   delta: number
   reasons: string[]
+  breakdown: MarketBreakdownItem[]
 }
 
 const MIN_PRICE = 1
+
+interface MarketDeltaResult {
+  delta: number
+  reasons: string[]
+  breakdown: MarketBreakdownItem[]
+}
+
+function addBreakdown(
+  breakdown: MarketBreakdownItem[],
+  reasons: string[],
+  item: MarketBreakdownItem,
+) {
+  breakdown.push(item)
+  reasons.push(item.label)
+}
 
 function proMarketDelta(
   pos: number | null,
@@ -36,28 +60,98 @@ function proMarketDelta(
   bikeFastest: boolean,
   runFastest: boolean,
   courseRecord: boolean, // reserved, unused
-): { delta: number; reasons: string[] } {
+): MarketDeltaResult {
   const reasons: string[] = []
+  const breakdown: MarketBreakdownItem[] = []
   let delta = 0
 
-  if (dns)      { delta -= 2; reasons.push('DNS −2') }
-  else if (dnf) { delta -= 2; reasons.push('DNF −2') }
+  if (dns) {
+    delta -= 2
+    addBreakdown(breakdown, reasons, {
+      code: 'dns',
+      label: 'DNS −2',
+      delta: -2,
+      category: 'status',
+    })
+  } else if (dnf) {
+    delta -= 2
+    addBreakdown(breakdown, reasons, {
+      code: 'dnf',
+      label: 'DNF −2',
+      delta: -2,
+      category: 'status',
+    })
+  }
   else {
     const p = pos ?? 99
-    if      (p === 1)       { delta += 4; reasons.push('1º lugar +4') }
-    else if (p <= 3)        { delta += 3; reasons.push(`${p}º lugar +3`) }
-    else if (p <= 5)        { delta += 2; reasons.push(`${p}º lugar +2`) }
-    else if (p <= 10)       { delta += 1; reasons.push(`${p}º lugar +1`) }
-    else if (p <= 20)       {             reasons.push(`${p}º lugar 0`) }
-    else                    { delta -= 1; reasons.push(`${p}º lugar −1`) }
+    let positionDelta = 0
+    let positionLabel = `${p}º lugar 0`
 
-    if (swimFastest) { delta += 1; reasons.push('Melhor natação +1') }
-    if (bikeFastest) { delta += 1; reasons.push('Melhor bike +1') }
-    if (runFastest)  { delta += 1; reasons.push('Melhor corrida +1') }
-    if (courseRecord){ delta += 2; reasons.push('Course record +2') }
+    if (p === 1) {
+      positionDelta = 4
+      positionLabel = '1º lugar +4'
+    } else if (p <= 3) {
+      positionDelta = 3
+      positionLabel = `${p}º lugar +3`
+    } else if (p <= 5) {
+      positionDelta = 2
+      positionLabel = `${p}º lugar +2`
+    } else if (p <= 10) {
+      positionDelta = 1
+      positionLabel = `${p}º lugar +1`
+    } else if (p > 20) {
+      positionDelta = -1
+      positionLabel = `${p}º lugar −1`
+    }
+
+    delta += positionDelta
+    addBreakdown(breakdown, reasons, {
+      code: 'pro_position',
+      label: positionLabel,
+      delta: positionDelta,
+      category: 'position',
+      metadata: { position: p },
+    })
+
+    if (swimFastest) {
+      delta += 1
+      addBreakdown(breakdown, reasons, {
+        code: 'fastest_swim_overall',
+        label: 'Melhor natação +1',
+        delta: 1,
+        category: 'segment',
+      })
+    }
+    if (bikeFastest) {
+      delta += 1
+      addBreakdown(breakdown, reasons, {
+        code: 'fastest_bike_overall',
+        label: 'Melhor bike +1',
+        delta: 1,
+        category: 'segment',
+      })
+    }
+    if (runFastest) {
+      delta += 1
+      addBreakdown(breakdown, reasons, {
+        code: 'fastest_run_overall',
+        label: 'Melhor corrida +1',
+        delta: 1,
+        category: 'segment',
+      })
+    }
+    if (courseRecord) {
+      delta += 2
+      addBreakdown(breakdown, reasons, {
+        code: 'course_record',
+        label: 'Course record +2',
+        delta: 2,
+        category: 'segment',
+      })
+    }
   }
 
-  return { delta, reasons }
+  return { delta, reasons, breakdown }
 }
 
 function agMarketDelta(
@@ -68,28 +162,87 @@ function agMarketDelta(
   swimFastest: boolean,
   bikeFastest: boolean,
   runFastest: boolean,
-): { delta: number; reasons: string[] } {
+): MarketDeltaResult {
   const reasons: string[] = []
+  const breakdown: MarketBreakdownItem[] = []
   let delta = 0
 
-  if (dns)      { delta -= 2; reasons.push('DNS −2') }
-  else if (dnf) { delta -= 2; reasons.push('DNF −2') }
+  if (dns) {
+    delta -= 2
+    addBreakdown(breakdown, reasons, {
+      code: 'dns',
+      label: 'DNS −2',
+      delta: -2,
+      category: 'status',
+    })
+  } else if (dnf) {
+    delta -= 2
+    addBreakdown(breakdown, reasons, {
+      code: 'dnf',
+      label: 'DNF −2',
+      delta: -2,
+      category: 'status',
+    })
+  }
   else {
     const p = pos ?? 99
     const pct = total > 0 ? p / total : 1
+    let positionDelta = 0
+    let positionLabel = 'Top 50% 0'
 
-    if      (p === 1)       { delta += 3; reasons.push('1º no AG +3') }
-    else if (p <= 3)        { delta += 2; reasons.push(`${p}º no AG +2`) }
-    else if (pct <= 0.25)   { delta += 1; reasons.push('Top 25% +1') }
-    else if (pct <= 0.50)   {             reasons.push('Top 50% 0') }
-    else                    { delta -= 1; reasons.push('Abaixo 50% −1') }
+    if (p === 1) {
+      positionDelta = 3
+      positionLabel = '1º no AG +3'
+    } else if (p <= 3) {
+      positionDelta = 2
+      positionLabel = `${p}º no AG +2`
+    } else if (pct <= 0.25) {
+      positionDelta = 1
+      positionLabel = 'Top 25% +1'
+    } else if (pct > 0.50) {
+      positionDelta = -1
+      positionLabel = 'Abaixo 50% −1'
+    }
 
-    if (swimFastest) { delta += 1; reasons.push('Melhor natação no AG +1') }
-    if (bikeFastest) { delta += 1; reasons.push('Melhor bike no AG +1') }
-    if (runFastest)  { delta += 1; reasons.push('Melhor corrida no AG +1') }
+    delta += positionDelta
+    addBreakdown(breakdown, reasons, {
+      code: 'ag_position',
+      label: positionLabel,
+      delta: positionDelta,
+      category: 'position',
+      metadata: { position: p, total_finishers: total, percentile: pct },
+    })
+
+    if (swimFastest) {
+      delta += 1
+      addBreakdown(breakdown, reasons, {
+        code: 'fastest_swim_ag',
+        label: 'Melhor natação no AG +1',
+        delta: 1,
+        category: 'segment',
+      })
+    }
+    if (bikeFastest) {
+      delta += 1
+      addBreakdown(breakdown, reasons, {
+        code: 'fastest_bike_ag',
+        label: 'Melhor bike no AG +1',
+        delta: 1,
+        category: 'segment',
+      })
+    }
+    if (runFastest) {
+      delta += 1
+      addBreakdown(breakdown, reasons, {
+        code: 'fastest_run_ag',
+        label: 'Melhor corrida no AG +1',
+        delta: 1,
+        category: 'segment',
+      })
+    }
   }
 
-  return { delta, reasons }
+  return { delta, reasons, breakdown }
 }
 
 export async function updateMarket(raceId: string): Promise<MarketUpdate[]> {
@@ -131,6 +284,7 @@ export async function updateMarket(raceId: string): Promise<MarketUpdate[]> {
     const oldPrice = Number(athlete.current_price ?? 10)
     let delta = 0
     let reasons: string[] = []
+    let breakdown: MarketBreakdownItem[] = []
 
     if (athlete.type === 'pro') {
       const res = proMarketDelta(
@@ -140,7 +294,7 @@ export async function updateMarket(raceId: string): Promise<MarketUpdate[]> {
         r.run_time  === bestRunPro,
         false,
       )
-      delta = res.delta; reasons = res.reasons
+      delta = res.delta; reasons = res.reasons; breakdown = res.breakdown
     } else {
       const ag = athlete.age_group ?? '__ag__'
       const total = agGroups[ag]?.length ?? 1
@@ -150,7 +304,7 @@ export async function updateMarket(raceId: string): Promise<MarketUpdate[]> {
         r.bike_time === bestInAg(ag, 'bike_time'),
         r.run_time  === bestInAg(ag, 'run_time'),
       )
-      delta = res.delta; reasons = res.reasons
+      delta = res.delta; reasons = res.reasons; breakdown = res.breakdown
     }
 
     const newPrice = Math.max(MIN_PRICE, oldPrice + delta)
@@ -165,10 +319,29 @@ export async function updateMarket(raceId: string): Promise<MarketUpdate[]> {
     // Log price change to history
     await supabase.from('athlete_price_history').insert({
       athlete_id: athlete.id,
+      old_price: oldPrice,
       price: newPrice,
+      new_price: newPrice,
       change: actualDelta,
       reason: 'race_result',
       race_id: raceId,
+      breakdown,
+      context: {
+        athlete_type: athlete.type,
+        athlete_gender: athlete.gender,
+        age_group: athlete.age_group ?? null,
+        result: {
+          overall_pos: r.overall_pos,
+          pro_pos: r.pro_pos,
+          ag_pos: r.ag_pos,
+          dnf: r.dnf,
+          dns: r.dns,
+        },
+        raw_delta: delta,
+        applied_delta: actualDelta,
+        clamped_by_floor: newPrice !== oldPrice + delta,
+        min_price: MIN_PRICE,
+      },
     })
 
     // Propagate to open/upcoming races
@@ -192,6 +365,7 @@ export async function updateMarket(raceId: string): Promise<MarketUpdate[]> {
       new_price:    newPrice,
       delta:        actualDelta,
       reasons,
+      breakdown,
     })
   }
 
