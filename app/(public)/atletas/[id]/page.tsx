@@ -63,11 +63,14 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
   if (!athlete) notFound()
 
   // Fetch user portfolio + wallet + market status in parallel
-  const [market, portfolioRes, profileRes] = await Promise.all([
+  const [market, portfolioRes, portfolioCountRes, profileRes] = await Promise.all([
     getMarketStatus(supabase),
     user
       ? supabase.from('portfolio').select('bought_price').eq('user_id', user.id).eq('athlete_id', id).maybeSingle()
       : { data: null },
+    user
+      ? supabase.from('portfolio').select('athlete_id', { count: 'exact', head: true }).eq('user_id', user.id)
+      : { count: 0 },
     user
       ? supabase.from('profiles').select('wallet').eq('id', user.id).single()
       : { data: null },
@@ -76,6 +79,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
   const owned = !!portfolioRes.data
   const boughtPrice = portfolioRes.data ? Number(portfolioRes.data.bought_price) : null
   const wallet: number | null = user ? Number(profileRes.data?.wallet ?? 0) : null
+  const rosterCount = Number(portfolioCountRes.count ?? 0)
 
   // Fetch race history: races this athlete is registered for + results
   const { data: raceAthletes } = await pub
@@ -104,7 +108,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
   // Best fantasy score contribution from scores.breakdown JSONB
   const { data: scoreRows } = await admin
     .from('scores')
-    .select('total_points, breakdown, teams(races(name, date))')
+    .select('total_points, breakdown, race:races(name, date)')
     .not('breakdown', 'is', null)
     .limit(500)
 
@@ -113,10 +117,10 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
   for (const row of scoreRows ?? []) {
     const breakdown = row.breakdown as any[]
     if (!Array.isArray(breakdown)) continue
-    const entry = breakdown.find((b: any) => b.athlete_id === id)
-    if (entry) {
-      contributions.push({
-        race: (row.teams as any)?.races?.name ?? '—',
+      const entry = breakdown.find((b: any) => b.athlete_id === id)
+      if (entry) {
+        contributions.push({
+        race: (row as any).race?.name ?? '—',
         points: Number(entry.total ?? entry.base_points ?? 0),
         detail: entry.detail ?? [],
       })
@@ -188,7 +192,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
           {owned ? (
             <SellButton athleteId={id} price={Number(athlete.current_price)} boughtPrice={boughtPrice!} marketLocked={market.locked} />
           ) : (
-            <BuyButton athleteId={id} price={Number(athlete.current_price)} wallet={wallet} marketLocked={market.locked} />
+            <BuyButton athleteId={id} price={Number(athlete.current_price)} wallet={wallet} rosterCount={rosterCount} marketLocked={market.locked} />
           )}
         </div>
       </div>

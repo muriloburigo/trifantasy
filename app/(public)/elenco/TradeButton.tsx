@@ -3,13 +3,15 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ShoppingCart, TrendingDown, Loader, Lock } from 'lucide-react'
 import { buyAthlete, sellAthlete } from './actions'
+import { TEAM_SIZE } from '~/lib/types'
 
 export function BuyButton({
-  athleteId, price, wallet, marketLocked,
+  athleteId, price, wallet, rosterCount, marketLocked,
 }: {
   athleteId: string
   price: number
   wallet: number | null
+  rosterCount?: number
   marketLocked?: boolean
 }) {
   const router = useRouter()
@@ -36,6 +38,7 @@ export function BuyButton({
   }
 
   const canAfford = wallet >= price
+  const hasRosterSlot = (rosterCount ?? 0) < TEAM_SIZE
 
   function handleBuy() {
     setMsg('')
@@ -50,7 +53,7 @@ export function BuyButton({
     <div className="flex flex-col items-end gap-1">
       <button
         onClick={handleBuy}
-        disabled={isPending || !canAfford}
+        disabled={isPending || !canAfford || !hasRosterSlot}
         className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
       >
         {isPending ? <Loader size={12} className="animate-spin" /> : <ShoppingCart size={12} />}
@@ -58,6 +61,9 @@ export function BuyButton({
       </button>
       {msg && <span className={`text-[10px] ${msg.startsWith('Comprado') ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{msg}</span>}
       {!canAfford && !msg && <span className="text-[10px] text-[var(--color-muted)]">Saldo insuficiente</span>}
+      {canAfford && !hasRosterSlot && !msg && (
+        <span className="text-[10px] text-[var(--color-muted)]">Elenco cheio ({TEAM_SIZE}/{TEAM_SIZE})</span>
+      )}
     </div>
   )
 }

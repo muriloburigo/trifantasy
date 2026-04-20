@@ -121,6 +121,7 @@ export interface LeagueMember {
 }
 
 // Budget constant
-export const TEAM_BUDGET = 100
+export const INITIAL_WALLET = 60
+export const TEAM_BUDGET = 60
 export const TEAM_SIZE = 5
 export const MAX_SAME_CLUB = 2

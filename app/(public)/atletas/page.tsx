@@ -58,7 +58,7 @@ export default async function AtletasPage() {
           <Link href="/elenco" className="flex items-center gap-2 bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/50 text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
             <Wallet size={14} className="text-[var(--color-orange)]" />
             <span>T${wallet.toFixed(0)}</span>
-            <span className="text-[var(--color-muted)] text-xs">· {Object.keys(ownedMap).length} atletas</span>
+            <span className="text-[var(--color-muted)] text-xs">· {Object.keys(ownedMap).length}/5 atletas</span>
           </Link>
         )}
       </div>

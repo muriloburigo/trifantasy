@@ -19,6 +19,7 @@ export default function AthleteList({
 }) {
   const t = useTranslations('market')
   const owned = useMemo(() => new Map(Object.entries(ownedMap)), [ownedMap])
+  const rosterCount = owned.size
 
   const [search, setSearch]   = useState('')
   const [gender, setGender]   = useState<'all' | 'M' | 'F'>('all')
@@ -163,6 +164,7 @@ export default function AthleteList({
                 owned={owned.has(a.id)}
                 boughtPrice={owned.get(a.id) ?? null}
                 wallet={wallet}
+                rosterCount={rosterCount}
                 marketLocked={marketLocked}
               />
             ))

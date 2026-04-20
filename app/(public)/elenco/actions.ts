@@ -2,6 +2,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '~/lib/supabase/server'
 import { getMarketStatus } from '~/lib/market'
+import { TEAM_SIZE } from '~/lib/types'
 
 export async function buyAthlete(athleteId: string) {
   const supabase = await createClient()
@@ -16,8 +17,16 @@ export async function buyAthlete(athleteId: string) {
     supabase.from('profiles').select('wallet').eq('id', user.id).single(),
   ])
 
+  const { count: rosterCount } = await supabase
+    .from('portfolio')
+    .select('athlete_id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+
   if (!athleteRes.data) return { error: 'Atleta não encontrado.' }
   if (!profileRes.data) return { error: 'Perfil não encontrado.' }
+  if ((rosterCount ?? 0) >= TEAM_SIZE) {
+    return { error: `Seu elenco já está completo com ${TEAM_SIZE} atletas. Venda um atleta antes de comprar outro.` }
+  }
 
   const price = Number(athleteRes.data.current_price)
   const wallet = Number(profileRes.data.wallet)
@@ -53,6 +62,7 @@ export async function buyAthlete(athleteId: string) {
 
   revalidatePath('/atletas')
   revalidatePath('/elenco')
+  revalidatePath('/provas')
   revalidatePath('/atletas/[id]', 'layout')
   return { success: true, price, name: athleteRes.data.name }
 }
@@ -96,6 +106,7 @@ export async function sellAthlete(athleteId: string) {
 
   revalidatePath('/atletas')
   revalidatePath('/elenco')
+  revalidatePath('/provas')
   revalidatePath('/atletas/[id]', 'layout')
   return { success: true, price, name: athleteRes.data.name }
 }

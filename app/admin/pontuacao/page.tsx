@@ -22,16 +22,21 @@ export default async function AdminPontuacaoPage({
   const selectedRaceId = race_id ?? races?.[0]?.id ?? ''
 
   // Teams with scores for selected race
-  const { data: teams } = selectedRaceId
+  const { data: rows } = selectedRaceId
     ? await supabase
-        .from('teams')
-        .select('id, user_id, profile:profiles(name), score:scores(total_points, calculated_at)')
+        .from('scores')
+        .select('total_points, calculated_at, teams!inner(id, user_id, profile:profiles(name))')
         .eq('race_id', selectedRaceId)
-        .order('created_at')
+        .order('calculated_at', { ascending: false })
     : { data: [] }
 
-  const sorted = (teams ?? [])
-    .map((t: any) => ({ ...t, pts: t.score?.total_points ?? null }))
+  const sorted = (rows ?? [])
+    .map((row: any) => ({
+      id: row.teams?.id,
+      user_id: row.teams?.user_id,
+      profile: row.teams?.profile,
+      pts: row.total_points ?? null,
+    }))
     .sort((a: any, b: any) => (b.pts ?? -1) - (a.pts ?? -1))
 
   return (

@@ -20,12 +20,13 @@ function Trend({ change }: { change: number }) {
 }
 
 export default function AthleteRow({
-  a, owned, boughtPrice, wallet, marketLocked,
+  a, owned, boughtPrice, wallet, rosterCount, marketLocked,
 }: {
   a: any
   owned: boolean
   boughtPrice: number | null
   wallet: number | null
+  rosterCount: number
   marketLocked?: boolean
 }) {
   const price = Number(a.current_price)
@@ -64,7 +65,7 @@ export default function AthleteRow({
         {owned ? (
           <SellButton athleteId={a.id} price={price} boughtPrice={boughtPrice!} marketLocked={marketLocked} />
         ) : (
-          <BuyButton athleteId={a.id} price={price} wallet={wallet} marketLocked={marketLocked} />
+          <BuyButton athleteId={a.id} price={price} wallet={wallet} rosterCount={rosterCount} marketLocked={marketLocked} />
         )}
       </div>
     </div>
