@@ -135,7 +135,10 @@
     "colCurrent": "Actual",
     "colPL": "P&G",
     "colAction": "Acción",
-    "netWorth": "Patrimonio total (billetera + plantilla)"
+    "netWorth": "Patrimonio total (billetera + plantilla)",
+    "autoRosterNote": "Tu plantilla actual se usará automáticamente cuando ocurra la carrera.",
+    "available": "DISPONIBLE",
+    "inRoster": "EN PLANTILLA"
   },
   "races": {
     "title": "Carreras",

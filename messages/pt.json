@@ -136,7 +136,10 @@
     "colCurrent": "Atual",
     "colPL": "P&L",
     "colAction": "Ação",
-    "netWorth": "Patrimônio total (carteira + elenco)"
+    "netWorth": "Patrimônio total (carteira + elenco)",
+    "autoRosterNote": "Seu elenco atual será usado automaticamente quando a prova acontecer.",
+    "available": "DISPONÍVEL",
+    "inRoster": "NO ELENCO"
   },
   "races": {
     "title": "Provas",
