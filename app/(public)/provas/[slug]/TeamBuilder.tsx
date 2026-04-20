@@ -214,10 +214,19 @@ export default function TeamBuilder({
               </p>
             )}
             {ownedRoster.map(ra => (
-              <div key={ra.athlete_id} className="flex items-center justify-between bg-[var(--color-navy-elevated)] rounded-lg px-2.5 py-1.5">
+              <div key={ra.athlete_id} className="flex items-center gap-2 bg-[var(--color-navy-elevated)] rounded-lg px-2 py-1.5 border border-[var(--color-navy-border)]">
+                {/* Small Avatar */}
+                <div className={`w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[8px] font-black text-white shrink-0 ${
+                  !ra.athlete?.photo_url ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)]' : ''
+                }`}>
+                  {ra.athlete?.photo_url
+                    ? <img src={ra.athlete.photo_url} alt={ra.athlete.name} className="w-full h-full object-cover" />
+                    : initials(ra.athlete?.name ?? '?')
+                  }
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium truncate">{ra.athlete?.name}</p>
-                  <p className="text-xs text-[var(--color-success)]">{t('inRace', { price: ra.price })}</p>
+                  <p className="text-[11px] font-bold truncate leading-tight">{ra.athlete?.name}</p>
+                  <p className="text-[9px] text-[var(--color-success)] font-medium">{t('inRace', { price: ra.price })}</p>
                 </div>
               </div>
             ))}
