@@ -1,7 +1,7 @@
 'use client'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Search, Wallet, ShoppingBag, AlertCircle, Info, CheckCircle2 } from 'lucide-react'
+import { Search, Wallet, ShoppingBag, AlertCircle, Info, CheckCircle2, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import type { Race, RaceAthlete } from '~/lib/types'
 import { TEAM_SIZE } from '~/lib/types'
 import { useTranslations } from 'next-intl'
@@ -9,10 +9,21 @@ import { BuyButton, SellButton } from '../../elenco/TradeButton'
 
 type Filter = { search: string }
 
-function PriceTrend({ change }: { change: number | null }) {
-  if (!change || change === 0) return <span className="text-[var(--color-muted)] text-xs">—</span>
-  if (change > 0) return <span className="text-[var(--color-success)] text-xs font-semibold">↑{change.toFixed(1)}</span>
-  return <span className="text-[var(--color-danger)] text-xs font-semibold">↓{Math.abs(change).toFixed(1)}</span>
+const COUNTRY_FLAGS: Record<string, string> = {
+  'Brazil': '🇧🇷', 'Norway': '🇳🇴', 'Germany': '🇩🇪', 'Belgium': '🇧🇪',
+  'Denmark': '🇩🇰', 'France': '🇫🇷', 'United States': '🇺🇸', 'Australia': '🇦🇺',
+  'Great Britain': '🇬🇧', 'New Zealand': '🇳🇿', 'Canada': '🇨🇦', 'Sweden': '🇸🇪',
+  'Switzerland': '🇨🇭', 'Austria': '🇦🇹', 'Spain': '🇪🇸', 'Netherlands': '🇳🇱',
+  'South Africa': '🇿🇦', 'Poland': '🇵🇱', 'Italy': '🇮🇹', 'Portugal': '🇵🇹',
+  'Mexico': '🇲🇽', 'Argentina': '🇦🇷', 'Chile': '🇨🇱', 'Uruguay': '🇺🇾',
+}
+function flag(c: string | null) { return COUNTRY_FLAGS[c ?? ''] ?? '' }
+function initials(name: string) { return name.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase() }
+
+function Trend({ change }: { change: number }) {
+  if (change > 0) return <span className="flex items-center gap-0.5 text-[var(--color-success)] text-[10px] font-bold"><TrendingUp size={10} />+{change.toFixed(1)}</span>
+  if (change < 0) return <span className="flex items-center gap-0.5 text-[var(--color-danger)] text-[10px] font-bold"><TrendingDown size={10} />{change.toFixed(1)}</span>
+  return <span className="flex items-center gap-0.5 text-[var(--color-muted)] text-[10px]"><Minus size={10} />0</span>
 }
 
 function AthleteCard({
@@ -29,21 +40,53 @@ function AthleteCard({
   const price = Number(ra.price)
 
   return (
-    <div className={`w-full text-left p-3 rounded-xl border transition-all ${
+    <div className={`w-full p-3 rounded-xl border transition-all ${
       owned
-        ? 'bg-[var(--color-orange-dim)] border-[var(--color-orange)]/50'
+        ? 'bg-[var(--color-orange-dim)] border-[var(--color-orange)]/40 shadow-[0_0_15px_rgba(var(--color-orange-rgb),0.05)]'
         : 'bg-[var(--color-navy-card)] border-[var(--color-navy-border)]'
     }`}>
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-center gap-3 mb-3">
+        {/* Avatar */}
+        <Link href={`/atletas/${a.id}`} className="shrink-0 group">
+          <div className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-xs font-black text-white border-2 transition-transform group-hover:scale-105 ${
+            owned ? 'border-[var(--color-orange)]/40' : 'border-[var(--color-navy-border)]'
+          } ${!a.photo_url ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)]' : ''}`}>
+            {a.photo_url
+              ? <img src={a.photo_url} alt={a.name} className="w-full h-full object-cover" />
+              : initials(a.name)
+            }
+          </div>
+        </Link>
+        
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm mt-0.5 truncate">{a.name}</p>
-          {a.pto_rank && <p className="text-xs text-[var(--color-muted)]">PTO #{a.pto_rank}</p>}
-          {a.club && <p className="text-xs text-[var(--color-muted)] truncate">{a.club}</p>}
-          <div className="mt-2">
-             <PriceTrend change={(a as any).price_change ?? null} />
+          <Link href={`/atletas/${a.id}`} className="block group">
+            <p className="font-bold text-sm truncate group-hover:text-[var(--color-orange)] transition-colors">
+              {a.name} <span className="text-xs font-normal">{flag(a.country)}</span>
+            </p>
+          </Link>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-[var(--color-navy-elevated)] text-[var(--color-muted)]">
+              PRO
+            </span>
+            {a.pto_rank && <span className="text-[10px] text-[var(--color-muted)] font-medium">#{a.pto_rank} PTO</span>}
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
+
+        <div className="flex flex-col items-end shrink-0">
+          <span className="font-black text-sm text-[var(--color-orange)]">T${price}</span>
+          <Trend change={Number((a as any).price_change ?? 0)} />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-2 pt-2 border-t border-[var(--color-navy-border)]/50">
+        <div className="flex items-center gap-1.5">
+          {owned && <CheckCircle2 size={12} className="text-[var(--color-success)]" />}
+          <span className={`text-[10px] font-bold ${owned ? 'text-[var(--color-success)]' : 'text-[var(--color-muted)]'}`}>
+            {owned ? 'NO ELENCO' : 'DISPONÍVEL'}
+          </span>
+        </div>
+        
+        <div className="shrink-0">
           {owned ? (
             <SellButton 
               athleteId={a.id} 
@@ -141,7 +184,7 @@ export default function TeamBuilder({
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[700px] overflow-y-auto pr-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[800px] overflow-y-auto pr-1">
           {filtered.map(ra => (
             <AthleteCard
               key={ra.id}
