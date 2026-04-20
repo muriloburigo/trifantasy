@@ -56,46 +56,7 @@ export default async function RegrasPage() {
           <Example label={t('exampleLabel')}>{t('s2example')}</Example>
         </Section>
 
-        <Section n="3" title={t('s3Title')}>
-          <p>
-            {t('s3p1')}{' '}
-            <Link href="/atletas" className="text-[var(--color-orange)] hover:underline">/atletas</Link>
-          </p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-[var(--color-navy-border)]">
-                  <th className="text-left py-1.5 pr-4 font-semibold text-white">{t('s3tableHeader1')}</th>
-                  <th className="text-left py-1.5 font-semibold text-white">{t('s3tableHeader2')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--color-navy-border)]">
-                {[
-                  ['≥ 95 pts (rank ~1–7)',   'T$35'],
-                  ['≥ 90 pts (rank ~8–15)',  'T$28'],
-                  ['≥ 85 pts (rank ~16–25)', 'T$22'],
-                  ['≥ 80 pts (rank ~26–40)', 'T$18'],
-                  ['≥ 75 pts (rank ~41–60)', 'T$15'],
-                  ['≥ 70 pts (rank ~61–80)', 'T$12'],
-                  ['≥ 60 pts (rank ~81–120)','T$11'],
-                  ['— PTO',                  'T$10'],
-                ].map(([r, p]) => (
-                  <tr key={r}><td className="py-1.5 pr-4">{r}</td><td className="py-1.5 font-semibold text-white">{p}</td></tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p>{t('s3p2')}</p>
-          <ul className="space-y-1 list-disc list-inside text-xs">
-            <li><strong className="text-[var(--color-success)]">{t('s3price1')}</strong></li>
-            <li><strong className="text-[var(--color-success)]">{t('s3price2')}</strong></li>
-            <li><strong className="text-[var(--color-success)]">{t('s3price3')}</strong></li>
-            <li><strong className="text-[var(--color-danger)]">{t('s3price4')}</strong></li>
-          </ul>
-          <Example label={t('exampleLabel')}>{t('s3example')}</Example>
-        </Section>
-
-        <Section n="4" title={t('s4Title')}>
+        <Section n="3" title={t('s4Title')}>
           <p>{t('s4p1')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-[var(--color-navy-elevated)] rounded-xl p-3 text-center border border-green-900/40">
@@ -115,7 +76,7 @@ export default async function RegrasPage() {
           <Example label={t('exampleLabel')}>{t('s4example')}</Example>
         </Section>
 
-        <Section n="5" title={t('s5Title')}>
+        <Section n="4" title={t('s5Title')}>
           <p>{t('s5p1')}</p>
           <ul className="space-y-1.5 list-disc list-inside">
             <li>{t('s5li1')}</li>
@@ -126,21 +87,7 @@ export default async function RegrasPage() {
           <Example label={t('exampleLabel')}>{t('s5example')}</Example>
         </Section>
 
-        <Section n="6" title={t('s6Title')}>
-          <p>{t('s6p1')}</p>
-          <div className="max-w-xs">
-            <table className="w-full text-xs">
-              <tbody className="divide-y divide-[var(--color-navy-border)]">
-                {[['1º','50'],['2º','40'],['3º','33'],['4º','27'],['5º','22'],['6º–10º','15'],['11º–15º','10'],['16º–20º','6'],['21º+','3'],['DNF/DNS','0']].map(([p, s]) => (
-                  <tr key={p}><td className="py-1 pr-3">{p}</td><td className="py-1 font-bold text-white">{s} pts</td></tr>
-                ))}
-              </tbody>
-            </table>
-            <p className="text-[10px] mt-2 text-[var(--color-success)]">{t('s6bonus')}</p>
-          </div>
-        </Section>
-
-        <Section n="7" title={t('s7Title')}>
+        <Section n="5" title={t('s7Title')}>
           <p>{t('s7p1')}</p>
           <ul className="space-y-2 list-disc list-inside">
             <li>{t('s7li1')}</li>
@@ -150,7 +97,7 @@ export default async function RegrasPage() {
           <Example label={t('exampleLabel')}>{t('s7example')}</Example>
         </Section>
 
-        <Section n="8" title={t('s8Title')}>
+        <Section n="6" title={t('s8Title')}>
           <ul className="space-y-2 list-disc list-inside">
             <li>{t('s8li1')}</li>
             <li>{t('s8li2')}</li>
@@ -164,7 +111,7 @@ export default async function RegrasPage() {
           </ul>
         </Section>
 
-        <Section n="9" title={t('s9Title')}>
+        <Section n="7" title={t('s9Title')}>
           <ul className="space-y-2 list-disc list-inside">
             <li>{t('s9li1')}</li>
             <li>{t('s9li2')}</li>
