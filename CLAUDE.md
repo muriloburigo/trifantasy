@@ -99,7 +99,7 @@ app/
 
 ## Mecânicas do jogo
 
-- **Orçamento Inicial:** T$60 (vitalício, aumenta conforme lucro nas vendas)
+- **Orçamento Inicial:** T$100 (vitalício, aumenta conforme lucro nas vendas)
 - **Elenco:** Exatamente 5 atletas no total (PRO + age-groupers)
 - **Escalação:** Automática — seu elenco atual de 5 atletas é o seu time para todas as provas.
 - **Restrição:** Sem limite de atletas por clube.
