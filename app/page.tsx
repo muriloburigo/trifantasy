@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createPublicClient, createAdminClient } from '~/lib/supabase/server'
+import { createPublicClient, createAdminClient, createClient } from '~/lib/supabase/server'
 import { formatDate, daysUntil } from '~/lib/utils'
 import type { Race } from '~/lib/types'
 import {
@@ -173,8 +173,10 @@ export default async function HomePage() {
   const t = await getTranslations('home')
   const pub   = createPublicClient()
   const admin = createAdminClient()
+  const auth = await createClient()
 
   const [
+    { data: { user } },
     { data: risingRaw },
     { data: fallingRaw },
     { data: topAthletesRaw },
@@ -184,6 +186,7 @@ export default async function HomePage() {
     { count: trixerCount },
     { count: athleteCount },
   ] = await Promise.all([
+    auth.auth.getUser(),
     // Market: rising
     pub.from('athletes')
       .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url')
@@ -260,8 +263,11 @@ export default async function HomePage() {
               {t('description')}
             </p>
             <div className="flex items-center gap-3 flex-wrap">
-              <Link href="/register" className="bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-colors">
-                {t('ctaPrimary')}
+              <Link
+                href={user ? "/atletas" : "/register"}
+                className="bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-colors"
+              >
+                {user ? t('ctaLogged') : t('ctaPrimary')}
               </Link>
               <Link href="/regras" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors flex items-center gap-1">
                 {t('ctaSecondary')} <ArrowRight size={12} />
