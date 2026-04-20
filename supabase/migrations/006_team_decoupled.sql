@@ -5,11 +5,22 @@
 -- Step 1: Add race_id to scores, backfill from teams.race_id
 ALTER TABLE scores ADD COLUMN IF NOT EXISTS race_id UUID REFERENCES races(id) ON DELETE CASCADE;
 
-UPDATE scores s
-SET race_id = t.race_id
-FROM teams t
-WHERE s.team_id = t.id
-  AND s.race_id IS NULL;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'teams'
+      AND column_name = 'race_id'
+  ) THEN
+    UPDATE scores s
+    SET race_id = t.race_id
+    FROM teams t
+    WHERE s.team_id = t.id
+      AND s.race_id IS NULL;
+  END IF;
+END $$;
 
 -- Step 2: Change scores unique constraint from team_id → (team_id, race_id)
 ALTER TABLE scores DROP CONSTRAINT IF EXISTS scores_team_id_key;
@@ -45,4 +56,14 @@ WHERE EXISTS (
 -- Step 4: Remove race_id from teams, enforce one team per user
 ALTER TABLE teams DROP CONSTRAINT IF EXISTS teams_user_id_race_id_key;
 ALTER TABLE teams DROP COLUMN IF EXISTS race_id;
-ALTER TABLE teams ADD CONSTRAINT teams_user_id_key UNIQUE (user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'teams_user_id_key'
+      AND conrelid = 'public.teams'::regclass
+  ) THEN
+    ALTER TABLE teams ADD CONSTRAINT teams_user_id_key UNIQUE (user_id);
+  END IF;
+END $$;
