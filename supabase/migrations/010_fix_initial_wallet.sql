@@ -1,7 +1,7 @@
--- Update initial wallet to T$60
-ALTER TABLE profiles ALTER COLUMN wallet SET DEFAULT 60;
+-- Update initial wallet to T$100
+ALTER TABLE profiles ALTER COLUMN wallet SET DEFAULT 100;
 
--- For users that haven't spent anything or are still at the old default, reset to 60
+-- Reset users to the new starting budget if they are below or at old defaults
 UPDATE profiles
-SET wallet = 60
-WHERE wallet >= 70;
+SET wallet = 100
+WHERE wallet < 100;
