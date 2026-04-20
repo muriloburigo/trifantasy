@@ -136,7 +136,10 @@
     "colCurrent": "Current",
     "colPL": "P&L",
     "colAction": "Action",
-    "netWorth": "Total net worth (wallet + roster)"
+    "netWorth": "Total net worth (wallet + roster)",
+    "autoRosterNote": "Your current roster will be used automatically when the race happens.",
+    "available": "AVAILABLE",
+    "inRoster": "IN ROSTER"
   },
   "races": {
     "title": "Races",

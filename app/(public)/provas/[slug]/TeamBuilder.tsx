@@ -82,7 +82,7 @@ function AthleteCard({
         <div className="flex items-center gap-1.5">
           {owned && <CheckCircle2 size={12} className="text-[var(--color-success)]" />}
           <span className={`text-[10px] font-bold ${owned ? 'text-[var(--color-success)]' : 'text-[var(--color-muted)]'}`}>
-            {owned ? 'NO ELENCO' : 'DISPONÍVEL'}
+            {owned ? t('inRoster') : t('available')}
           </span>
         </div>
         

@@ -102,7 +102,7 @@ export default async function ElencoPage() {
           <p className="text-sm">
             <span className="text-[var(--color-muted)]">{t('nextRace')}</span>
             <span className="font-semibold">{nextRace.name}</span>
-            <span className="block text-xs text-[var(--color-muted)] mt-0.5">Seu elenco atual será usado automaticamente quando a prova acontecer.</span>
+            <span className="block text-xs text-[var(--color-muted)] mt-0.5">{t('autoRosterNote')}</span>
           </p>
           <Link
             href={`/provas/${nextRace.slug}`}
