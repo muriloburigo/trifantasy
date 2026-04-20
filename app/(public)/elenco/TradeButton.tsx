@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { ShoppingCart, TrendingDown, Loader, Lock } from 'lucide-react'
 import { buyAthlete, sellAthlete } from './actions'
 import { TEAM_SIZE } from '~/lib/types'
+import { useTranslations } from 'next-intl'
 
 export function BuyButton({
   athleteId, price, wallet, rosterCount, marketLocked,
@@ -14,6 +15,7 @@ export function BuyButton({
   rosterCount?: number
   marketLocked?: boolean
 }) {
+  const t = useTranslations('market')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [msg, setMsg] = useState('')
@@ -21,7 +23,7 @@ export function BuyButton({
   if (wallet === null) {
     return (
       <a href="/login" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--color-orange)]/10 text-[var(--color-orange)] hover:bg-[var(--color-orange)]/20 transition-colors">
-        <ShoppingCart size={13} />Entrar para comprar
+        <ShoppingCart size={13} />{t('loginToBuy')}
       </a>
     )
   }
@@ -32,7 +34,7 @@ export function BuyButton({
         <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-[var(--color-navy-elevated)] text-[var(--color-muted)] border border-[var(--color-navy-border)] opacity-50">
           <Lock size={11} />T${price}
         </span>
-        <span className="text-[10px] text-yellow-500">Mercado fechado</span>
+        <span className="text-[10px] text-yellow-500">{t('marketLocked')}</span>
       </div>
     )
   }
@@ -45,7 +47,7 @@ export function BuyButton({
     startTransition(async () => {
       const res = await buyAthlete(athleteId)
       if (res.error) { setMsg(res.error) }
-      else { setMsg(`Comprado por T$${res.price}!`); router.refresh() }
+      else { setMsg(t('boughtSuccess', { price: res.price })); router.refresh() }
     })
   }
 
@@ -57,12 +59,12 @@ export function BuyButton({
         className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
       >
         {isPending ? <Loader size={12} className="animate-spin" /> : <ShoppingCart size={12} />}
-        Comprar T${price}
+        {t('buyAt', { price })}
       </button>
-      {msg && <span className={`text-[10px] ${msg.startsWith('Comprado') ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{msg}</span>}
-      {!canAfford && !msg && <span className="text-[10px] text-[var(--color-muted)]">Saldo insuficiente</span>}
+      {msg && <span className={`text-[10px] ${msg.includes('!') ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{msg}</span>}
+      {!canAfford && !msg && <span className="text-[10px] text-[var(--color-danger)]">{t('insufficientFunds')}</span>}
       {canAfford && !hasRosterSlot && !msg && (
-        <span className="text-[10px] text-[var(--color-muted)]">Elenco cheio ({TEAM_SIZE}/{TEAM_SIZE})</span>
+        <span className="text-[10px] text-[var(--color-muted)]">{t('fullRoster', { current: TEAM_SIZE, total: TEAM_SIZE })}</span>
       )}
     </div>
   )
@@ -76,6 +78,7 @@ export function SellButton({
   boughtPrice: number
   marketLocked?: boolean
 }) {
+  const t = useTranslations('market')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [msg, setMsg] = useState('')
@@ -88,7 +91,7 @@ export function SellButton({
     startTransition(async () => {
       const res = await sellAthlete(athleteId)
       if (res.error) { setMsg(res.error) }
-      else { setMsg(`Vendido por T$${res.price}!`); router.refresh() }
+      else { setMsg(t('soldSuccess', { price: res.price })); router.refresh() }
     })
   }
 
@@ -113,12 +116,12 @@ export function SellButton({
         className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--color-navy-elevated)] hover:bg-[var(--color-danger)]/20 hover:text-[var(--color-danger)] border border-[var(--color-navy-border)] text-[var(--color-muted)] transition-colors disabled:opacity-40"
       >
         {isPending ? <Loader size={12} className="animate-spin" /> : <TrendingDown size={12} />}
-        Vender T${price}
+        {t('sellAt', { price })}
       </button>
       {msg
-        ? <span className={`text-[10px] ${msg.startsWith('Vendido') ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{msg}</span>
+        ? <span className={`text-[10px] ${msg.includes('!') ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{msg}</span>
         : <span className={`text-[10px] font-semibold ${isProfit ? 'text-[var(--color-success)]' : pl < 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-muted)]'}`}>
-            {isProfit ? '+' : ''}{pl.toFixed(0)} vs compra T${boughtPrice}
+            {t('vsBuy', { pl: `${isProfit ? '+' : ''}${pl.toFixed(0)}`, price: boughtPrice })}
           </span>
       }
     </div>
