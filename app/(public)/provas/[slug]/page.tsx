@@ -101,14 +101,24 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
   }
   // Fetch results if race is finished
   let proResults: any[] = []
+  let raceLeaderboard: any[] = []
   if (race.status === 'finished') {
-    const { data: resultsData } = await supabase
-      .from('results')
-      .select('pro_pos, swim_time, bike_time, run_time, finish_time, dnf, dns, athlete:athletes(id, name, country, gender, photo_url)')
-      .eq('race_id', race.id)
-      .not('pro_pos', 'is', null)
-      .order('pro_pos', { ascending: true })
-    proResults = resultsData ?? []
+    const [resRes, leadRes] = await Promise.all([
+      supabase
+        .from('results')
+        .select('pro_pos, swim_time, bike_time, run_time, finish_time, dnf, dns, athlete:athletes(id, name, country, gender, photo_url)')
+        .eq('race_id', race.id)
+        .not('pro_pos', 'is', null)
+        .order('pro_pos', { ascending: true }),
+      supabase
+        .from('scores')
+        .select(`id, total_points, team:teams(profile:profiles(name))`)
+        .eq('race_id', race.id)
+        .order('total_points', { ascending: false })
+        .limit(10)
+    ])
+    proResults = resRes.data ?? []
+    raceLeaderboard = leadRes.data ?? []
   }
 
   const menResults   = proResults.filter((r: any) => (r.athlete as any)?.gender === 'M')
@@ -280,6 +290,45 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
                   </div>
                 )
               ))}
+
+              {/* Trixer Leaderboard for this race */}
+              {raceLeaderboard.length > 0 && (
+                <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden shadow-lg mt-8">
+                  <div className="px-4 py-3 border-b border-[var(--color-navy-border)] flex items-center gap-2">
+                    <Trophy size={16} className="text-yellow-400" />
+                    <h2 className="font-bold text-sm">Leaderboard de Trixers</h2>
+                  </div>
+                  <div className="divide-y divide-[var(--color-navy-border)]">
+                    {raceLeaderboard.map((score: any, i: number) => (
+                      <Link 
+                        key={score.id}
+                        href={`/meu-time/${score.id}`}
+                        className="flex items-center gap-4 px-4 py-3 hover:bg-[var(--color-navy-elevated)]/40 transition-colors"
+                      >
+                        <div className="w-8 text-center shrink-0">
+                          {i < 3 ? (
+                            <span className="text-lg">
+                              {['🥇', '🥈', '🥉'][i]}
+                            </span>
+                          ) : (
+                            <span className="text-sm font-bold text-[var(--color-muted)]">{i + 1}</span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold truncate">
+                            {score.team?.profile?.name || 'Trixer'}
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-sm font-black text-[var(--color-orange)] tabular-nums">
+                            {score.total_points} <span className="text-[10px] font-normal opacity-60">pts</span>
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
