@@ -3,10 +3,11 @@ import type { Metadata } from 'next'
 import { createPublicClient, createAdminClient, createClient } from '~/lib/supabase/server'
 import BackLink from '~/app/components/BackLink'
 import { formatDate, formatTime } from '~/lib/utils'
-import { TrendingUp, TrendingDown, Minus, Trophy, Flag, Timer, Bike, PersonStanding, Waves } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, Trophy, Flag, Timer, Bike, PersonStanding, Waves, Share2 } from 'lucide-react'
 import { BuyButton, SellButton } from '~/app/(public)/elenco/TradeButton'
 import { getMarketStatus } from '~/lib/market'
 import { getTranslations } from 'next-intl/server'
+import WhatsAppShare from '~/app/components/WhatsAppShare'
 
 export const revalidate = 0
 
@@ -210,11 +211,18 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
         <div className="text-right shrink-0 flex flex-col items-end gap-2">
           <p className="text-3xl font-black text-[var(--color-orange)]">T${Number(athlete.current_price).toFixed(0)}</p>
           <PriceTrend change={priceChange} />
-          {owned ? (
-            <SellButton athleteId={id} price={Number(athlete.current_price)} boughtPrice={boughtPrice!} marketLocked={market.locked} />
-          ) : (
-            <BuyButton athleteId={id} price={Number(athlete.current_price)} wallet={wallet} rosterCount={rosterCount} marketLocked={market.locked} />
-          )}
+          <div className="flex items-center gap-2">
+            <WhatsAppShare 
+              text={`Conheça ${athlete.name} (${athlete.country}) no Trixer! Preço atual: T$${Number(athlete.current_price).toFixed(0)}`}
+              label=""
+              variant="outline"
+            />
+            {owned ? (
+              <SellButton athleteId={id} price={Number(athlete.current_price)} boughtPrice={boughtPrice!} marketLocked={market.locked} />
+            ) : (
+              <BuyButton athleteId={id} price={Number(athlete.current_price)} wallet={wallet} rosterCount={rosterCount} marketLocked={market.locked} />
+            )}
+          </div>
         </div>
       </article>
 
