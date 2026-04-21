@@ -65,14 +65,14 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
   const { data: allScores } = teamIds.length > 0
     ? await supabase
         .from('scores')
-        .select('total_points, team_id, race_id, race:races(name, slug)')
+        .select('id, total_points, team_id, race_id, race:races(name, slug)')
         .in('team_id', teamIds)
     : { data: [] }
 
   const teamMap = new Map((memberTeams ?? []).map((t: any) => [t.id, t]))
 
   // Aggregate scores per user
-  const scoresByUser: Record<string, { total: number; races: { name: string; slug: string; pts: number }[] }> = {}
+  const scoresByUser: Record<string, { total: number; races: { id: string; name: string; slug: string; pts: number }[] }> = {}
   for (const score of allScores ?? []) {
     const team = teamMap.get((score as any).team_id)
     if (!team) continue
@@ -80,6 +80,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
     if (!scoresByUser[uid]) scoresByUser[uid] = { total: 0, races: [] }
     scoresByUser[uid].total += Number(score.total_points ?? 0)
     scoresByUser[uid].races.push({
+      id: score.id,
       name: (score as any).race?.name ?? '—',
       slug: (score as any).race?.slug ?? '',
       pts: Number(score.total_points ?? 0),
@@ -177,14 +178,22 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
                       {isMe && <span className="text-[var(--color-orange)] ml-1 text-[10px]">{t('youLabel')}</span>}
                     </p>
                     {member.races.length > 0 && (
-                      <p className="text-[10px] text-[var(--color-muted)] truncate mt-0.5">
+                      <div className="flex flex-wrap gap-x-2 mt-0.5">
                         {member.races
                           .sort((a: any, b: any) => b.pts - a.pts)
-                          .slice(0, 2)
-                          .map((r: any) => `${r.name.replace('IRONMAN ', '').replace('70.3 ', '')} (${r.pts})`)
-                          .join(' · ')}
-                      </p>
+                          .slice(0, 3)
+                          .map((r: any, idx: number) => (
+                            <Link 
+                              key={r.id} 
+                              href={`/meu-time/${r.id}`}
+                              className="text-[10px] text-[var(--color-muted)] hover:text-[var(--color-orange)] transition-colors flex items-center gap-1"
+                            >
+                              {r.name.replace('IRONMAN ', '').replace('70.3 ', '')} ({r.pts}p){idx < Math.min(member.races.length, 3) - 1 && <span className="opacity-30">·</span>}
+                            </Link>
+                          ))}
+                      </div>
                     )}
+
                     {member.races.length === 0 && (
                       <p className="text-[10px] text-[var(--color-muted)] mt-0.5">{t('noScore')}</p>
                     )}

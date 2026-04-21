@@ -68,15 +68,16 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
     .eq('race_id', race.id)
     .order('price', { ascending: false })
 
-  // Check current roster
+  // Check current roster + User Score
   const authSupabase = await createClient()
   const { data: { user } } = await authSupabase.auth.getUser()
 
   let ownedMap: Record<string, number> = {}
   let wallet: number = 0
+  let userScore: any = null
 
   if (user) {
-    const [portfolioRes, profileRes] = await Promise.all([
+    const [portfolioRes, profileRes, scoreRes] = await Promise.all([
       authSupabase
         .from('portfolio')
         .select('athlete_id, bought_price')
@@ -86,11 +87,18 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
         .select('wallet')
         .eq('id', user.id)
         .single(),
+      authSupabase
+        .from('scores')
+        .select('id, total_points')
+        .eq('race_id', race.id)
+        .filter('teams.user_id', 'eq', user.id)
+        .innerJoin('teams', 'team_id', 'id')
+        .maybeSingle()
     ])
     ownedMap = Object.fromEntries((portfolioRes.data ?? []).map((p: any) => [p.athlete_id, Number(p.bought_price)]))
     wallet = Number(profileRes.data?.wallet ?? 0)
+    userScore = scoreRes.data
   }
-
   // Fetch results if race is finished
   let proResults: any[] = []
   if (race.status === 'finished') {
@@ -148,6 +156,25 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
       {/* Team builder or results view */}
       {isFinished ? (
         <div className="space-y-6">
+          {userScore && (
+            <div className="bg-gradient-to-r from-[var(--color-navy-card)] to-[var(--color-navy-elevated)] border border-[var(--color-orange)]/30 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-[var(--color-orange)]/10 flex items-center justify-center text-[var(--color-orange)]">
+                  <Trophy size={24} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-[var(--color-muted)] uppercase tracking-widest">Sua Pontuação</p>
+                  <p className="text-2xl font-black text-white">{userScore.total_points} pts</p>
+                </div>
+              </div>
+              <Link 
+                href={`/meu-time/${userScore.id}`}
+                className="bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-[var(--color-orange)]/20"
+              >
+                Ver Detalhamento
+              </Link>
+            </div>
+          )}
           <div className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
             <span className="text-xl">🏁</span>
             <span>{t('finished')}</span>
