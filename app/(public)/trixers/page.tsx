@@ -83,7 +83,7 @@ export default async function TrixersPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Comunidade Trixers</h1>
         <p className="text-sm text-[var(--color-muted)] mt-1">
-          Rankings e estatísticas da comunidade TriFantasy
+          Rankings e estatísticas da comunidade Trixer
         </p>
       </div>
 

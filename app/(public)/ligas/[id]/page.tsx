@@ -1,10 +1,11 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '~/lib/supabase/server'
-import { Trophy, Users, Medal, Globe, Lock } from 'lucide-react'
+import { Trophy, Users, Medal, Globe, Lock, Share2 } from 'lucide-react'
 import CopyButton from './CopyButton'
 import AddMemberForm from './AddMemberForm'
 import BackLink from '~/app/components/BackLink'
+import WhatsAppShare from '~/app/components/WhatsAppShare'
 import { getTranslations } from 'next-intl/server'
 
 export const revalidate = 0
@@ -120,7 +121,14 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
             <p className="mb-0.5">{t('inviteCode')}</p>
             <span className="font-mono text-sm text-white font-semibold">{league.invite_code}</span>
           </div>
-          <CopyButton code={league.invite_code} />
+          <div className="flex items-center gap-1">
+            <CopyButton code={league.invite_code} />
+            <WhatsAppShare 
+              text={`Entre na minha liga "${league.name}" no Trixer! Use o código de convite: ${league.invite_code}`}
+              label=""
+              variant="ghost"
+            />
+          </div>
         </div>
       </div>
 
