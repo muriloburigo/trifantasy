@@ -89,10 +89,9 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
         .single(),
       authSupabase
         .from('scores')
-        .select('id, total_points')
+        .select('id, total_points, teams!inner(user_id)')
         .eq('race_id', race.id)
-        .filter('teams.user_id', 'eq', user.id)
-        .innerJoin('teams', 'team_id', 'id')
+        .eq('teams.user_id', user.id)
         .maybeSingle()
     ])
     ownedMap = Object.fromEntries((portfolioRes.data ?? []).map((p: any) => [p.athlete_id, Number(p.bought_price)]))
