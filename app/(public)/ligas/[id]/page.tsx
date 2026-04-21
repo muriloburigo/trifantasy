@@ -1,14 +1,13 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '~/lib/supabase/server'
+import { createClient, createAdminClient } from '~/lib/supabase/server'
 import { Trophy, Users, Medal, Globe, Lock, Share2 } from 'lucide-react'
 import CopyButton from './CopyButton'
 import AddMemberForm from './AddMemberForm'
 import BackLink from '~/app/components/BackLink'
-import { notFound, redirect } from 'next/navigation'
-import Link from 'next/link'
-import { createClient, createAdminClient } from '~/lib/supabase/server'
-...
+import WhatsAppShare from '~/app/components/WhatsAppShare'
+import { getTranslations } from 'next-intl/server'
+
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
@@ -172,7 +171,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
                     {i === 0 ? <Medal size={17} className="text-yellow-400 mx-auto" />
                       : i === 1 ? <Medal size={17} className="text-gray-400 mx-auto" />
                       : i === 2 ? <Medal size={17} className="text-amber-600 mx-auto" />
-                      : <span className="text-sm text-[var(--color-muted)]">{i + 1}</span>}
+                      : <span className="text-sm text-[var(--color-muted)] font-bold">{i + 1}</span>}
                   </div>
 
                   <div className="flex-1 min-w-0">
