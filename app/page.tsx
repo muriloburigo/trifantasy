@@ -444,13 +444,27 @@ export default async function HomePage() {
               <p className="text-[11px] text-[var(--color-muted)] mb-4 leading-relaxed">
                 {t('leagueCtaDesc')}
               </p>
-              <Link href="/register"
-                className="block w-full text-center bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-xs font-bold py-2.5 rounded-lg transition-colors mb-2">
-                {t('leagueCtaButton')}
-              </Link>
-              <Link href="/login" className="block w-full text-center text-xs text-[var(--color-muted)] hover:text-white border border-[var(--color-navy-border)] py-2.5 rounded-lg transition-colors">
-                {t('leagueCtaLogin')}
-              </Link>
+              {user ? (
+                <>
+                  <Link href="/ligas"
+                    className="block w-full text-center bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-xs font-bold py-2.5 rounded-lg transition-colors mb-2">
+                    {t('leagueCtaView')}
+                  </Link>
+                  <Link href="/ligas/criar" className="block w-full text-center text-xs text-[var(--color-muted)] hover:text-white border border-[var(--color-navy-border)] py-2.5 rounded-lg transition-colors">
+                    {t('leagueCtaCreate')}
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/register"
+                    className="block w-full text-center bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-xs font-bold py-2.5 rounded-lg transition-colors mb-2">
+                    {t('leagueCtaButton')}
+                  </Link>
+                  <Link href="/login" className="block w-full text-center text-xs text-[var(--color-muted)] hover:text-white border border-[var(--color-navy-border)] py-2.5 rounded-lg transition-colors">
+                    {t('leagueCtaLogin')}
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Invite code */}
