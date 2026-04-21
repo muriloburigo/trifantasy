@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createClient, createPublicClient } from '~/lib/supabase/server'
+import { createClient, createPublicClient, createAdminClient } from '~/lib/supabase/server'
 import { Plus, Trophy } from 'lucide-react'
 import BackLink from '~/app/components/BackLink'
 import { getTranslations } from 'next-intl/server'
