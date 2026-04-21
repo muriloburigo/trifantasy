@@ -1,4 +1,4 @@
--- TriFantasy — Initial Schema
+-- Trixer — Initial Schema
 -- Run in Supabase SQL Editor
 
 -- ─────────────────────────────────────────

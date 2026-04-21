@@ -5,9 +5,10 @@ import BackLink from '~/app/components/BackLink'
 import MarketBanner from '~/app/components/MarketBanner'
 import { SellButton } from './TradeButton'
 import { getMarketStatus } from '~/lib/market'
-import { TrendingUp, TrendingDown, Minus, Wallet, ShoppingBag } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, Wallet, ShoppingBag, Share2 } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { TEAM_SIZE } from '~/lib/types'
+import WhatsAppShare from '~/app/components/WhatsAppShare'
 
 export const revalidate = 0
 
@@ -61,13 +62,22 @@ export default async function ElencoPage() {
           <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-[var(--color-muted)] mt-1">{t('subtitle')}</p>
         </div>
-        <Link
-          href="/atletas"
-          className="flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-        >
-          <ShoppingBag size={15} />
-          {t('marketButton')}
-        </Link>
+        <div className="flex items-center gap-2">
+          {portfolio.length > 0 && (
+            <WhatsAppShare 
+              text={`Veja meu elenco no Trixer!\n\n${portfolio.map(p => `• ${p.athlete?.name}`).join('\n')}\n\nPatrimônio: T$${netWorth.toFixed(0)}`}
+              label="Compartilhar"
+              variant="outline"
+            />
+          )}
+          <Link
+            href="/atletas"
+            className="flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+          >
+            <ShoppingBag size={15} />
+            {t('marketButton')}
+          </Link>
+        </div>
       </div>
 
       <MarketBanner locked={market.locked} reasonKey={market.reasonKey} lockRace={market.lockRace} />

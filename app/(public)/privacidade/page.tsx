@@ -1,7 +1,7 @@
 import BackLink from '~/app/components/BackLink'
 
 export const metadata = {
-  title: 'Política de Privacidade — TriFantasy',
+  title: 'Política de Privacidade — Trixer',
 }
 
 export default function PrivacidadePage() {
@@ -16,21 +16,21 @@ export default function PrivacidadePage() {
         <section>
           <h2 className="text-base font-bold mb-2">1. Quem somos</h2>
           <p>
-            TriFantasy é uma plataforma de fantasy esportivo voltada para o circuito profissional de triathlon (IRONMAN e 70.3).
+            Trixer é uma plataforma de fantasy esportivo voltada para o circuito profissional de triathlon (IRONMAN e 70.3).
             Este documento descreve como coletamos, usamos e protegemos as informações dos usuários.
           </p>
         </section>
 
         <section>
           <h2 className="text-base font-bold mb-2">2. Dados coletados</h2>
-          <p>Ao se cadastrar e usar o TriFantasy, coletamos:</p>
+          <p>Ao se cadastrar e usar o Trixer, coletamos:</p>
           <ul className="list-disc list-inside space-y-1 mt-2 text-[var(--color-muted)]">
             <li>Nome de usuário e endereço de e-mail (para autenticação)</li>
             <li>Ações dentro do jogo: compras, vendas e escalações de atletas</li>
             <li>Participação em ligas e pontuações obtidas</li>
             <li>Dados de sessão e logs de acesso (para segurança e diagnóstico)</li>
           </ul>
-          <p className="mt-2">Não coletamos dados de pagamento. O TriFantasy é gratuito.</p>
+          <p className="mt-2">Não coletamos dados de pagamento. O Trixer é gratuito.</p>
         </section>
 
         <section>
@@ -88,7 +88,7 @@ export default function PrivacidadePage() {
         <section>
           <h2 className="text-base font-bold mb-2">8. Menores de idade</h2>
           <p>
-            O TriFantasy não é direcionado a menores de 13 anos. Se tomarmos conhecimento de que coletamos dados de
+            O Trixer não é direcionado a menores de 13 anos. Se tomarmos conhecimento de que coletamos dados de
             menores sem consentimento dos responsáveis, removeremos essas informações imediatamente.
           </p>
         </section>
