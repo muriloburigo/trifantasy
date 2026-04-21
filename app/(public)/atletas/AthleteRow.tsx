@@ -32,10 +32,10 @@ export default function AthleteRow({
   const price = Number(a.current_price)
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-navy-border)] last:border-0 hover:bg-[var(--color-navy-elevated)]/20 transition-colors">
+    <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 border-b border-[var(--color-navy-border)] last:border-0 hover:bg-[var(--color-navy-elevated)]/20 transition-colors">
       {/* Avatar — clickable */}
-      <Link href={`/atletas/${a.id}`} className="flex items-center gap-3 flex-1 min-w-0">
-        <div className={`w-9 h-9 rounded-full overflow-hidden shrink-0 flex items-center justify-center text-xs font-black text-white ${
+      <Link href={`/atletas/${a.id}`} className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden shrink-0 flex items-center justify-center text-[10px] sm:text-xs font-black text-white ${
           !a.photo_url ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)]' : ''
         }`}>
           {a.photo_url
@@ -44,24 +44,28 @@ export default function AthleteRow({
           }
         </div>
 
-        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 bg-[var(--color-orange)]/15 text-[var(--color-orange)]">
-          PRO
-        </span>
-
         <div className="min-w-0">
-          <p className="text-sm font-semibold truncate">{a.name} <span className="text-xs">{flag(a.country)}</span></p>
-          {a.pto_rank && <span className="text-[11px] text-[var(--color-muted)]">#{a.pto_rank} PTO</span>}
+          <div className="flex items-center gap-1.5 mb-0.5">
+             <span className="text-[9px] font-bold px-1 py-0.5 rounded shrink-0 bg-[var(--color-orange)]/15 text-[var(--color-orange)] uppercase">
+              PRO
+            </span>
+            <p className="text-xs sm:text-sm font-semibold truncate">{a.name}</p>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] text-[var(--color-muted)]">
+            <span>{flag(a.country)} {a.country?.split(' ')[0]}</span>
+            {a.pto_rank && <span>#{a.pto_rank} PTO</span>}
+          </div>
         </div>
       </Link>
 
       {/* Trend + price */}
-      <div className="flex flex-col items-end shrink-0 w-14">
-        <span className="text-sm font-black text-[var(--color-orange)]">T${price}</span>
+      <div className="flex flex-col items-end shrink-0 w-12 sm:w-14">
+        <span className="text-xs sm:text-sm font-black text-[var(--color-orange)]">T${price}</span>
         <Trend change={Number(a.price_change ?? 0)} />
       </div>
 
       {/* Buy / Sell / Owned badge */}
-      <div className="shrink-0 w-[130px] flex justify-end">
+      <div className="shrink-0 w-[100px] sm:w-[130px] flex justify-end">
         {owned ? (
           <SellButton athleteId={a.id} price={price} boughtPrice={boughtPrice!} marketLocked={marketLocked} />
         ) : (

@@ -113,17 +113,20 @@ export function SellButton({
       <button
         onClick={handleSell}
         disabled={isPending}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--color-navy-elevated)] hover:bg-[var(--color-danger)]/20 hover:text-[var(--color-danger)] border border-[var(--color-navy-border)] text-[var(--color-muted)] transition-colors disabled:opacity-40"
+        className="inline-flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-semibold px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-[var(--color-navy-elevated)] hover:bg-[var(--color-danger)]/20 hover:text-[var(--color-danger)] border border-[var(--color-navy-border)] text-[var(--color-muted)] transition-colors disabled:opacity-40"
       >
-        {isPending ? <Loader size={12} className="animate-spin" /> : <TrendingDown size={12} />}
+        {isPending ? <Loader size={11} className="animate-spin" /> : <TrendingDown size={11} />}
         {t('sellAt', { price })}
       </button>
       {msg
-        ? <span className={`text-[10px] ${msg.includes('!') ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{msg}</span>
-        : <span className={`text-[10px] font-semibold ${isProfit ? 'text-[var(--color-success)]' : pl < 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-muted)]'}`}>
+        ? <span className={`text-[9px] sm:text-[10px] ${msg.includes('!') ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>{msg}</span>
+        : <span className={`text-[9px] sm:text-[10px] font-semibold ${isProfit ? 'text-[var(--color-success)]' : pl < 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-muted)]'}`}>
             {t('vsBuy', { pl: `${isProfit ? '+' : ''}${pl.toFixed(0)}`, price: boughtPrice })}
           </span>
       }
     </div>
+  )
+}
+ </div>
   )
 }

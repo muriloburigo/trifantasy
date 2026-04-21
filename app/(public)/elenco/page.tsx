@@ -83,24 +83,24 @@ export default async function ElencoPage() {
       <MarketBanner locked={market.locked} reasonKey={market.reasonKey} lockRace={market.lockRace} />
 
       {/* Stats bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4">
-          <div className="flex items-center gap-2 text-[var(--color-muted)] text-xs mb-1">
-            <Wallet size={12} />{t('walletStat')}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-8">
+        <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-3 sm:p-4">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[var(--color-muted)] text-[10px] sm:text-xs mb-1">
+            <Wallet size={11} />{t('walletStat')}
           </div>
-          <p className="text-xl font-black text-[var(--color-orange)]">T${wallet.toFixed(0)}</p>
+          <p className="text-lg sm:text-xl font-black text-[var(--color-orange)]">T${wallet.toFixed(0)}</p>
         </div>
-        <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4">
-          <p className="text-xs text-[var(--color-muted)] mb-1">{t('athletesStat')}</p>
-          <p className="text-xl font-black">{portfolio.length}<span className="text-sm font-normal text-[var(--color-muted)]">/{TEAM_SIZE}</span></p>
+        <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-3 sm:p-4">
+          <p className="text-[10px] sm:text-xs text-[var(--color-muted)] mb-1">{t('athletesStat')}</p>
+          <p className="text-lg sm:text-xl font-black">{portfolio.length}<span className="text-xs sm:text-sm font-normal text-[var(--color-muted)]">/{TEAM_SIZE}</span></p>
         </div>
-        <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4">
-          <p className="text-xs text-[var(--color-muted)] mb-1">{t('teamValueStat')}</p>
-          <p className="text-xl font-black">T${totalNow.toFixed(0)}</p>
+        <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-3 sm:p-4">
+          <p className="text-[10px] sm:text-xs text-[var(--color-muted)] mb-1">{t('teamValueStat')}</p>
+          <p className="text-lg sm:text-xl font-black">T${totalNow.toFixed(0)}</p>
         </div>
-        <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4">
-          <p className="text-xs text-[var(--color-muted)] mb-1">{t('plStat')}</p>
-          <p className={`text-xl font-black ${totalPL > 0 ? 'text-[var(--color-success)]' : totalPL < 0 ? 'text-[var(--color-danger)]' : ''}`}>
+        <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-3 sm:p-4">
+          <p className="text-[10px] sm:text-xs text-[var(--color-muted)] mb-1">{t('plStat')}</p>
+          <p className={`text-lg sm:text-xl font-black ${totalPL > 0 ? 'text-[var(--color-success)]' : totalPL < 0 ? 'text-[var(--color-danger)]' : ''}`}>
             {totalPL > 0 ? '+' : ''}{totalPL.toFixed(0)}
           </p>
         </div>
@@ -139,75 +139,79 @@ export default async function ElencoPage() {
         </div>
       ) : (
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
-          <div className="grid grid-cols-[1fr_70px_70px_70px_120px] gap-2 px-4 py-2.5 border-b border-[var(--color-navy-border)] text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
-            <span>{t('colAthlete')}</span>
-            <span className="text-right">{t('colBought')}</span>
-            <span className="text-right">{t('colCurrent')}</span>
-            <span className="text-right">{t('colPL')}</span>
-            <span className="text-right">{t('colAction')}</span>
-          </div>
-
-          {portfolio.map((p) => {
-            const ath = p.athlete as any
-            const boughtPrice = Number(p.bought_price)
-            const currentPrice = Number(ath?.current_price ?? 0)
-            const pl = currentPrice - boughtPrice
-            const priceChange = Number(ath?.price_change ?? 0)
-
-            return (
-              <div key={p.athlete_id} className="grid grid-cols-[1fr_70px_70px_70px_120px] gap-2 items-center px-4 py-3 border-b border-[var(--color-navy-border)] last:border-0">
-                {/* Athlete info */}
-                <div className="flex items-center gap-2.5 min-w-0">
-                  {ath?.photo_url ? (
-                    <img src={ath.photo_url} alt={ath.name} className="w-9 h-9 rounded-full object-cover shrink-0" />
-                  ) : (
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--color-purple)] to-[#3B1F8C] flex items-center justify-center text-xs font-black text-white shrink-0">
-                      {ath?.name?.split(' ').slice(0,2).map((w: string) => w[0]).join('').toUpperCase()}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <Link href={`/atletas/${p.athlete_id}`} className="text-sm font-semibold truncate hover:text-[var(--color-orange)] transition-colors block">
-                      {ath?.name}
-                      {ath?.country && <span className="ml-1 text-xs">{flag(ath.country)}</span>}
-                    </Link>
-                    <p className="text-[11px] text-[var(--color-muted)]">
-                      PRO{ath?.pto_rank ? ` · PTO #${ath.pto_rank}` : ''}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Bought price */}
-                <div className="text-right">
-                  <span className="text-sm tabular-nums text-[var(--color-muted)]">T${boughtPrice}</span>
-                </div>
-
-                {/* Current price */}
-                <div className="text-right">
-                  <span className="text-sm font-semibold tabular-nums">T${currentPrice}</span>
-                  {priceChange !== 0 && (
-                    <div className={`text-[10px] font-bold ${priceChange > 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
-                      {priceChange > 0 ? '+' : ''}{priceChange}
-                    </div>
-                  )}
-                </div>
-
-                {/* P&L */}
-                <div className="text-right flex items-center justify-end gap-1">
-                  {pl > 0
-                    ? <><TrendingUp size={12} className="text-[var(--color-success)]" /><span className="text-sm font-bold text-[var(--color-success)] tabular-nums">+{pl.toFixed(0)}</span></>
-                    : pl < 0
-                    ? <><TrendingDown size={12} className="text-[var(--color-danger)]" /><span className="text-sm font-bold text-[var(--color-danger)] tabular-nums">{pl.toFixed(0)}</span></>
-                    : <><Minus size={12} className="text-[var(--color-muted)]" /><span className="text-sm text-[var(--color-muted)] tabular-nums">0</span></>
-                  }
-                </div>
-
-                {/* Sell action */}
-                <div className="flex justify-end">
-                  <SellButton athleteId={p.athlete_id} price={currentPrice} boughtPrice={boughtPrice} marketLocked={market.locked} />
-                </div>
+          <div className="overflow-x-auto scrollbar-thin">
+            <div className="min-w-[500px]">
+              <div className="grid grid-cols-[1fr_70px_70px_70px_110px] gap-2 px-4 py-2.5 border-b border-[var(--color-navy-border)] text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+                <span>{t('colAthlete')}</span>
+                <span className="text-right">{t('colBought')}</span>
+                <span className="text-right">{t('colCurrent')}</span>
+                <span className="text-right">{t('colPL')}</span>
+                <span className="text-right">{t('colAction')}</span>
               </div>
-            )
-          })}
+
+              {portfolio.map((p) => {
+                const ath = p.athlete as any
+                const boughtPrice = Number(p.bought_price)
+                const currentPrice = Number(ath?.current_price ?? 0)
+                const pl = currentPrice - boughtPrice
+                const priceChange = Number(ath?.price_change ?? 0)
+
+                return (
+                  <div key={p.athlete_id} className="grid grid-cols-[1fr_70px_70px_70px_110px] gap-2 items-center px-4 py-3 border-b border-[var(--color-navy-border)] last:border-0">
+                    {/* Athlete info */}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {ath?.photo_url ? (
+                        <img src={ath.photo_url} alt={ath.name} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-[var(--color-purple)] to-[#3B1F8C] flex items-center justify-center text-[10px] sm:text-xs font-black text-white shrink-0">
+                          {ath?.name?.split(' ').slice(0,2).map((w: string) => w[0]).join('').toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <Link href={`/atletas/${p.athlete_id}`} className="text-xs sm:text-sm font-semibold truncate hover:text-[var(--color-orange)] transition-colors block leading-tight mb-0.5">
+                          {ath?.name}
+                          {ath?.country && <span className="ml-1 text-[10px]">{flag(ath.country)}</span>}
+                        </Link>
+                        <p className="text-[10px] text-[var(--color-muted)]">
+                          PRO{ath?.pto_rank ? ` · #${ath.pto_rank}` : ''}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Bought price */}
+                    <div className="text-right">
+                      <span className="text-xs sm:text-sm tabular-nums text-[var(--color-muted)]">T${boughtPrice}</span>
+                    </div>
+
+                    {/* Current price */}
+                    <div className="text-right">
+                      <span className="text-xs sm:text-sm font-semibold tabular-nums">T${currentPrice}</span>
+                      {priceChange !== 0 && (
+                        <div className={`text-[9px] sm:text-[10px] font-bold ${priceChange > 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
+                          {priceChange > 0 ? '+' : ''}{priceChange}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* P&L */}
+                    <div className="text-right flex items-center justify-end gap-1">
+                      {pl > 0
+                        ? <><TrendingUp size={11} className="text-[var(--color-success)]" /><span className="text-xs sm:text-sm font-bold text-[var(--color-success)] tabular-nums">+{pl.toFixed(0)}</span></>
+                        : pl < 0
+                        ? <><TrendingDown size={11} className="text-[var(--color-danger)]" /><span className="text-xs sm:text-sm font-bold text-[var(--color-danger)] tabular-nums">{pl.toFixed(0)}</span></>
+                        : <><Minus size={11} className="text-[var(--color-muted)]" /><span className="text-xs sm:text-sm text-[var(--color-muted)] tabular-nums">0</span></>
+                      }
+                    </div>
+
+                    {/* Sell action */}
+                    <div className="flex justify-end">
+                      <SellButton athleteId={p.athlete_id} price={currentPrice} boughtPrice={boughtPrice} marketLocked={market.locked} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </div>
       )}
 
