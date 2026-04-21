@@ -127,6 +127,3 @@ export function SellButton({
     </div>
   )
 }
- </div>
-  )
-}

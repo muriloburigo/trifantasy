@@ -174,8 +174,3 @@ export default function AthleteList({
     </div>
   )
 }
-div>
-      </div>
-    </div>
-  )
-}
