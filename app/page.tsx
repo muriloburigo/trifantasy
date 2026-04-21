@@ -135,38 +135,6 @@ function RaceCard({ race, athleteCount, t }: { race: Race; athleteCount?: number
   )
 }
 
-// ─── rank row ─────────────────────────────────────────────────────────────────
-
-function RankRow({ entry, pos }: { entry: any; pos: number }) {
-  const name: string = entry.teams?.profiles?.name ?? 'Trixter'
-  const race: string = entry.race?.name ?? '—'
-  const pts = Number(entry.total_points ?? 0)
-  const medals = ['🥇', '🥈', '🥉']
-
-  return (
-    <div className={`flex items-center gap-3 px-4 py-3 border-b border-[var(--color-navy-border)] last:border-0 ${pos <= 3 ? 'bg-[var(--color-navy-elevated)]/30' : ''}`}>
-      <span className="w-7 text-center shrink-0 text-base">
-        {pos <= 3 ? medals[pos - 1] : <span className="text-sm text-[var(--color-muted)] font-bold">{pos}</span>}
-      </span>
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
-        pos <= 3
-          ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)] text-white'
-          : 'bg-[var(--color-navy-elevated)] text-[var(--color-muted)]'
-      }`}>
-        {initials(name)}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate">{name}</p>
-        <p className="text-[11px] text-[var(--color-muted)] truncate">{race}</p>
-      </div>
-      <div className="text-right shrink-0">
-        <p className={`text-sm font-black tabular-nums ${pos <= 3 ? 'text-[var(--color-orange)]' : ''}`}>{pts}</p>
-        <p className="text-[10px] text-[var(--color-muted)]">pts</p>
-      </div>
-    </div>
-  )
-}
-
 // ─── page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
@@ -180,7 +148,7 @@ export default async function HomePage() {
     { data: risingRaw },
     { data: fallingRaw },
     { data: topAthletesRaw },
-    { data: topScores },
+    { data: globalRankRaw },
     { data: races },
     { count: leagueCount },
     { count: trixerCount },
@@ -208,11 +176,24 @@ export default async function HomePage() {
       .order('current_price', { ascending: false })
       .limit(16),
 
-    // Trix Rank
-    admin.from('scores')
-      .select('total_points, race:races(name), teams(user_id, profiles(name, country))')
-      .order('total_points', { ascending: false })
-      .limit(10),
+    // Global League Rank
+    admin.from('leagues')
+      .select('id')
+      .eq('is_global', true)
+      .single()
+      .then(async ({ data: globalLeague }) => {
+        if (!globalLeague) return { data: [] }
+        return admin.from('league_members')
+          .select(`
+            user_id,
+            profile:profiles(name),
+            teams(
+              id,
+              scores(total_points, race:races(name))
+            )
+          `)
+          .eq('league_id', globalLeague.id)
+      }),
 
     // Races (enough to count beyond 7-day window)
     pub.from('races')
@@ -225,6 +206,19 @@ export default async function HomePage() {
     pub.from('profiles').select('*', { count: 'exact', head: true }),
     pub.from('athletes').select('*', { count: 'exact', head: true }),
   ])
+
+  // Transform globalRankRaw into a sorted list of scores
+  const globalRank = (globalRankRaw ?? []).map((m: any) => {
+    const team = m.teams?.[0]
+    const total = (team?.scores ?? []).reduce((acc: number, s: any) => acc + Number(s.total_points), 0)
+    return {
+      name: m.profile?.name ?? 'Trixer',
+      total,
+      raceCount: (team?.scores ?? []).length
+    }
+  })
+  .sort((a, b) => b.total - a.total)
+  .slice(0, 10)
 
   const rising  = risingRaw ?? []
   const falling = fallingRaw ?? []
@@ -397,8 +391,29 @@ export default async function HomePage() {
                 </Link>
               </div>
               <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
-                {(topScores ?? []).length > 0 ? (
-                  (topScores ?? []).map((e, i) => <RankRow key={i} entry={e} pos={i + 1} />)
+                {globalRank.length > 0 ? (
+                  globalRank.map((e, i) => (
+                    <div key={i} className={`flex items-center gap-3 px-4 py-3 border-b border-[var(--color-navy-border)] last:border-0 ${i < 3 ? 'bg-[var(--color-navy-elevated)]/30' : ''}`}>
+                      <span className="w-7 text-center shrink-0 text-base">
+                        {i < 3 ? ['🥇', '🥈', '🥉'][i] : <span className="text-sm text-[var(--color-muted)] font-bold">{i + 1}</span>}
+                      </span>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                        i < 3
+                          ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)] text-white'
+                          : 'bg-[var(--color-navy-elevated)] text-[var(--color-muted)]'
+                      }`}>
+                        {initials(e.name)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold truncate">{e.name}</p>
+                        <p className="text-[10px] text-[var(--color-muted)] truncate">{e.raceCount} {e.raceCount === 1 ? 'prova' : 'provas'}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className={`text-sm font-black tabular-nums ${i < 3 ? 'text-[var(--color-orange)]' : ''}`}>{e.total}</p>
+                        <p className="text-[10px] text-[var(--color-muted)]">pts</p>
+                      </div>
+                    </div>
+                  ))
                 ) : (
                   <div className="py-14 text-center text-[var(--color-muted)]">
                     <Trophy size={28} className="mx-auto mb-3 opacity-20" />
