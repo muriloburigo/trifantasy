@@ -13,20 +13,26 @@ export default async function LigasPage() {
   const { data: { user } } = await supabase.auth.getUser()
   const pub = createPublicClient()
 
+  // My leagues
   let myLeagues: any[] = []
   if (user) {
     const { data: memberships } = await supabase
       .from('league_members')
-      .select('league:leagues(id, name, invite_code, owner_id, is_public)')
+      .select('league:leagues(id, name, invite_code, owner_id, is_public, is_global)')
       .eq('user_id', user.id)
     myLeagues = (memberships ?? []).map((m: any) => m.league).filter(Boolean)
   }
 
-  // Public leagues the user is NOT in
+  // Public leagues (including Global) the user is NOT in
   const myLeagueIds = myLeagues.map((l: any) => l.id)
-  const publicQuery = pub.from('leagues').select('id, name, invite_code, is_public').eq('is_public', true).limit(20)
+  const publicQuery = pub.from('leagues')
+    .select('id, name, invite_code, is_public, is_global')
+    .eq('is_public', true)
+    .limit(20)
+
   const { data: publicLeaguesRaw } = await publicQuery
   const publicLeagues = (publicLeaguesRaw ?? []).filter((l: any) => !myLeagueIds.includes(l.id))
+
 
   const { count: totalLeagues } = await pub.from('leagues').select('*', { count: 'exact', head: true })
   const { count: totalTeams } = await pub.from('teams').select('*', { count: 'exact', head: true })
