@@ -62,6 +62,8 @@
     "leagueCtaDesc": "Invite friends, build teams and compete to see who knows the peloton best.",
     "leagueCtaButton": "Create free account",
     "leagueCtaLogin": "I already have an account",
+    "leagueCtaView": "My Leagues",
+    "leagueCtaCreate": "Create New League",
     "inviteTitle": "Got an invite code?",
     "inviteDesc": "Join a private league with the code sent by a friend.",
     "inviteLoginCta": "Create account to join →",
