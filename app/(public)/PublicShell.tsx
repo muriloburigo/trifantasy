@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '~/lib/supabase/server'
 import UserMenu from './UserMenu'
 import { getTranslations } from 'next-intl/server'
+import OnboardingTour from '../components/OnboardingTour'
 
 export default async function PublicShell({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -9,14 +10,18 @@ export default async function PublicShell({ children }: { children: React.ReactN
   const t = await getTranslations('nav')
   const tHome = await getTranslations('home')
 
-  let wallet: number | null = null
+  let profileData = null
   if (user) {
-    const { data } = await supabase.from('profiles').select('wallet').eq('id', user.id).single()
-    wallet = data?.wallet != null ? Number(data.wallet) : null
+    const { data } = await supabase.from('profiles').select('wallet, has_seen_tour, name').eq('id', user.id).single()
+    profileData = data
   }
+
+  const wallet = profileData?.wallet != null ? Number(profileData.wallet) : null
+  const showTour = user && !profileData?.has_seen_tour
 
   return (
     <div className="min-h-screen flex flex-col">
+      {showTour && <OnboardingTour userName={profileData?.name || ''} />}
       <header className="border-b border-[var(--color-navy-border)] bg-[var(--color-navy-card)]/90 backdrop-blur sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-1">
