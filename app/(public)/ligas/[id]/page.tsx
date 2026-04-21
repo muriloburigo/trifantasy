@@ -5,28 +5,31 @@ import { Trophy, Users, Medal, Globe, Lock, Share2 } from 'lucide-react'
 import CopyButton from './CopyButton'
 import AddMemberForm from './AddMemberForm'
 import BackLink from '~/app/components/BackLink'
-import WhatsAppShare from '~/app/components/WhatsAppShare'
-import { getTranslations } from 'next-intl/server'
-
+import { notFound, redirect } from 'next/navigation'
+import Link from 'next/link'
+import { createClient, createAdminClient } from '~/lib/supabase/server'
+...
+export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function LeaguePage({ params }: { params: Promise<{ id: string }> }) {
   const t = await getTranslations('leagues')
   const { id } = await params
   const supabase = await createClient()
+  const admin = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: league } = await supabase
+  const { data: league } = await admin
     .from('leagues')
-    .select('id, name, invite_code, owner_id, is_public')
+    .select('id, name, invite_code, owner_id, is_public, is_global')
     .eq('id', id)
     .single()
 
   if (!league) notFound()
 
   // Check membership
-  const { data: membership } = await supabase
+  const { data: membership } = await admin
     .from('league_members')
     .select('user_id')
     .eq('league_id', id)
@@ -39,8 +42,8 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
 
   if (!isMember && !league.is_public) redirect('/ligas')
 
-  // Fetch all members with their total scores across all races
-  const { data: members } = await supabase
+  // Fetch all members using admin
+  const { data: members } = await admin
     .from('league_members')
     .select(`
       user_id, joined_at,
@@ -51,9 +54,9 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
   // For each member, sum all their team scores
   const memberIds = (members ?? []).map((m: any) => m.user_id)
 
-  // Fetch teams for all members
+  // Fetch teams using admin
   const { data: memberTeams } = memberIds.length > 0
-    ? await supabase
+    ? await admin
         .from('teams')
         .select('id, user_id')
         .in('user_id', memberIds)
@@ -61,9 +64,9 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
 
   const teamIds = (memberTeams ?? []).map((t: any) => t.id)
 
-  // Fetch scores with race info
+  // Fetch scores with race info using admin
   const { data: allScores } = teamIds.length > 0
-    ? await supabase
+    ? await admin
         .from('scores')
         .select('id, total_points, team_id, race_id, race:races(name, slug)')
         .in('team_id', teamIds)
