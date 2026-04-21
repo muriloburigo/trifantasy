@@ -65,7 +65,7 @@ export default async function ElencoPage() {
         <div className="flex items-center gap-2">
           {portfolio.length > 0 && (
             <WhatsAppShare 
-              text={`Veja meu elenco no Trixer!\n\n${portfolio.map(p => `• ${p.athlete?.name}`).join('\n')}\n\nPatrimônio: T$${netWorth.toFixed(0)}`}
+              text={`Veja meu elenco no Trixer!\n\n${portfolio.map(p => `• ${(p.athlete as any)?.name}`).join('\n')}\n\nPatrimônio: T$${netWorth.toFixed(0)}`}
               label="Compartilhar"
               variant="outline"
             />
