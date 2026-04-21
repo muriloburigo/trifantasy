@@ -5,48 +5,52 @@ import BackLink from '~/app/components/BackLink'
 import { getTranslations } from 'next-intl/server'
 import LeagueSearch from './LeagueSearch'
 
+export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function LigasPage() {
   const t = await getTranslations('leagues')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const pub = createPublicClient()
+  const admin = createAdminClient()
 
-  // My leagues
   let myLeagues: any[] = []
-  if (user) {
-    const { data: memberships } = await supabase
-      .from('league_members')
-      .select('league:leagues(id, name, invite_code, owner_id, is_public, is_global)')
-      .eq('user_id', user.id)
-    myLeagues = (memberships ?? []).map((m: any) => m.league).filter(Boolean)
-  }
 
-  // ── FORCE GLOBAL LEAGUE VISIBILITY ──
-  // Search for the global league directly to ensure it shows up
-  const { data: globalLeague } = await pub.from('leagues')
+  // 1. Fetch Global League using Admin (bypass RLS)
+  const { data: globalLeague } = await admin
+    .from('leagues')
     .select('id, name, invite_code, owner_id, is_public, is_global')
     .eq('is_global', true)
     .single()
 
+  if (user) {
+    // 2. Fetch user memberships
+    const { data: memberships } = await admin
+      .from('league_members')
+      .select('league:leagues(id, name, invite_code, owner_id, is_public, is_global)')
+      .eq('user_id', user.id)
+
+    myLeagues = (memberships ?? []).map((m: any) => m.league).filter(Boolean)
+  }
+
+  // 3. Ensure Global is in myLeagues if it exists
   if (globalLeague) {
-    const alreadyIn = myLeagues.some(l => l.id === globalLeague.id)
-    if (!alreadyIn) {
-      // If the user isn't in it (or RLS blocked the membership view), 
-      // we add it to the list anyway so they can see/join it.
+    const isAlreadyListed = myLeagues.some(l => l.id === globalLeague.id)
+    if (!isAlreadyListed) {
       myLeagues.unshift(globalLeague)
     }
   }
 
-  // Public leagues (excluding Global if already in myLeagues)
+  // 4. Public leagues (limit 20)
   const myLeagueIds = myLeagues.map((l: any) => l.id)
-  const { data: publicLeaguesRaw } = await pub.from('leagues')
+  const { data: publicLeaguesRaw } = await admin
+    .from('leagues')
     .select('id, name, invite_code, is_public, is_global')
     .eq('is_public', true)
     .limit(20)
 
   const publicLeagues = (publicLeaguesRaw ?? []).filter((l: any) => !myLeagueIds.includes(l.id))
+
 
   const { count: totalLeagues } = await pub.from('leagues').select('*', { count: 'exact', head: true })
   const { count: totalTeams } = await pub.from('teams').select('*', { count: 'exact', head: true })
