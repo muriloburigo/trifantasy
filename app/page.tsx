@@ -9,7 +9,8 @@ import {
 import PublicShell from './(public)/PublicShell'
 import { getTranslations } from 'next-intl/server'
 
-export const revalidate = 600
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 // ─── utils ────────────────────────────────────────────────────────────────────
 
