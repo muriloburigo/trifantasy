@@ -391,7 +391,7 @@ export default async function HomePage() {
                 </Link>
               </div>
               <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
-                {globalRank.length > 0 ? (
+                {globalRankRaw && globalRankRaw.length > 0 ? (
                   globalRank.map((e, i) => (
                     <div key={i} className={`flex items-center gap-3 px-4 py-3 border-b border-[var(--color-navy-border)] last:border-0 ${i < 3 ? 'bg-[var(--color-navy-elevated)]/30' : ''}`}>
                       <span className="w-7 text-center shrink-0 text-base">
