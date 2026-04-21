@@ -23,16 +23,30 @@ export default async function LigasPage() {
     myLeagues = (memberships ?? []).map((m: any) => m.league).filter(Boolean)
   }
 
-  // Public leagues (including Global) the user is NOT in
+  // ── FORCE GLOBAL LEAGUE VISIBILITY ──
+  // Search for the global league directly to ensure it shows up
+  const { data: globalLeague } = await pub.from('leagues')
+    .select('id, name, invite_code, owner_id, is_public, is_global')
+    .eq('is_global', true)
+    .single()
+
+  if (globalLeague) {
+    const alreadyIn = myLeagues.some(l => l.id === globalLeague.id)
+    if (!alreadyIn) {
+      // If the user isn't in it (or RLS blocked the membership view), 
+      // we add it to the list anyway so they can see/join it.
+      myLeagues.unshift(globalLeague)
+    }
+  }
+
+  // Public leagues (excluding Global if already in myLeagues)
   const myLeagueIds = myLeagues.map((l: any) => l.id)
-  const publicQuery = pub.from('leagues')
+  const { data: publicLeaguesRaw } = await pub.from('leagues')
     .select('id, name, invite_code, is_public, is_global')
     .eq('is_public', true)
     .limit(20)
 
-  const { data: publicLeaguesRaw } = await publicQuery
   const publicLeagues = (publicLeaguesRaw ?? []).filter((l: any) => !myLeagueIds.includes(l.id))
-
 
   const { count: totalLeagues } = await pub.from('leagues').select('*', { count: 'exact', head: true })
   const { count: totalTeams } = await pub.from('teams').select('*', { count: 'exact', head: true })
