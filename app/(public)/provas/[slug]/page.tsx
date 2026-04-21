@@ -33,9 +33,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const supabase = createPublicClient()
   const { data: race } = await supabase.from('races').select('name, location, country, date').eq('slug', slug).single()
   if (!race) return {}
+  
+  const title = `${race.name} | Escale seu Time`
+  const description = `Confira o field PRO e acompanhe os resultados de ${race.name} em ${race.location}, ${race.country} no Trixer. ${formatDate(race.date)}.`
+
   return {
-    title: race.name,
-    description: `Veja o campo da prova e acompanhe como o seu elenco atual vale para ${race.name} — ${race.location}, ${race.country}. ${formatDate(race.date)}.`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+    }
   }
 }
 
