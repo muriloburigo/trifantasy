@@ -104,7 +104,7 @@ export default function AthleteList({
       </div>
 
       {/* Filter chips */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-4">
         {/* Gender */}
         <button onClick={() => setGender('all')} className={chip(gender === 'all')}>{t('filterAll')}</button>
         <button onClick={() => setGender('M')}   className={chip(gender === 'M')}>{t('filterMen')}</button>
@@ -170,6 +170,11 @@ export default function AthleteList({
             ))
           )}
         </div>
+      </div>
+    </div>
+  )
+}
+div>
       </div>
     </div>
   )

@@ -204,19 +204,19 @@ export default function TeamBuilder({
       </div>
 
       <div className="lg:w-72 shrink-0">
-        <div className="sticky top-20 bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-4">
-          <h2 className="font-bold mb-3">{t('rosterTitle')}</h2>
+        <div className="sticky top-20 bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-3 sm:p-4">
+          <h2 className="font-bold text-sm sm:text-base mb-3">{t('rosterTitle')}</h2>
 
-          <div className="space-y-1.5 mb-4 min-h-[120px]">
+          <div className="space-y-1.5 mb-4 min-h-[100px]">
             {ownedAthleteIds.length === 0 && (
-              <p className="text-xs text-[var(--color-muted)] text-center py-4">
+              <p className="text-[10px] sm:text-xs text-[var(--color-muted)] text-center py-4">
                 {t('teamHint')}
               </p>
             )}
             {ownedRoster.map(ra => (
               <div key={ra.athlete_id} className="flex items-center gap-2 bg-[var(--color-navy-elevated)] rounded-lg px-2 py-1.5 border border-[var(--color-navy-border)]">
                 {/* Small Avatar */}
-                <div className={`w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[8px] font-black text-white shrink-0 ${
+                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full overflow-hidden flex items-center justify-center text-[7px] sm:text-[8px] font-black text-white shrink-0 ${
                   !ra.athlete?.photo_url ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)]' : ''
                 }`}>
                   {ra.athlete?.photo_url
@@ -225,14 +225,14 @@ export default function TeamBuilder({
                   }
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-bold truncate leading-tight">{ra.athlete?.name}</p>
-                  <p className="text-[9px] text-[var(--color-success)] font-medium">{t('inRace', { price: ra.price })}</p>
+                  <p className="text-[10px] sm:text-[11px] font-bold truncate leading-tight">{ra.athlete?.name}</p>
+                  <p className="text-[8px] sm:text-[9px] text-[var(--color-success)] font-medium">{t('inRace', { price: ra.price })}</p>
                 </div>
               </div>
             ))}
             {ownedRoster.length === 0 && ownedAthleteIds.length > 0 && (
-              <div className="py-4 text-center">
-                 <p className="text-xs text-[var(--color-muted)]">Nenhum atleta do seu elenco está nesta prova.</p>
+              <div className="py-3 text-center border border-dashed border-[var(--color-navy-border)] rounded-lg">
+                 <p className="text-[10px] text-[var(--color-muted)]">Nenhum atleta do elenco nesta prova.</p>
               </div>
             )}
           </div>

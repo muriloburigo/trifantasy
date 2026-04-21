@@ -171,32 +171,31 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
                       : <span className="text-sm text-[var(--color-muted)]">{i + 1}</span>}
                   </div>
 
-                  {/* Name + races */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm">
+                    <p className="font-semibold text-xs sm:text-sm truncate leading-tight">
                       {member.profile?.name ?? 'Usuário'}
-                      {isMe && <span className="text-[var(--color-orange)] ml-1 text-xs">{t('youLabel')}</span>}
+                      {isMe && <span className="text-[var(--color-orange)] ml-1 text-[10px]">{t('youLabel')}</span>}
                     </p>
                     {member.races.length > 0 && (
-                      <p className="text-[11px] text-[var(--color-muted)] truncate">
+                      <p className="text-[10px] text-[var(--color-muted)] truncate mt-0.5">
                         {member.races
                           .sort((a: any, b: any) => b.pts - a.pts)
-                          .slice(0, 3)
-                          .map((r: any) => `${r.name.replace('IRONMAN ', '').replace('70.3 ', '')} (${r.pts}pts)`)
+                          .slice(0, 2)
+                          .map((r: any) => `${r.name.replace('IRONMAN ', '').replace('70.3 ', '')} (${r.pts})`)
                           .join(' · ')}
                       </p>
                     )}
                     {member.races.length === 0 && (
-                      <p className="text-[11px] text-[var(--color-muted)]">{t('noScore')}</p>
+                      <p className="text-[10px] text-[var(--color-muted)] mt-0.5">{t('noScore')}</p>
                     )}
                   </div>
 
                   {/* Total score */}
                   <div className="text-right shrink-0">
                     {member.total !== null ? (
-                      <span className="font-bold text-[var(--color-orange)]">{member.total} pts</span>
+                      <p className="font-bold text-sm sm:text-base text-[var(--color-orange)]">{member.total} <span className="text-[9px] font-normal opacity-70">pts</span></p>
                     ) : (
-                      <span className="text-xs text-[var(--color-muted)]">—</span>
+                      <span className="text-[10px] sm:text-xs text-[var(--color-muted)]">—</span>
                     )}
                   </div>
                 </div>
