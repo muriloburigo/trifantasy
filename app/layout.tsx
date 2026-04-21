@@ -22,17 +22,36 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://trixer.com.br'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Trixer — Endurance Fantasy Game',
+    default: 'Trixer — Endurance Fantasy Game | Ironman & 70.3',
     template: '%s | Trixer',
   },
-  description: 'Build your roster with real athletes from the triathlon circuit — PROs — and score based on their race performance.',
+  description: 'O fantasy game do triathlon mundial. Monte seu elenco com atletas PRO reais do circuito Ironman e 70.3, gerencie sua carteira e suba no ranking global.',
+  keywords: ['triathlon', 'fantasy game', 'ironman', '70.3', 'atleta pro', 'trixer', 'endurance', 'esporte', 'ranking'],
+  authors: [{ name: 'Trixer Team' }],
   openGraph: {
     type: 'website',
     siteName: 'Trixer',
     url: SITE_URL,
+    title: 'Trixer — Endurance Fantasy Game',
+    description: 'Monte seu elenco com atletas PRO reais e pontue pelo desempenho nas provas.',
+    locale: 'pt_BR',
   },
-  twitter: { card: 'summary_large_image' },
-  robots: { index: true, follow: true },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Trixer — Endurance Fantasy Game',
+    description: 'O fantasy game do triathlon mundial.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

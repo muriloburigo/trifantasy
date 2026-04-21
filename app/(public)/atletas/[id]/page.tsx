@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import { createPublicClient, createAdminClient, createClient } from '~/lib/supabase/server'
 import BackLink from '~/app/components/BackLink'
 import { formatDate, formatTime } from '~/lib/utils'
@@ -8,6 +9,26 @@ import { getMarketStatus } from '~/lib/market'
 import { getTranslations } from 'next-intl/server'
 
 export const revalidate = 0
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const pub = createPublicClient()
+  const { data: athlete } = await pub.from('athletes').select('name, country, pto_rank, type').eq('id', id).single()
+  
+  if (!athlete) return { title: 'Atleta não encontrado' }
+
+  const description = `${athlete.name} (${athlete.country}) - Atleta ${athlete.type.toUpperCase()}${athlete.pto_rank ? ` · Rank PTO #${athlete.pto_rank}` : ''}. Veja o histórico de provas e escale no seu elenco do Trixer.`
+
+  return {
+    title: `${athlete.name} | Perfil do Atleta`,
+    description,
+    openGraph: {
+      title: `${athlete.name} - Trixer Fantasy`,
+      description,
+      type: 'profile',
+    }
+  }
+}
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'Brazil': '🇧🇷', 'Norway': '🇳🇴', 'Germany': '🇩🇪', 'Belgium': '🇧🇪',
@@ -151,7 +172,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
       <BackLink href="/atletas" />
 
       {/* Hero */}
-      <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-6 mb-6 flex gap-5 items-center">
+      <article className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-6 mb-6 flex gap-5 items-center">
         {/* Avatar */}
         <div className={`w-20 h-20 rounded-full overflow-hidden shrink-0 flex items-center justify-center text-xl font-black text-white ${
           !athlete.photo_url
@@ -195,7 +216,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
             <BuyButton athleteId={id} price={Number(athlete.current_price)} wallet={wallet} rosterCount={rosterCount} marketLocked={market.locked} />
           )}
         </div>
-      </div>
+      </article>
 
       {/* Stats bar */}
       <div className="grid grid-cols-4 gap-3 mb-6">
