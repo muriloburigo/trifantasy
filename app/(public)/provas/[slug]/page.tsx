@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createPublicClient, createClient } from '~/lib/supabase/server'
 import { formatDate, formatTime, daysUntil } from '~/lib/utils'
