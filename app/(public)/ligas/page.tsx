@@ -52,8 +52,8 @@ export default async function LigasPage() {
   const publicLeagues = (publicLeaguesRaw ?? []).filter((l: any) => !myLeagueIds.includes(l.id))
 
 
-  const { count: totalLeagues } = await pub.from('leagues').select('*', { count: 'exact', head: true })
-  const { count: totalTeams } = await pub.from('teams').select('*', { count: 'exact', head: true })
+  const { count: totalLeagues } = await admin.from('leagues').select('*', { count: 'exact', head: true })
+  const { count: totalTeams } = await admin.from('teams').select('*', { count: 'exact', head: true })
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
