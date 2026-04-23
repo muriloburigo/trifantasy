@@ -200,11 +200,15 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
 
           <h1 className="text-2xl font-black leading-tight">{athlete.name}</h1>
 
-          <div className="flex items-center gap-3 mt-1 text-sm text-[var(--color-muted)] flex-wrap">
-            <span>{flag(athlete.country)} {athlete.country}</span>
-            {athlete.pto_rank && <span className="bg-white/5 px-2 py-0.5 rounded-md text-xs">#{athlete.pto_rank} PTO World Rank</span>}
-            {athlete.wtcs_rank && <span className="bg-blue-900/20 text-blue-300 px-2 py-0.5 rounded-md text-xs">#{athlete.wtcs_rank} WTCS Olympic Rank</span>}
-            {athlete.club && <span>· {athlete.club}</span>}
+          <div className="flex items-center gap-2 mt-2 text-sm text-[var(--color-muted)] flex-wrap">
+            <span className="mr-2">{flag(athlete.country)} {athlete.country}</span>
+            <span className="bg-white/5 border border-white/5 px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider">
+              PTO {athlete.pto_rank ? `#${athlete.pto_rank}` : '—'}
+            </span>
+            <span className="bg-white/5 border border-white/5 px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider">
+              WTCS {athlete.wtcs_rank ? `#${athlete.wtcs_rank}` : '—'}
+            </span>
+            {athlete.club && <span className="ml-1 opacity-60">· {athlete.club}</span>}
           </div>
         </div>
 
