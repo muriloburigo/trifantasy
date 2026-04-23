@@ -43,14 +43,15 @@ function AthleteCard({ a, rank }: { a: any; rank?: number }) {
 
   return (
     <Link href={`/atletas/${a.id}`} className="relative flex-shrink-0 w-[130px] bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-3 flex flex-col items-center gap-2 hover:border-[var(--color-orange)]/50 transition-all">
-      {/* Type badge */}
-      <span className={`absolute top-2.5 left-2.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
-        isPro
-          ? 'bg-[var(--color-orange)]/15 text-[var(--color-orange)]'
-          : 'bg-[var(--color-purple)]/15 text-[var(--color-purple)]'
-      }`}>
-        {isPro ? 'PRO' : a.age_group ?? 'AG'}
-      </span>
+      {/* Ranks badge */}
+      <div className="flex flex-col gap-0.5 absolute top-2.5 left-2.5">
+        <span className="text-[8px] font-black px-1 py-0.5 rounded bg-white/5 text-[var(--color-muted)] uppercase tracking-tighter">
+          PTO {a.pto_rank ? `#${a.pto_rank}` : '—'}
+        </span>
+        <span className="text-[8px] font-black px-1 py-0.5 rounded bg-blue-900/20 text-blue-400 uppercase tracking-tighter">
+          WTCS {a.wtcs_rank ? `#${a.wtcs_rank}` : '—'}
+        </span>
+      </div>
 
       {/* Rank badge */}
       {rank && (

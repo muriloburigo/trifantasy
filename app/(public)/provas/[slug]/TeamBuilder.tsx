@@ -64,12 +64,13 @@ function AthleteCard({
               {a.name} <span className="text-xs font-normal">{flag(a.country)}</span>
             </p>
           </Link>
-          <div className="flex flex-wrap items-center gap-2 mt-0.5">
-            <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-[var(--color-navy-elevated)] text-[var(--color-muted)]">
-              PRO
+          <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+            <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-[var(--color-navy-elevated)] text-[var(--color-muted)] uppercase tracking-tighter">
+              PTO {a.pto_rank ? `#${a.pto_rank}` : '—'}
             </span>
-            {a.pto_rank && <span className="text-[10px] text-[var(--color-muted)] font-medium">#{a.pto_rank} PTO</span>}
-            {a.wtcs_rank && <span className="text-[10px] text-blue-400 font-medium">#{a.wtcs_rank} WTCS</span>}
+            <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-blue-900/20 text-blue-400 uppercase tracking-tighter">
+              WTCS {a.wtcs_rank ? `#${a.wtcs_rank}` : '—'}
+            </span>
           </div>
         </div>
 
