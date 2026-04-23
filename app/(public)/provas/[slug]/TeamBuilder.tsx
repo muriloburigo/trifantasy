@@ -64,11 +64,12 @@ function AthleteCard({
               {a.name} <span className="text-xs font-normal">{flag(a.country)}</span>
             </p>
           </Link>
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="flex flex-wrap items-center gap-2 mt-0.5">
             <span className="text-[10px] font-bold px-1 py-0.5 rounded bg-[var(--color-navy-elevated)] text-[var(--color-muted)]">
               PRO
             </span>
             {a.pto_rank && <span className="text-[10px] text-[var(--color-muted)] font-medium">#{a.pto_rank} PTO</span>}
+            {a.wtcs_rank && <span className="text-[10px] text-blue-400 font-medium">#{a.wtcs_rank} WTCS</span>}
           </div>
         </div>
 

@@ -202,7 +202,8 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
 
           <div className="flex items-center gap-3 mt-1 text-sm text-[var(--color-muted)] flex-wrap">
             <span>{flag(athlete.country)} {athlete.country}</span>
-            {athlete.pto_rank && <span>#{athlete.pto_rank} PTO</span>}
+            {athlete.pto_rank && <span className="bg-white/5 px-2 py-0.5 rounded-md text-xs">#{athlete.pto_rank} PTO World Rank</span>}
+            {athlete.wtcs_rank && <span className="bg-blue-900/20 text-blue-300 px-2 py-0.5 rounded-md text-xs">#{athlete.wtcs_rank} WTCS Olympic Rank</span>}
             {athlete.club && <span>· {athlete.club}</span>}
           </div>
         </div>

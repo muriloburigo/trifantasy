@@ -28,6 +28,7 @@ export interface Athlete {
   type: AthleteType
   age_group: string | null
   pto_rank: number | null
+  wtcs_rank?: number | null
   photo_url?: string | null
   current_price?: number
   price_change?: number
