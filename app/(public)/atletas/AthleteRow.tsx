@@ -53,7 +53,10 @@ export default function AthleteRow({
           </div>
           <div className="flex items-center gap-2 text-[10px] text-[var(--color-muted)]">
             <span>{flag(a.country)} {a.country?.split(' ')[0]}</span>
-            {a.pto_rank && <span>#{a.pto_rank} PTO</span>}
+            <div className="flex items-center gap-1.5">
+              {a.pto_rank && <span className="bg-white/5 px-1 rounded">#{a.pto_rank} PTO</span>}
+              {a.wtcs_rank && <span className="bg-blue-900/20 text-blue-400 px-1 rounded">#{a.wtcs_rank} WTCS</span>}
+            </div>
           </div>
         </div>
       </Link>
