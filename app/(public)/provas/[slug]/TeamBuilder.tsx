@@ -65,10 +65,10 @@ function AthleteCard({
             </p>
           </Link>
           <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-            <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-[var(--color-navy-elevated)] text-[var(--color-muted)] uppercase tracking-tighter">
+            <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-white/5 text-[var(--color-muted)] uppercase tracking-tighter border border-white/5">
               PTO {a.pto_rank ? `#${a.pto_rank}` : '—'}
             </span>
-            <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-blue-900/20 text-blue-400 uppercase tracking-tighter">
+            <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-white/5 text-[var(--color-muted)] uppercase tracking-tighter border border-white/5">
               WTCS {a.wtcs_rank ? `#${a.wtcs_rank}` : '—'}
             </span>
           </div>
