@@ -14,8 +14,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const nav = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/provas', label: 'Provas', icon: Flag },
-    { href: '/admin/atletas', label: 'Atletas', icon: Users },
+    { href: '/admin/usuarios',  label: 'Usuários',  icon: Users },
+    { href: '/admin/provas',    label: 'Provas',    icon: Flag },
+    { href: '/admin/atletas',   label: 'Atletas',   icon: Users },
     { href: '/admin/resultados', label: 'Resultados', icon: FileText },
     { href: '/admin/pontuacao', label: 'Pontuação', icon: BarChart2 },
     { href: '/admin/mercado',   label: 'Mercado',   icon: TrendingUp },
