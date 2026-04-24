@@ -187,26 +187,9 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
                       {member.profile?.name ?? 'Usuário'}
                       {isMe && <span className="text-[var(--color-orange)] ml-1 text-[10px]">{t('youLabel')}</span>}
                     </p>
-                    {member.races.length > 0 && (
-                      <div className="flex flex-wrap gap-x-2 mt-0.5">
-                        {member.races
-                          .sort((a: any, b: any) => b.pts - a.pts)
-                          .slice(0, 3)
-                          .map((r: any, idx: number) => (
-                            <Link 
-                              key={r.id} 
-                              href={`/meu-time/${r.id}`}
-                              className="text-[10px] text-[var(--color-muted)] hover:text-[var(--color-orange)] transition-colors flex items-center gap-1"
-                            >
-                              {r.name.replace('IRONMAN ', '').replace('70.3 ', '')} ({r.pts}p){idx < Math.min(member.races.length, 3) - 1 && <span className="opacity-30">·</span>}
-                            </Link>
-                          ))}
-                      </div>
-                    )}
-
-                    {member.races.length === 0 && (
-                      <p className="text-[10px] text-[var(--color-muted)] mt-0.5">{t('noScore')}</p>
-                    )}
+                    <p className="text-[10px] text-[var(--color-muted)] mt-0.5 uppercase tracking-tighter">
+                      {member.races.length} {member.races.length === 1 ? 'prova' : 'provas'}
+                    </p>
                   </div>
 
                   {/* Total score */}
