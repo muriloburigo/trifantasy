@@ -228,7 +228,15 @@ export default function TeamBuilder({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] sm:text-[11px] font-bold truncate leading-tight">{ra.athlete?.name}</p>
-                  <p className="text-[8px] sm:text-[9px] text-[var(--color-success)] font-medium">{t('inRace', { price: ra.price })}</p>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <span className="text-[7px] font-bold px-0.5 rounded bg-white/5 text-[var(--color-muted)] uppercase tracking-tighter">
+                      P {ra.athlete?.pto_rank ? `#${ra.athlete.pto_rank}` : '—'}
+                    </span>
+                    <span className="text-[7px] font-bold px-0.5 rounded bg-white/5 text-[var(--color-muted)] uppercase tracking-tighter">
+                      W {ra.athlete?.wtcs_rank ? `#${ra.athlete.wtcs_rank}` : '—'}
+                    </span>
+                    <span className="text-[8px] sm:text-[9px] text-[var(--color-success)] font-medium ml-auto shrink-0">{t('inRace', { price: ra.price })}</span>
+                  </div>
                 </div>
               </div>
             ))}
