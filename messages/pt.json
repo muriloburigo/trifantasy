@@ -360,8 +360,8 @@
     "s5li3": "Você pode trocar atletas do elenco sempre que o mercado estiver aberto.",
     "s5example": "Seu elenco tem 5 atletas. 3 deles estão no IRONMAN Texas. No dia da prova, esses 3 pontuam para você. Se quiser trocar os outros 2, deve fazer antes do mercado fechar.",
     "s6Title": "Pontuação (Trix Score)",
-    "s6p1": "A pontuação é calculada pela posição no campo (PRO ou Age Group).",
-    "s6bonus": "+6 pts segmento mais rápido PRO / +4 pts segmento mais rápido AG",
+    "s6p1": "A pontuação é calculada pela posição no campo profissional (PRO) da prova.",
+    "s6bonus": "+6 pts para o segmento mais rápido (natação, bike ou corrida) entre todos os PROs.",
     "s7Title": "Trix Leagues",
     "s7p1": "Dispute com amigos quem tem o melhor elenco acumulado ou em provas específicas.",
     "s7li1": "Ranking por Trix Score — a soma dos pontos dos atletas do seu elenco na prova.",
@@ -410,6 +410,10 @@
     "s8p1": "O Trixer não é direcionado a menores de 13 anos. Se tomarmos conhecimento de que coletamos dados de menores sem consentimento dos responsáveis, removeremos essas informações imediatamente.",
     "s9Title": "9. Alterações nesta política",
     "s9p1": "Podemos atualizar esta política periodicamente. Alterações significativas serão comunicadas por e-mail ou notificação no app. O uso continuado da plataforma após as alterações implica aceite da nova política.",
+    "s10Title": "10. Contato",
+    "s10p1": "Dúvidas sobre privacidade:"
+  }
+}as serão comunicadas por e-mail ou notificação no app. O uso continuado da plataforma após as alterações implica aceite da nova política.",
     "s10Title": "10. Contato",
     "s10p1": "Dúvidas sobre privacidade:"
   }
