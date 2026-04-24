@@ -33,7 +33,7 @@ export default async function ElencoPage() {
     supabase.from('profiles').select('name, wallet').eq('id', user.id).single(),
     supabase
       .from('portfolio')
-      .select('athlete_id, bought_price, created_at, athlete:athletes(id, name, country, gender, type, pto_rank, current_price, price_change, photo_url)')
+      .select('athlete_id, bought_price, created_at, athlete:athletes(id, name, country, gender, type, pto_rank, wtcs_rank, current_price, price_change, photo_url)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false }),
     supabase
@@ -172,9 +172,14 @@ export default async function ElencoPage() {
                           {ath?.name}
                           {ath?.country && <span className="ml-1 text-[10px]">{flag(ath.country)}</span>}
                         </Link>
-                        <p className="text-[10px] text-[var(--color-muted)]">
-                          PRO{ath?.pto_rank ? ` · #${ath.pto_rank}` : ''}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <span className="bg-white/5 text-[var(--color-muted)] px-1 rounded uppercase text-[9px] font-bold tracking-tighter">
+                            PTO {ath?.pto_rank ? `#${ath.pto_rank}` : '—'}
+                          </span>
+                          <span className="bg-white/5 text-[var(--color-muted)] px-1 rounded uppercase text-[9px] font-bold tracking-tighter">
+                            WTCS {ath?.wtcs_rank ? `#${ath.wtcs_rank}` : '—'}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
