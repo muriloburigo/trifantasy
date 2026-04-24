@@ -3,13 +3,23 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '~/lib/supabase/server'
 import { requireAdmin } from '~/lib/auth/require-admin'
 
+function normalizeName(name: string): string {
+  return name
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+    .split(/\s+/)
+    .join(' ') // Normaliza espaços extras
+}
+
 /** Upsert a single athlete and link to a race */
 export async function upsertAthlete(formData: FormData) {
   await requireAdmin()
   const supabase = createAdminClient()
 
   const raceId = formData.get('race_id') as string
-  const name = (formData.get('name') as string).trim()
+  const rawName = (formData.get('name') as string)
+  const name = normalizeName(rawName)
   const gender = formData.get('gender') as string
   const type = formData.get('type') as string
   const age_group = (formData.get('age_group') as string)?.trim() || null
@@ -54,10 +64,11 @@ export async function bulkImportAthletes(raceId: string, json: string) {
   const errors: string[] = []
 
   for (const row of rows) {
+    const name = normalizeName(row.name)
     const { data: athlete, error: aErr } = await supabase
       .from('athletes')
       .upsert({
-        name: row.name,
+        name,
         gender: row.gender,
         type: row.type ?? 'age_grouper',
         age_group: row.age_group ?? null,
