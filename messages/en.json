@@ -262,7 +262,8 @@
     "filterPrivate": "Private",
     "filterEmpty": "No leagues found.",
     "filterClear": "Clear",
-    "publicCount": "{n} public leagues"
+    "publicCount": "{n} public leagues",
+    "globalLeagueName": "Global Trixer League"
   },
   "auth": {
     "loginTitle": "Sign in to your account",
