@@ -71,8 +71,8 @@ export default function PrivacidadePage() {
           </ul>
           <p className="mt-2">
             Para exercer esses direitos, entre em contato pelo e-mail:{' '}
-            <a href="mailto:contato@trifantasy.com" className="text-[var(--color-orange)] hover:underline">
-              contato@trifantasy.com
+            <a href="mailto:contato@trixer.app" className="text-[var(--color-orange)] hover:underline">
+              contato@trixer.app
             </a>
           </p>
         </section>
@@ -105,8 +105,8 @@ export default function PrivacidadePage() {
           <h2 className="text-base font-bold mb-2">10. Contato</h2>
           <p>
             Dúvidas sobre privacidade:{' '}
-            <a href="mailto:contato@trifantasy.com" className="text-[var(--color-orange)] hover:underline">
-              contato@trifantasy.com
+            <a href="mailto:contato@trixer.app" className="text-[var(--color-orange)] hover:underline">
+              contato@trixer.app
             </a>
           </p>
         </section>
