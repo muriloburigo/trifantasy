@@ -61,6 +61,12 @@ export default async function AdminProvasPage() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
+                    <Link 
+                      href={`/admin/provas/${race.id}/startlist`}
+                      className="text-[10px] font-bold px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition-colors uppercase tracking-wider"
+                    >
+                      Field PRO
+                    </Link>
                     <Link href={`/admin/provas/${race.id}`} className="p-1.5 hover:text-[var(--color-orange)] transition-colors">
                       <Pencil size={14} />
                     </Link>
