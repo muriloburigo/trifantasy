@@ -56,7 +56,32 @@ export default async function RegrasPage() {
           <Example label={t('exampleLabel')}>{t('s2example')}</Example>
         </Section>
 
-        <Section n="3" title={t('s4Title')}>
+        <Section n="3" title={t('s3Title')}>
+          <p>{t('s3p1')}</p>
+          <div className="grid grid-cols-2 gap-4 max-w-sm mb-4">
+            <div className="bg-[var(--color-navy-elevated)] p-3 rounded-xl border border-[var(--color-navy-border)]">
+              <p className="text-[10px] uppercase font-bold text-[var(--color-muted)] mb-1">{t('s3tableHeader1')}</p>
+              <p className="text-sm font-bold text-white">#1 – #7</p>
+              <p className="text-sm font-bold text-white">#8 – #15</p>
+              <p className="text-sm font-bold text-white">#16 – #25</p>
+            </div>
+            <div className="bg-[var(--color-navy-elevated)] p-3 rounded-xl border border-[var(--color-navy-border)] text-right">
+              <p className="text-[10px] uppercase font-bold text-[var(--color-muted)] mb-1">{t('s3tableHeader2')}</p>
+              <p className="text-sm font-black text-[var(--color-orange)]">T$35</p>
+              <p className="text-sm font-black text-[var(--color-orange)]">T$28</p>
+              <p className="text-sm font-black text-[var(--color-orange)]">T$22</p>
+            </div>
+          </div>
+          <p>{t('s3p2')}</p>
+          <ul className="space-y-1 list-disc list-inside text-xs">
+            <li>{t('s3price1')}</li>
+            <li>{t('s3price2')}</li>
+            <li>{t('s3price3')}</li>
+          </ul>
+          <Example label={t('exampleLabel')}>{t('s3example')}</Example>
+        </Section>
+
+        <Section n="4" title={t('s4Title')}>
           <p>{t('s4p1')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-[var(--color-navy-elevated)] rounded-xl p-3 text-center border border-green-900/40">
@@ -76,47 +101,46 @@ export default async function RegrasPage() {
           <Example label={t('exampleLabel')}>{t('s4example')}</Example>
         </Section>
 
-        <Section n="4" title={t('s5Title')}>
+        <Section n="5" title={t('s5Title')}>
           <p>{t('s5p1')}</p>
           <ul className="space-y-1.5 list-disc list-inside">
             <li>{t('s5li1')}</li>
             <li>{t('s5li2')}</li>
             <li>{t('s5li3')}</li>
-            <li>{t('s5li4')}</li>
           </ul>
           <Example label={t('exampleLabel')}>{t('s5example')}</Example>
         </Section>
 
-        <Section n="5" title={t('s7Title')}>
-          <p>{t('s7p1')}</p>
-          <ul className="space-y-2 list-disc list-inside">
-            <li>{t('s7li1')}</li>
-            <li>{t('s7li2')}</li>
-            <li>{t('s7li3')}</li>
-          </ul>
-          <Example label={t('exampleLabel')}>{t('s7example')}</Example>
+        <Section n="6" title={t('s6Title')}>
+          <p>{t('s6p1')}</p>
+          <p className="font-bold text-white mt-2">{t('s6bonus')}</p>
         </Section>
 
-        <Section n="6" title={t('s8Title')}>
+        <Section n="7" title={t('s7Title')}>
+          <p>{t('s7p1')}</p>
+          <ul className="space-y-1.5 list-disc list-inside">
+            <li>{t('s7li1')}</li>
+            <li>{t('s7li2')}</li>
+          </ul>
+        </Section>
+
+        <Section n="8" title={t('s8Title')}>
           <ul className="space-y-2 list-disc list-inside">
             <li>{t('s8li1')}</li>
             <li>{t('s8li2')}</li>
-            <li>{t('s8li3')}</li>
-            <li>{t('s8li4')}</li>
             <li>
-              {t('s8li5').split(t('s8li5Link'))[0]}
-              <Link href="/elenco" className="text-[var(--color-orange)] hover:underline">{t('s8li5Link')}</Link>
-              {t('s8li5').split(t('s8li5Link'))[1]}
+              {t('s8li3').split(t('s8li3Link'))[0]}
+              <Link href="/elenco" className="text-[var(--color-orange)] hover:underline font-bold">{t('s8li3Link')}</Link>
+              {t('s8li3').split(t('s8li3Link'))[1]}
             </li>
           </ul>
         </Section>
 
-        <Section n="7" title={t('s9Title')}>
+        <Section n="9" title={t('s9Title')}>
           <ul className="space-y-2 list-disc list-inside">
             <li>{t('s9li1')}</li>
             <li>{t('s9li2')}</li>
             <li>{t('s9li3')}</li>
-            <li>{t('s9li4')}</li>
           </ul>
         </Section>
 
