@@ -1,162 +1,73 @@
-# TriFantasy
+# Trixer
 
-Fantasy game do circuito Ironman — usuários montam times com atletas PRO e age-groupers reais e pontuam pelo desempenho nas provas.
+Fantasy game do circuito mundial de Triathlon — usuários montam elencos com 5 atletas profissionais e pontuam pelo desempenho nas provas reais.
 
-**Status:** MVP implementado. Aguarda Supabase + .env.local para rodar.
+**Status:** Produção — Core funcional, Ligas e Mercado ativos.
 
 ---
 
 ## Stack
 
-- **Next.js 16** App Router (não é o Next.js padrão — leia `node_modules/next/dist/docs/`)
+- **Next.js 16** App Router
 - **Supabase** — Auth + PostgreSQL + RLS
-- **Tailwind CSS v4** — `@theme inline` em `globals.css`
+- **Tailwind CSS v4**
 - **TypeScript** strict
 - **Vercel** para deploy
 
 ---
 
-## Para começar
+## Mecânicas do Jogo
 
-1. Criar projeto no Supabase
-2. Copiar `.env.local.example` → `.env.local` e preencher
-3. Rodar migration: copiar `supabase/migrations/001_initial.sql` no SQL Editor do Supabase
-4. Adicionar unique constraint nos atletas (ver abaixo)
-5. Criar conta no site e tornar admin: `node scripts/set-admin.mjs email@voce.com`
-6. Seed de prova de exemplo: `node scripts/seed-race.mjs`
-7. Deploy: `PATH="/opt/homebrew/Cellar/node/25.9.0_1/bin:$PATH" npx vercel --prod`
-
-### Unique constraint em athletes (rodar no Supabase SQL Editor)
-```sql
-ALTER TABLE athletes ADD CONSTRAINT athletes_name_gender_type_key UNIQUE (name, gender, type);
-```
+- **Orçamento Inicial:** T$100 (vitalício, aumenta conforme lucro nas vendas).
+- **Elenco:** Exatamente 5 atletas no total (PRO + Elite Olímpica).
+- **Escalação:** Automática — seu elenco atual de 5 atletas é o seu time para todas as provas.
+- **Mercado:** Dinâmico, baseado no melhor ranking entre **PTO World Rank** (longa distância) e **WTCS Olympic Rank** (curta distância).
+- **Liga Global:** Todos os usuários participam da "Liga Global Trixer" por padrão.
+- **Janela de Mercado:** Abre após cada prova, fecha 24h antes da próxima.
 
 ---
 
-## Variáveis de ambiente (`.env.local`)
+## Funcionalidades Implementadas
 
-```
-NEXT_PUBLIC_SUPABASE_URL=https://SEU_REF.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-```
-
----
-
-## Clientes Supabase
-
-| Função | Chave | Usa RLS | Quando usar |
-|--------|-------|---------|-------------|
-| `createClient()` | anon + cookie | Sim | Auth, layout, server components logados |
-| `createPublicClient()` | anon | Sim | Páginas públicas (sem cookie) |
-| `createAdminClient()` | service role | **Não** | Server actions admin (sempre com `requireAdmin()`) |
+- [x] **Gerenciamento de Elenco:** Compra e venda de atletas com limite fixo de 5 nomes.
+- [x] **Mercado Unificado:** Preços baseados no melhor de dois rankings mundiais (PTO + WTCS).
+- [x] **Ligas:** Privadas, Públicas e a Liga Global automática.
+- [x] **Onboarding:** Tour guiado no primeiro acesso para novos usuários.
+- [x] **Score Detalhado:** Página de breakdown de pontos (`/meu-time/[id]`) com detalhes por segmento.
+- [x] **Leaderboard por Prova:** Ranking de usuários dentro da página de resultados de cada prova.
+- [x] **Compartilhamento:** Botões de WhatsApp com **OG Images dinâmicas** (mostram foto e preço do atleta).
+- [x] **SEO:** Sitemap automático, Robots.txt e Meta Tags dinâmicas.
+- [x] **Responsividade:** Interface otimizada para mobile.
 
 ---
 
-## Estrutura de rotas
-
-```
-app/
-  (public)/          → loja pública
-    page.tsx           → home: calendário de provas
-    provas/[slug]/     → detalhe da prova + team builder
-    ligas/             → minhas ligas
-    ligas/criar/       → criar ou entrar em liga
-    ligas/[id]/        → ranking da liga
-  (auth)/
-    login/
-    register/
-  admin/              → painel admin (requer is_admin=true)
-    dashboard/
-    provas/           → CRUD de provas
-    atletas/          → adicionar/importar atletas por prova
-    resultados/       → importar resultados pós-prova
-    pontuacao/        → calcular pontos e marcar prova como finalizada
-  api/
-    auth/callback/    → OAuth callback
-    auth/logout/
-```
-
----
-
-## Banco de dados
+## Estrutura de Banco de Dados (Principais)
 
 | Tabela | Descrição |
 |--------|-----------|
-| `races` | Provas do calendário Ironman |
-| `athletes` | Pool global de atletas (PRO + age-groupers) |
-| `race_athletes` | Atletas inscritos por prova + preço em Tricoins |
-| `results` | Resultados por atleta por prova (splits + posições) |
-| `profiles` | Extensão de auth.users (name, is_admin) |
-| `teams` | Cache do elenco de 5 atletas (espelho do `portfolio`) |
-| `team_athletes` | Atletas no time (máx. 5) |
-| `scores` | Pontuação calculada por time |
-| `leagues` | Ligas privadas por prova |
-| `league_members` | Membros de cada liga |
+| `races` | Provas do calendário (status: upcoming, open, locked, finished). |
+| `athletes` | Pool global com `pto_rank` e `wtcs_rank`. |
+| `portfolio` | **Source of truth** do elenco atual de cada usuário. |
+| `teams` | Cache do elenco (espelho do `portfolio`) usado para histórico de scores. |
+| `scores` | Pontuação calculada por usuário por prova (inclui JSON `breakdown`). |
+| `leagues` | Ligas de competição (flag `is_global` para a liga principal). |
 
 ---
 
-## Mecânicas do jogo
-
-- **Orçamento Inicial:** T$100 (vitalício, aumenta conforme lucro nas vendas)
-- **Elenco:** Exatamente 5 atletas no total (PRO + age-groupers)
-- **Escalação:** Automática — seu elenco atual de 5 atletas é o seu time para todas as provas.
-- **Restrição:** Sem limite de atletas por clube.
-- **Mercado:** Abre após cada prova, fecha 24h antes da próxima.
-- **PRO:** pontos por posição no campo PRO + bônus de melhor segmento
-- **Age-grouper:** pontos por posição no AG + bônus de segmento + Kona slot (+8)
-- **Sem capitão**
-
-### Pontuação PRO (posição no campo)
-1º=50, 2º=40, 3º=33, 4º=27, 5º=22, 6-10º=15, 11-20º=8, 21+=3
-
-### Pontuação Age-Grouperconfira (posição no AG)
-1º=30, 2º=24, 3º=19, 4-10º=13, top25%=8, 25-50%=5, 50-75%=2, 75%+=1
-
-### Bônus segmentos PRO: natação/bike/corrida melhor geral = +6 cada
-### Bônus segmentos AG: melhor no AG = +4 cada; Kona slot = +8
-
----
-
-## Fluxo de uso
-
-1. Admin cria prova → muda status para `open`
-2. Admin importa atletas via JSON (`/admin/atletas`)
-3. Usuários criam conta, montam time em `/provas/[slug]`
-4. Prova acontece → admin importa resultados via JSON (`/admin/resultados`)
-5. Admin dispara cálculo de pontos em `/admin/pontuacao` → status muda para `finished`
-6. Rankings ficam disponíveis nas ligas
-
----
-
-## Scripts
+## Scripts Úteis
 
 ```bash
-# Leem .env.local automaticamente
-node scripts/seed-race.mjs      # Cria Ironman Brasil 2025 com atletas
-node scripts/seed-results.mjs   # Simula resultados para testar scoring
-node scripts/set-admin.mjs email@voce.com  # Torna usuário admin
+node scripts/sync-unified-ranks-v2.mjs  # Sincroniza atletas com rankings mundiais
+node scripts/seed-brasilia-2026.mjs     # Exemplo de seed de prova real
+node scripts/set-admin.mjs email@ex.com # Torna usuário admin
 ```
 
 ---
 
 ## Deploy
 
+O deploy é automático via GitHub Actions ou manual via Vercel CLI:
 ```bash
 PATH="/opt/homebrew/Cellar/node/25.9.0_1/bin:$PATH" npx vercel --prod
 ```
-
-Erros TypeScript só aparecem nos logs do Vercel — verificar após deploy.
-
----
-
-## Pendente para produção
-
-- [ ] Domínio customizado no Vercel + `NEXT_PUBLIC_SITE_URL`
-- [ ] OG image dinâmica (`app/opengraph-image.tsx`)
-- [ ] Sitemap (`app/sitemap.ts`)
-- [ ] Scraper do Ironman Tracker para importação automática de atletas/resultados
-- [ ] Página de score detalhado por time (`/meu-time/[raceId]`)
-- [ ] Ranking geral da prova (público, não só por liga)
-- [ ] Notificações por email pós-cálculo de pontos
+URL Oficial: [https://www.trixer.app](https://www.trixer.app)

@@ -10,8 +10,8 @@ interface WhatsAppShareProps {
 
 export default function WhatsAppShare({ text, url, label, variant = 'primary' }: WhatsAppShareProps) {
   function handleShare() {
-    const shareUrl = url || typeof window !== 'undefined' ? window.location.href : ''
-    const fullText = `${text}\n\n${shareUrl}`
+    const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '')
+    const fullText = `🔥 ${text}\n\n🏆 Veja no Trixer:\n${shareUrl}`
     const waUrl = `https://wa.me/?text=${encodeURIComponent(fullText)}`
     window.open(waUrl, '_blank')
   }
