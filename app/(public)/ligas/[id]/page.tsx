@@ -41,14 +41,22 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
 
   if (!isMember && !league.is_public) redirect('/ligas')
 
-  // Fetch all members using admin
-  const { data: members } = await admin
+  // Fetch all members using admin (user_id → auth.users, not profiles, so join separately)
+  const { data: membersRaw } = await admin
     .from('league_members')
-    .select(`
-      user_id, joined_at,
-      profile:profiles(name)
-    `)
+    .select('user_id, joined_at')
     .eq('league_id', id)
+
+  const memberUserIds = (membersRaw ?? []).map((m: any) => m.user_id)
+  const { data: memberProfiles } = memberUserIds.length > 0
+    ? await admin.from('profiles').select('id, name').in('id', memberUserIds)
+    : { data: [] }
+  const profileMap = new Map((memberProfiles ?? []).map((p: any) => [p.id, p]))
+
+  const members = (membersRaw ?? []).map((m: any) => ({
+    ...m,
+    profile: profileMap.get(m.user_id) ?? null,
+  }))
 
   // For each member, sum all their team scores
   const memberIds = (members ?? []).map((m: any) => m.user_id)

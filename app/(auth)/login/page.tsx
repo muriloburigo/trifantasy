@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '~/lib/supabase/client'
 import { useTranslations } from 'next-intl'
+import LocaleSwitcher from '~/app/components/LocaleSwitcher'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -30,6 +31,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="absolute top-4 right-4">
+        <LocaleSwitcher />
+      </div>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Link href="/" className="text-2xl font-bold" style={{ fontFamily: 'var(--font-sora)' }}>
