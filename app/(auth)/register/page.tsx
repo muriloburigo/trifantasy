@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '~/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 import { Eye, EyeOff, CheckCircle2, ShieldCheck, Mail } from 'lucide-react'
+import LocaleSwitcher from '~/app/components/LocaleSwitcher'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -64,6 +65,9 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="absolute top-4 right-4">
+        <LocaleSwitcher />
+      </div>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-2 group">

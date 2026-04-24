@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '~/lib/supabase/server'
 import UserMenu from './UserMenu'
+import MobileMenu from './MobileMenu'
 import { getTranslations } from 'next-intl/server'
 import OnboardingTour from '../components/OnboardingTour'
 
@@ -23,7 +24,7 @@ export default async function PublicShell({ children }: { children: React.ReactN
     <div className="min-h-screen flex flex-col">
       {showTour && <OnboardingTour userName={profileData?.name || ''} />}
       <header className="border-b border-[var(--color-navy-border)] bg-[var(--color-navy-card)]/90 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between relative">
           <Link href="/" className="flex items-center gap-1">
             <span className="font-bold text-xl tracking-tight" style={{ fontFamily: 'var(--font-sora)' }}>
               <span className="text-[var(--color-orange)]">TRIX</span><span className="text-white">ER</span>
@@ -36,7 +37,10 @@ export default async function PublicShell({ children }: { children: React.ReactN
             <Link href="/ligas" className="hover:text-white transition-colors">Trix Leagues</Link>
             <Link href="/regras" className="hover:text-white transition-colors">{t('rules')}</Link>
           </nav>
-          <UserMenu user={user} wallet={wallet} />
+          <div className="flex items-center gap-2">
+            <MobileMenu />
+            <UserMenu user={user} wallet={wallet} />
+          </div>
         </div>
       </header>
 

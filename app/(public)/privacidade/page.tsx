@@ -1,76 +1,71 @@
+import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import BackLink from '~/app/components/BackLink'
 
-export const metadata = {
-  title: 'Política de Privacidade — Trixer',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('privacy')
+  return { title: t('title') }
 }
 
-export default function PrivacidadePage() {
+export default async function PrivacidadePage() {
+  const t = await getTranslations('privacy')
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
       <BackLink href="/" />
-      <h1 className="text-2xl font-bold mb-2">Política de Privacidade</h1>
-      <p className="text-sm text-[var(--color-muted)] mb-8">Última atualização: abril de 2026</p>
+      <h1 className="text-2xl font-bold mb-2">{t('title')}</h1>
+      <p className="text-sm text-[var(--color-muted)] mb-8">{t('updated')}</p>
 
       <div className="prose prose-invert max-w-none space-y-8 text-sm text-[var(--color-text)] leading-relaxed">
 
         <section>
-          <h2 className="text-base font-bold mb-2">1. Quem somos</h2>
-          <p>
-            Trixer é uma plataforma de fantasy esportivo voltada para o circuito profissional de triathlon (IRONMAN e 70.3).
-            Este documento descreve como coletamos, usamos e protegemos as informações dos usuários.
-          </p>
+          <h2 className="text-base font-bold mb-2">{t('s1Title')}</h2>
+          <p>{t('s1p1')}</p>
         </section>
 
         <section>
-          <h2 className="text-base font-bold mb-2">2. Dados coletados</h2>
-          <p>Ao se cadastrar e usar o Trixer, coletamos:</p>
+          <h2 className="text-base font-bold mb-2">{t('s2Title')}</h2>
+          <p>{t('s2p1')}</p>
           <ul className="list-disc list-inside space-y-1 mt-2 text-[var(--color-muted)]">
-            <li>Nome de usuário e endereço de e-mail (para autenticação)</li>
-            <li>Ações dentro do jogo: compras, vendas e escalações de atletas</li>
-            <li>Participação em ligas e pontuações obtidas</li>
-            <li>Dados de sessão e logs de acesso (para segurança e diagnóstico)</li>
+            <li>{t('s2li1')}</li>
+            <li>{t('s2li2')}</li>
+            <li>{t('s2li3')}</li>
+            <li>{t('s2li4')}</li>
           </ul>
-          <p className="mt-2">Não coletamos dados de pagamento. O Trixer é gratuito.</p>
+          <p className="mt-2">{t('s2p2')}</p>
         </section>
 
         <section>
-          <h2 className="text-base font-bold mb-2">3. Como usamos seus dados</h2>
+          <h2 className="text-base font-bold mb-2">{t('s3Title')}</h2>
           <ul className="list-disc list-inside space-y-1 text-[var(--color-muted)]">
-            <li>Operar o jogo: exibir seu elenco, time, pontuações e ranking</li>
-            <li>Comunicar atualizações relevantes da plataforma</li>
-            <li>Gerar estatísticas agregadas e anônimas sobre uso do jogo</li>
-            <li>Prevenir fraudes e garantir a integridade do jogo</li>
+            <li>{t('s3li1')}</li>
+            <li>{t('s3li2')}</li>
+            <li>{t('s3li3')}</li>
+            <li>{t('s3li4')}</li>
           </ul>
-          <p className="mt-2">Não vendemos nem compartilhamos seus dados pessoais com terceiros para fins comerciais.</p>
+          <p className="mt-2">{t('s3p1')}</p>
         </section>
 
         <section>
-          <h2 className="text-base font-bold mb-2">4. Armazenamento e segurança</h2>
-          <p>
-            Os dados são armazenados na plataforma Supabase, hospedada em infraestrutura segura com criptografia em trânsito (TLS)
-            e em repouso. O acesso é restrito por Row Level Security (RLS) — cada usuário acessa apenas seus próprios dados.
-          </p>
+          <h2 className="text-base font-bold mb-2">{t('s4Title')}</h2>
+          <p>{t('s4p1')}</p>
         </section>
 
         <section>
-          <h2 className="text-base font-bold mb-2">5. Dados de atletas</h2>
-          <p>
-            As informações sobre atletas profissionais (nome, nacionalidade, ranking PTO, resultados de provas) são de caráter
-            público e obtidas de fontes abertas como a PTO (Professional Triathletes Organisation) e resultados oficiais do
-            IRONMAN. Não armazenamos dados pessoais sensíveis de atletas.
-          </p>
+          <h2 className="text-base font-bold mb-2">{t('s5Title')}</h2>
+          <p>{t('s5p1')}</p>
         </section>
 
         <section>
-          <h2 className="text-base font-bold mb-2">6. Seus direitos</h2>
-          <p>Você pode a qualquer momento:</p>
+          <h2 className="text-base font-bold mb-2">{t('s6Title')}</h2>
+          <p>{t('s6p1')}</p>
           <ul className="list-disc list-inside space-y-1 mt-2 text-[var(--color-muted)]">
-            <li>Solicitar a exclusão da sua conta e todos os dados associados</li>
-            <li>Solicitar uma cópia dos dados que temos sobre você</li>
-            <li>Corrigir informações incorretas no seu perfil</li>
+            <li>{t('s6li1')}</li>
+            <li>{t('s6li2')}</li>
+            <li>{t('s6li3')}</li>
           </ul>
           <p className="mt-2">
-            Para exercer esses direitos, entre em contato pelo e-mail:{' '}
+            {t('s6p2')}{' '}
             <a href="mailto:contato@trixer.app" className="text-[var(--color-orange)] hover:underline">
               contato@trixer.app
             </a>
@@ -78,33 +73,24 @@ export default function PrivacidadePage() {
         </section>
 
         <section>
-          <h2 className="text-base font-bold mb-2">7. Cookies e rastreamento</h2>
-          <p>
-            Utilizamos cookies estritamente necessários para autenticação e manutenção de sessão. Não utilizamos cookies
-            de rastreamento publicitário ou ferramentas de analytics de terceiros.
-          </p>
+          <h2 className="text-base font-bold mb-2">{t('s7Title')}</h2>
+          <p>{t('s7p1')}</p>
         </section>
 
         <section>
-          <h2 className="text-base font-bold mb-2">8. Menores de idade</h2>
-          <p>
-            O Trixer não é direcionado a menores de 13 anos. Se tomarmos conhecimento de que coletamos dados de
-            menores sem consentimento dos responsáveis, removeremos essas informações imediatamente.
-          </p>
+          <h2 className="text-base font-bold mb-2">{t('s8Title')}</h2>
+          <p>{t('s8p1')}</p>
         </section>
 
         <section>
-          <h2 className="text-base font-bold mb-2">9. Alterações nesta política</h2>
-          <p>
-            Podemos atualizar esta política periodicamente. Alterações significativas serão comunicadas por e-mail ou
-            notificação no app. O uso continuado da plataforma após as alterações implica aceite da nova política.
-          </p>
+          <h2 className="text-base font-bold mb-2">{t('s9Title')}</h2>
+          <p>{t('s9p1')}</p>
         </section>
 
         <section>
-          <h2 className="text-base font-bold mb-2">10. Contato</h2>
+          <h2 className="text-base font-bold mb-2">{t('s10Title')}</h2>
           <p>
-            Dúvidas sobre privacidade:{' '}
+            {t('s10p1')}{' '}
             <a href="mailto:contato@trixer.app" className="text-[var(--color-orange)] hover:underline">
               contato@trixer.app
             </a>

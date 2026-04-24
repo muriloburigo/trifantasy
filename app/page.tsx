@@ -7,6 +7,7 @@ import {
   Users, ChevronRight, Zap, ArrowRight, Star, Lock,
 } from 'lucide-react'
 import PublicShell from './(public)/PublicShell'
+import GlobalRankWidget from './components/GlobalRankWidget'
 import { getTranslations } from 'next-intl/server'
 
 export const dynamic = 'force-dynamic'
@@ -149,42 +150,43 @@ export default async function HomePage() {
     auth.auth.getUser(),
     // Market: rising
     pub.from('athletes')
-      .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url')
+      .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url, pto_rank, wtcs_rank')
       .gt('price_change', 0)
       .order('price_change', { ascending: false })
       .limit(12),
 
     // Market: falling
     pub.from('athletes')
-      .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url')
+      .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url, pto_rank, wtcs_rank')
       .lt('price_change', 0)
       .order('price_change', { ascending: true })
       .limit(12),
 
     // Top athletes by price (all, for featured section)
     pub.from('athletes')
-      .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url')
+      .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url, pto_rank, wtcs_rank')
       .eq('type', 'pro')
       .order('current_price', { ascending: false })
       .limit(16),
 
-    // Global League Rank
+    // Global League Rank — fetch members, then profiles + scores separately
     admin.from('leagues')
       .select('id')
       .eq('is_global', true)
       .single()
       .then(async ({ data: globalLeague }) => {
         if (!globalLeague) return { data: [] }
-        return admin.from('league_members')
-          .select(`
-            user_id,
-            profile:profiles(name),
-            teams(
-              id,
-              scores(total_points, race:races(name))
-            )
-          `)
+        const { data: members } = await admin
+          .from('league_members')
+          .select('user_id')
           .eq('league_id', globalLeague.id)
+        if (!members?.length) return { data: [] }
+        const userIds = members.map((m: any) => m.user_id)
+        const [{ data: profiles }, { data: teams }] = await Promise.all([
+          admin.from('profiles').select('id, name').in('id', userIds),
+          admin.from('teams').select('id, user_id, scores(total_points)').in('user_id', userIds),
+        ])
+        return { data: { members, profiles, teams } }
       }),
 
     // Races (enough to count beyond 7-day window)
@@ -200,17 +202,23 @@ export default async function HomePage() {
   ])
 
   // Transform globalRankRaw into a sorted list of scores
-  const globalRank = (globalRankRaw ?? []).map((m: any) => {
-    const team = m.teams?.[0]
-    const total = (team?.scores ?? []).reduce((acc: number, s: any) => acc + Number(s.total_points), 0)
-    return {
-      name: m.profile?.name ?? 'Trixer',
-      total,
-      raceCount: (team?.scores ?? []).length
-    }
-  })
-  .sort((a, b) => b.total - a.total)
-  .slice(0, 10)
+  const globalRankData = globalRankRaw as any
+  const globalRank: { name: string; total: number; raceCount: number; userId: string }[] = (() => {
+    if (!globalRankData?.members) return []
+    const profileMap = new Map((globalRankData.profiles ?? []).map((p: any) => [p.id, p.name]))
+    const teamMap = new Map((globalRankData.teams ?? []).map((t: any) => [t.user_id, t]))
+    return (globalRankData.members as any[]).map((m: any) => {
+      const team = teamMap.get(m.user_id) as any
+      const scores = team?.scores ?? []
+      const total = scores.reduce((acc: number, s: any) => acc + Number(s.total_points ?? 0), 0)
+      return {
+        userId: m.user_id,
+        name: (profileMap.get(m.user_id) as string) ?? 'Trixer',
+        total,
+        raceCount: scores.length,
+      }
+    }).sort((a: any, b: any) => b.total - a.total)
+  })()
 
   const rising  = risingRaw ?? []
   const falling = fallingRaw ?? []
@@ -382,38 +390,7 @@ export default async function HomePage() {
                   {t('rankingViewAll')} <ArrowRight size={11} />
                 </Link>
               </div>
-              <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
-                {globalRankRaw && globalRankRaw.length > 0 ? (
-                  globalRank.map((e, i) => (
-                    <div key={i} className={`flex items-center gap-3 px-4 py-3 border-b border-[var(--color-navy-border)] last:border-0 ${i < 3 ? 'bg-[var(--color-navy-elevated)]/30' : ''}`}>
-                      <span className="w-7 text-center shrink-0 text-base">
-                        {i < 3 ? ['🥇', '🥈', '🥉'][i] : <span className="text-sm text-[var(--color-muted)] font-bold">{i + 1}</span>}
-                      </span>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
-                        i < 3
-                          ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)] text-white'
-                          : 'bg-[var(--color-navy-elevated)] text-[var(--color-muted)]'
-                      }`}>
-                        {initials(e.name)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold truncate">{e.name}</p>
-                        <p className="text-[10px] text-[var(--color-muted)] truncate">{e.raceCount} {e.raceCount === 1 ? 'prova' : 'provas'}</p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className={`text-sm font-black tabular-nums ${i < 3 ? 'text-[var(--color-orange)]' : ''}`}>{e.total}</p>
-                        <p className="text-[10px] text-[var(--color-muted)]">pts</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="py-14 text-center text-[var(--color-muted)]">
-                    <Trophy size={28} className="mx-auto mb-3 opacity-20" />
-                    <p className="text-sm">{t('rankingEmpty')}</p>
-                    <Link href="/register" className="text-xs text-[var(--color-orange)] mt-2 inline-block">{t('rankingEmptyCta')}</Link>
-                  </div>
-                )}
-              </div>
+              <GlobalRankWidget entries={globalRank} currentUserId={user?.id ?? null} />
             </section>
           </div>
 

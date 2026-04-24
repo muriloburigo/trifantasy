@@ -20,7 +20,7 @@ export default async function AtletasPage() {
 
   const [athletesRes, portfolioRes, profileRes, feedRes] = await Promise.all([
     pub.from('athletes')
-      .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url, pto_rank')
+      .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url, pto_rank, wtcs_rank')
       .order('current_price', { ascending: false }),
     user
       ? supabase.from('portfolio').select('athlete_id, bought_price').eq('user_id', user.id)
