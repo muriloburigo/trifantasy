@@ -1,10 +1,56 @@
 import { requireAdmin } from '~/lib/auth/require-admin'
-import { Terminal, Users, FileText, Copy, ChevronRight } from 'lucide-react'
+import { Terminal, Users, FileText, Flag, UserPlus, ChevronRight } from 'lucide-react'
 
 export default async function AdminSkillsPage() {
   await requireAdmin()
 
   const skills = [
+    {
+      command: '/cadastrar-prova',
+      icon: Flag,
+      title: 'Cadastrar Prova',
+      description: 'Cria uma nova prova interativamente: pergunta nome, data, local, distância e status. Gera slug automático e insere na tabela races.',
+      steps: [
+        'Abra o Claude Code neste projeto',
+        'Digite /cadastrar-prova no chat',
+        'Informe os dados quando solicitado (nome, data, local, país, distância)',
+        'O Claude cria a prova e mostra o ID gerado',
+      ],
+      args: [
+        { name: '--name', desc: 'Nome da prova (ex: "IRONMAN 70.3 Florianópolis")' },
+        { name: '--date', desc: 'Data no formato YYYY-MM-DD' },
+        { name: '--location', desc: 'Cidade' },
+        { name: '--country / --country-code', desc: 'País e código de 2 letras' },
+        { name: '--distance', desc: 'full | 70.3 | ows | other' },
+        { name: '--status', desc: 'upcoming (padrão) | open | locked | finished' },
+        { name: '--pro (flag)', desc: 'Marca que a prova tem campo PRO' },
+      ],
+      script: 'node scripts/create-race.mjs',
+      color: 'green',
+    },
+    {
+      command: '/cadastrar-atleta',
+      icon: UserPlus,
+      title: 'Cadastrar Atleta',
+      description: 'Cadastra um atleta PRO que ainda não está no sistema. Avisa se já existir um atleta com nome similar. Calcula preço automaticamente pelo rank PTO. Opcionalmente vincula a uma prova.',
+      steps: [
+        'Abra o Claude Code neste projeto',
+        'Digite /cadastrar-atleta no chat',
+        'Informe nome, gênero, país e rank PTO quando solicitado',
+        'Opcionalmente vincule a uma prova na hora',
+      ],
+      args: [
+        { name: '--name', desc: 'Nome completo do atleta' },
+        { name: '--gender', desc: 'M ou F' },
+        { name: '--country / --country-code', desc: 'País e código de 2 letras' },
+        { name: '--pto-rank', desc: 'Posição no ranking PTO (define o preço automaticamente)' },
+        { name: '--race-id (opcional)', desc: 'UUID da prova para vincular' },
+        { name: '--bib (opcional)', desc: 'Número de largada' },
+        { name: '--photo-url (opcional)', desc: 'URL da foto do atleta' },
+      ],
+      script: 'node scripts/create-athlete.mjs',
+      color: 'blue',
+    },
     {
       command: '/import-startlist',
       icon: Users,
@@ -17,7 +63,7 @@ export default async function AdminSkillsPage() {
         'O Claude irá executar o script e mostrar o resultado',
       ],
       args: [
-        { name: 'URL', desc: 'URL da página de startlist (ex: https://protriathletes.org/events/slug/startlist)' },
+        { name: 'url', desc: 'URL da página de startlist (ex: https://protriathletes.org/events/slug/startlist)' },
         { name: 'race_id', desc: 'UUID da prova no banco — copie de /admin/provas' },
         { name: '--all (opcional)', desc: 'Importa todas as divisões, não só PRO' },
       ],
@@ -37,7 +83,7 @@ export default async function AdminSkillsPage() {
         'Após importar, vá em /admin/pontuacao para calcular os Trix Scores',
       ],
       args: [
-        { name: 'URL', desc: 'URL da página de resultados (ex: https://protriathletes.org/events/slug/results)' },
+        { name: 'url', desc: 'URL da página de resultados (ex: https://protriathletes.org/events/slug/results)' },
         { name: 'race_id', desc: 'UUID da prova no banco — copie de /admin/provas' },
       ],
       script: 'node scripts/import-results.mjs <url> <race_id>',
@@ -80,16 +126,25 @@ export default async function AdminSkillsPage() {
               {/* Header */}
               <div className="flex items-start gap-4 p-6 border-b border-[var(--color-navy-border)]">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                  skill.color === 'orange'
-                    ? 'bg-[var(--color-orange)]/15 border border-[var(--color-orange)]/30'
-                    : 'bg-purple-500/15 border border-purple-500/30'
+                  skill.color === 'orange' ? 'bg-[var(--color-orange)]/15 border border-[var(--color-orange)]/30'
+                  : skill.color === 'green' ? 'bg-green-500/15 border border-green-500/30'
+                  : skill.color === 'blue' ? 'bg-blue-500/15 border border-blue-500/30'
+                  : 'bg-purple-500/15 border border-purple-500/30'
                 }`}>
-                  <Icon size={18} className={skill.color === 'orange' ? 'text-[var(--color-orange)]' : 'text-purple-400'} />
+                  <Icon size={18} className={
+                    skill.color === 'orange' ? 'text-[var(--color-orange)]'
+                    : skill.color === 'green' ? 'text-green-400'
+                    : skill.color === 'blue' ? 'text-blue-400'
+                    : 'text-purple-400'
+                  } />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-1">
                     <code className={`text-base font-bold font-mono ${
-                      skill.color === 'orange' ? 'text-[var(--color-orange)]' : 'text-purple-400'
+                      skill.color === 'orange' ? 'text-[var(--color-orange)]'
+                      : skill.color === 'green' ? 'text-green-400'
+                      : skill.color === 'blue' ? 'text-blue-400'
+                      : 'text-purple-400'
                     }`}>{skill.command}</code>
                   </div>
                   <h2 className="font-semibold text-white mb-1">{skill.title}</h2>
@@ -105,9 +160,10 @@ export default async function AdminSkillsPage() {
                     {skill.steps.map((step, i) => (
                       <li key={i} className="flex items-start gap-2.5 text-sm text-[var(--color-muted)]">
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 ${
-                          skill.color === 'orange'
-                            ? 'bg-[var(--color-orange)]/20 text-[var(--color-orange)]'
-                            : 'bg-purple-500/20 text-purple-400'
+                          skill.color === 'orange' ? 'bg-[var(--color-orange)]/20 text-[var(--color-orange)]'
+                          : skill.color === 'green' ? 'bg-green-500/20 text-green-400'
+                          : skill.color === 'blue' ? 'bg-blue-500/20 text-blue-400'
+                          : 'bg-purple-500/20 text-purple-400'
                         }`}>{i + 1}</span>
                         {step}
                       </li>
@@ -147,10 +203,10 @@ export default async function AdminSkillsPage() {
         <h2 className="font-bold text-sm mb-4">Fluxo recomendado por prova</h2>
         <div className="flex items-center gap-2 flex-wrap text-sm">
           {[
-            'Criar prova em /admin/provas',
+            '/cadastrar-prova',
             '/import-startlist',
             '/import-results',
-            'Calcular pontuação em /admin/pontuacao',
+            'Calcular em /admin/pontuacao',
           ].map((step, i, arr) => (
             <div key={i} className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] px-2.5 py-1.5 rounded-lg">
