@@ -25,7 +25,9 @@
     "admin": "Admin",
     "createAccount": "Criar conta",
     "myLeagues": "Minhas Ligas",
-    "home": "Home"
+    "home": "Home",
+    "security": "Segurança",
+    "tour": "Ver tour guiado"
   },
   "home": {
     "tagline": "O Game do Triathlon",
