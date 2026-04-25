@@ -1,15 +1,33 @@
 import { notFound, redirect } from 'next/navigation'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient, createAdminClient } from '~/lib/supabase/server'
 import { Trophy, Users, Medal, Globe, Lock, Share2 } from 'lucide-react'
 import CopyButton from './CopyButton'
 import AddMemberForm from './AddMemberForm'
 import BackLink from '~/app/components/BackLink'
-import WhatsAppShare from '~/app/components/WhatsAppShare'
 import { getTranslations } from 'next-intl/server'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://trixer.app'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const admin = createAdminClient()
+  const { data: league } = await admin.from('leagues').select('name, invite_code').eq('id', id).single()
+  if (!league) return { title: 'Liga | Trixer' }
+  return {
+    title: `${league.name} | Liga Trixer`,
+    description: `Entre na liga "${league.name}" no Trixer — o fantasy game do triathlon mundial. Código de convite: ${league.invite_code}`,
+    openGraph: {
+      title: `${league.name} — Liga no Trixer`,
+      description: `Entre na liga "${league.name}" no Trixer — o fantasy game do triathlon mundial.`,
+      url: `${SITE_URL}/ligas/${id}`,
+    },
+  }
+}
 
 export default async function LeaguePage({ params }: { params: Promise<{ id: string }> }) {
   const t = await getTranslations('leagues')
@@ -134,11 +152,6 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
           </div>
           <div className="flex items-center gap-1">
             <CopyButton code={league.invite_code} />
-            <WhatsAppShare 
-              text={`Entre na minha liga "${league.name}" no Trixer! Use o código de convite: ${league.invite_code}`}
-              label=""
-              variant="ghost"
-            />
           </div>
         </div>
       </div>

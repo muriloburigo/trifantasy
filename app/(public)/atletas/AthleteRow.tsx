@@ -20,7 +20,7 @@ function Trend({ change }: { change: number }) {
 }
 
 export default function AthleteRow({
-  a, owned, boughtPrice, wallet, rosterCount, marketLocked,
+  a, owned, boughtPrice, wallet, rosterCount, marketLocked, inStartlist,
 }: {
   a: any
   owned: boolean
@@ -28,6 +28,7 @@ export default function AthleteRow({
   wallet: number | null
   rosterCount: number
   marketLocked?: boolean
+  inStartlist?: boolean
 }) {
   const price = Number(a.current_price)
 
@@ -46,9 +47,14 @@ export default function AthleteRow({
 
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 mb-0.5">
-             <span className="text-[9px] font-bold px-1 py-0.5 rounded shrink-0 bg-[var(--color-orange)]/15 text-[var(--color-orange)] uppercase">
+            <span className="text-[9px] font-bold px-1 py-0.5 rounded shrink-0 bg-[var(--color-orange)]/15 text-[var(--color-orange)] uppercase">
               PRO
             </span>
+            {inStartlist && (
+              <span className="text-[9px] font-bold px-1 py-0.5 rounded shrink-0 bg-green-900/40 text-green-400 uppercase">
+                ✓ lista
+              </span>
+            )}
             <p className="text-xs sm:text-sm font-semibold truncate">{a.name}</p>
           </div>
           <div className="flex items-center gap-2 text-[10px] text-[var(--color-muted)]">

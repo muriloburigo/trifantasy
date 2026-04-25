@@ -7,7 +7,6 @@ import { TrendingUp, TrendingDown, Minus, Trophy, Flag, Timer, Bike, PersonStand
 import { BuyButton, SellButton } from '~/app/(public)/elenco/TradeButton'
 import { getMarketStatus } from '~/lib/market'
 import { getTranslations } from 'next-intl/server'
-import WhatsAppShare from '~/app/components/WhatsAppShare'
 
 export const revalidate = 0
 
@@ -30,6 +29,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     }
   }
 }
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://trixer.app'
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'Brazil': '🇧🇷', 'Norway': '🇳🇴', 'Germany': '🇩🇪', 'Belgium': '🇧🇪',
@@ -217,11 +218,6 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
           <p className="text-3xl font-black text-[var(--color-orange)]">T${Number(athlete.current_price).toFixed(0)}</p>
           <PriceTrend change={priceChange} />
           <div className="flex items-center gap-2">
-            <WhatsAppShare 
-              text={`Conheça ${athlete.name} (${athlete.country}) no Trixer! Preço atual: T$${Number(athlete.current_price).toFixed(0)}`}
-              label=""
-              variant="outline"
-            />
             {owned ? (
               <SellButton athleteId={id} price={Number(athlete.current_price)} boughtPrice={boughtPrice!} marketLocked={market.locked} />
             ) : (

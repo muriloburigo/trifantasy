@@ -23,7 +23,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://trixer.com.br'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Trixer — Endurance Fantasy Game | Ironman & 70.3',
+    default: 'Trixer — O Game do Triathlon',
     template: '%s | Trixer',
   },
   description: 'O fantasy game do triathlon mundial. Monte seu elenco com atletas PRO reais do circuito Ironman e 70.3, gerencie sua carteira e suba no ranking global.',
@@ -33,13 +33,13 @@ export const metadata: Metadata = {
     type: 'website',
     siteName: 'Trixer',
     url: SITE_URL,
-    title: 'Trixer — Endurance Fantasy Game',
+    title: 'Trixer — O Game do Triathlon',
     description: 'Monte seu elenco com atletas PRO reais e pontue pelo desempenho nas provas.',
     locale: 'pt_BR',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Trixer — Endurance Fantasy Game',
+    title: 'Trixer — O Game do Triathlon',
     description: 'O fantasy game do triathlon mundial.',
   },
   robots: {

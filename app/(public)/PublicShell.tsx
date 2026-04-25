@@ -4,6 +4,7 @@ import UserMenu from './UserMenu'
 import MobileMenu from './MobileMenu'
 import { getTranslations } from 'next-intl/server'
 import OnboardingTour from '../components/OnboardingTour'
+import PushNotificationManager from '../components/PushNotificationManager'
 
 export default async function PublicShell({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -38,6 +39,7 @@ export default async function PublicShell({ children }: { children: React.ReactN
             <Link href="/regras" className="hover:text-white transition-colors">{t('rules')}</Link>
           </nav>
           <div className="flex items-center gap-2">
+            {user && <PushNotificationManager />}
             <MobileMenu />
             <UserMenu user={user} wallet={wallet} />
           </div>
@@ -54,6 +56,7 @@ export default async function PublicShell({ children }: { children: React.ReactN
           </span>
           <div className="flex items-center gap-4">
             <Link href="/regras" className="hover:text-white transition-colors">Regras</Link>
+            <Link href="/suporte" className="hover:text-white transition-colors">Suporte</Link>
             <span>Não afiliado ao Ironman/WTC. Apenas para fins recreativos.</span>
           </div>
         </div>
