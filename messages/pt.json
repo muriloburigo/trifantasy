@@ -373,7 +373,7 @@
     "s2li1": "Comprar: preço do atleta é debitado da carteira, ele entra no seu elenco.",
     "s2li2": "Vender: preço atual do atleta é credita na carteira, ele sai do elenco.",
     "s2li3": "Limite de elenco: você deve ter exatamente 5 atletas para pontuar plenamente.",
-    "s2example": "Carteira: T$100. Você compra 3 atletas: T$25 + T$15 + T$10 = T$50 gastos. Carteira fica em T$10. Elenco vale T$50. Patrimônio total continua T$100 — sem ganho ainda.",
+    "s2example": "Carteira: T$100. Você compra 3 atletas: T$35 + T$28 + T$22 = T$85 gastos. Carteira fica em T$15. Elenco vale T$85. Patrimônio total continua T$100 — sem ganho ainda.",
     "s3Title": "Mercado de Atletas e Preços",
     "s3p1": "No mercado você vê todos os atletas com preço atual e variação. Os preços base são definidos com base no nível do atleta:",
     "s3tableHeader1": "Nível",

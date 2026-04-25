@@ -373,7 +373,7 @@
     "s2li1": "Buy: the athlete's price is debited from your wallet and they join your roster.",
     "s2li2": "Sell: the athlete's current price is credited to your wallet and they leave your roster.",
     "s2li3": "Roster limit: you must have exactly 5 athletes to score fully.",
-    "s2example": "Wallet: T$100. You buy 3 athletes: T$25 + T$15 + T$10 = T$50 spent. Wallet drops to T$10. Roster worth T$50. Total net worth stays T$100 — no gain yet.",
+    "s2example": "Wallet: T$100. You buy 3 athletes: T$35 + T$28 + T$22 = T$85 spent. Wallet drops to T$15. Roster worth T$85. Total net worth stays T$100 — no gain yet.",
     "s3Title": "Athlete Market & Prices",
     "s3p1": "In the market you see all athletes with their current price and movement. Base prices are set based on the athlete's level:",
     "s3tableHeader1": "Level",

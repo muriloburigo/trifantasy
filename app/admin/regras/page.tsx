@@ -18,7 +18,7 @@ export default async function AdminRegrasPage() {
           <h2 className="text-base font-bold text-[var(--color-orange)] uppercase tracking-wider mb-3">Mercado de Atletas</h2>
           <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl divide-y divide-[var(--color-navy-border)]">
 
-            <Row label="Saldo inicial" value="T$200 por usuário (gerado no cadastro via default da coluna profiles.wallet)" />
+            <Row label="Saldo inicial" value="T$100 por usuário (gerado no cadastro via default da coluna profiles.wallet)" />
             <Row label="Comprar atleta" value="Débita current_price da carteira, insere linha em portfolio(user_id, athlete_id, bought_price)" />
             <Row label="Vender atleta" value="Credita current_price na carteira, remove linha do portfolio. P&L = current_price − bought_price" />
             <Row label="Regra de posse" value="Usuário só pode escalar atletas que possui no portfolio" />
