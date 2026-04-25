@@ -1,5 +1,6 @@
 import { createAdminClient, createPublicClient } from '~/lib/supabase/server'
 import BackLink from '~/app/components/BackLink'
+import { getTranslations } from 'next-intl/server'
 
 export const revalidate = 600
 
@@ -24,6 +25,7 @@ function initials(name: string | null) {
 const MEDALS = ['🥇', '🥈', '🥉']
 
 export default async function TrixersPage() {
+  const t = await getTranslations('trixers')
   const admin = createAdminClient()
   const pub   = createPublicClient()
 
@@ -81,42 +83,40 @@ export default async function TrixersPage() {
     <div className="max-w-3xl mx-auto px-4 py-10">
       <BackLink href="/" />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Comunidade Trixers</h1>
-        <p className="text-sm text-[var(--color-muted)] mt-1">
-          Rankings e estatísticas da comunidade Trixer
-        </p>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
+        <p className="text-sm text-[var(--color-muted)] mt-1">{t('subtitle')}</p>
       </div>
 
       {/* Stats bar */}
       <div className="grid grid-cols-3 gap-3 mb-8">
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4 text-center">
           <p className="text-2xl font-black text-[var(--color-orange)]">{totalTrixers}</p>
-          <p className="text-xs text-[var(--color-muted)] mt-1">Trixers</p>
+          <p className="text-xs text-[var(--color-muted)] mt-1">{t('statTrixers')}</p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4 text-center">
           <p className="text-2xl font-black text-[var(--color-success)]">{activeTrixers}</p>
-          <p className="text-xs text-[var(--color-muted)] mt-1">Jogaram</p>
+          <p className="text-xs text-[var(--color-muted)] mt-1">{t('statPlayed')}</p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4 text-center">
           <p className="text-2xl font-black">{totalTeams}</p>
-          <p className="text-xs text-[var(--color-muted)] mt-1">Times montados</p>
+          <p className="text-xs text-[var(--color-muted)] mt-1">{t('statTeams')}</p>
         </div>
       </div>
 
       <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
         {/* Header */}
         <div className="grid grid-cols-[40px_1fr_60px_70px] gap-2 px-4 py-2.5 border-b border-[var(--color-navy-border)] text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
-          <span>#</span>
-          <span>Trixter</span>
-          <span className="text-center">Provas</span>
-          <span className="text-right">Melhor</span>
+          <span>{t('colRank')}</span>
+          <span>{t('colTrixter')}</span>
+          <span className="text-center">{t('colRaces')}</span>
+          <span className="text-right">{t('colBest')}</span>
         </div>
 
         {ranked.length === 0 && (
           <div className="py-16 text-center text-[var(--color-muted)]">
             <p className="text-4xl mb-3">🏊</p>
-            <p className="font-medium">Nenhuma pontuação ainda.</p>
-            <p className="text-sm mt-1">Seja o primeiro Trixter a jogar!</p>
+            <p className="font-medium">{t('empty')}</p>
+            <p className="text-sm mt-1">{t('emptySubtitle')}</p>
           </div>
         )}
 

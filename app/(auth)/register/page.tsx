@@ -4,8 +4,20 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '~/lib/supabase/client'
 import { useTranslations } from 'next-intl'
-import { Eye, EyeOff, CheckCircle2, ShieldCheck, Mail } from 'lucide-react'
+import { Eye, EyeOff, ShieldCheck, Mail } from 'lucide-react'
 import LocaleSwitcher from '~/app/components/LocaleSwitcher'
+import { Turnstile } from '@marsidev/react-turnstile'
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''
+
+function isStrongPassword(p: string) {
+  return p.length >= 8 && /[0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p)
+}
+
+function hasFullName(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  return parts.length >= 2 && parts.every(p => p.length >= 1)
+}
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -13,18 +25,34 @@ export default function RegisterPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (password.length < 6) { setError(t('passwordMinLength')); return }
-    if (name.trim().length < 3) { setError('Nome deve ter ao menos 3 caracteres'); return }
-    
+    if (!hasFullName(name)) { setError(t('nameMinWords')); return }
+    if (password.length < 8) { setError(t('passwordMinLength')); return }
+    if (!isStrongPassword(password)) { setError(t('passwordWeak')); return }
+    if (password !== confirmPassword) { setError(t('passwordMismatch')); return }
+    if (TURNSTILE_SITE_KEY && !captchaToken) { setError(t('captchaRequired')); return }
+
     setLoading(true)
     setError('')
+
+    if (TURNSTILE_SITE_KEY && captchaToken) {
+      const v = await fetch('/api/auth/verify-captcha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: captchaToken }),
+      })
+      const vd = await v.json()
+      if (!vd.success) { setError(t('captchaRequired')); setLoading(false); return }
+    }
 
     const supabase = createClient()
     const { error } = await supabase.auth.signUp({
@@ -63,6 +91,8 @@ export default function RegisterPage() {
     )
   }
 
+  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="absolute top-4 right-4">
@@ -86,16 +116,18 @@ export default function RegisterPage() {
             <p className="text-[var(--color-danger)] text-[11px] font-medium text-center bg-red-950/20 border border-red-900/30 rounded-lg p-3">{error}</p>
           )}
 
+          {/* Full name */}
           <div>
             <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-1.5">{t('nameLabel')}</label>
             <input
               type="text" required
               value={name} onChange={e => setName(e.target.value)}
-              placeholder="Como quer ser chamado?"
+              placeholder={t('namePlaceholder')}
               className="w-full bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--color-orange)] transition-colors"
             />
           </div>
 
+          {/* Email */}
           <div>
             <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-1.5">{t('emailLabel')}</label>
             <input
@@ -106,14 +138,15 @@ export default function RegisterPage() {
             />
           </div>
 
+          {/* Password */}
           <div>
             <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-1.5">{t('passwordLabel')}</label>
             <div className="relative">
               <input
-                type={showPassword ? "text" : "password"} required minLength={6}
+                type={showPassword ? 'text' : 'password'} required minLength={8}
                 value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
-                className="w-full bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--color-orange)] transition-colors"
+                placeholder="Mínimo 8 caracteres + número/símbolo"
+                className="w-full bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-xl px-4 py-2.5 pr-10 text-sm focus:outline-none focus:border-[var(--color-orange)] transition-colors"
               />
               <button
                 type="button"
@@ -124,6 +157,46 @@ export default function RegisterPage() {
               </button>
             </div>
           </div>
+
+          {/* Confirm password */}
+          <div>
+            <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-1.5">{t('confirmPasswordLabel')}</label>
+            <div className="relative">
+              <input
+                type={showConfirm ? 'text' : 'password'} required minLength={8}
+                value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                placeholder={t('confirmPasswordPlaceholder')}
+                className={`w-full bg-[var(--color-navy-elevated)] border rounded-xl px-4 py-2.5 pr-10 text-sm focus:outline-none transition-colors ${
+                  confirmPassword.length > 0
+                    ? passwordsMatch
+                      ? 'border-green-600 focus:border-green-500'
+                      : 'border-red-700 focus:border-red-600'
+                    : 'border-[var(--color-navy-border)] focus:border-[var(--color-orange)]'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] hover:text-white"
+              >
+                {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            {confirmPassword.length > 0 && !passwordsMatch && (
+              <p className="text-[11px] text-[var(--color-danger)] mt-1">{t('passwordMismatch')}</p>
+            )}
+          </div>
+
+          {TURNSTILE_SITE_KEY && (
+            <div className="flex justify-center">
+              <Turnstile
+                siteKey={TURNSTILE_SITE_KEY}
+                onSuccess={setCaptchaToken}
+                onError={() => setCaptchaToken('')}
+                onExpire={() => setCaptchaToken('')}
+              />
+            </div>
+          )}
 
           <button
             type="submit" disabled={loading}

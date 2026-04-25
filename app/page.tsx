@@ -191,7 +191,7 @@ export default async function HomePage() {
 
     // Races (enough to count beyond 7-day window)
     pub.from('races')
-      .select('*')
+      .select('*, race_athletes(athlete_id)')
       .in('status', ['open', 'upcoming'])
       .order('date', { ascending: true })
       .limit(30),
@@ -227,8 +227,10 @@ export default async function HomePage() {
   const in7   = new Date(today); in7.setDate(today.getDate() + 7)
 
   const allActive = (races ?? []).filter(r => r.status === 'open' || r.status === 'upcoming') as Race[]
-  const openRaces     = allActive.filter(r => r.status === 'open')
-  const next7Races    = allActive.filter(r => new Date(r.date) <= in7)
+  // Only count races that already have a startlist registered
+  const withStartlist = allActive.filter(r => ((r as any).race_athletes?.length ?? 0) > 0)
+  const openRaces  = withStartlist.filter(r => r.status === 'open')
+  const next7Races = withStartlist.filter(r => new Date(r.date) <= in7)
   const remainingCount = allActive.length - next7Races.length
 
   const featuredAthletes = (topAthletesRaw ?? []).slice(0, 12)
@@ -363,6 +365,9 @@ export default async function HomePage() {
                     {t('availableAthletes')}
                     <span className="text-xs text-[var(--color-muted)] font-normal">{t('availableSubtitle')}</span>
                   </h2>
+                  <Link href="/atletas" className="text-xs text-[var(--color-muted)] hover:text-[var(--color-orange)] flex items-center gap-1 transition-colors shrink-0">
+                    {t('viewAllAthletes')} <ArrowRight size={11} />
+                  </Link>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
                   {featuredAthletes.map((a: any, i: number) => <AthleteCard key={a.id} a={a} rank={i + 1} />)}

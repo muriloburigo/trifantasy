@@ -8,9 +8,10 @@ import { getMarketStatus } from '~/lib/market'
 import { TrendingUp, TrendingDown, Minus, Wallet, ShoppingBag, Share2 } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { TEAM_SIZE } from '~/lib/types'
-import WhatsAppShare from '~/app/components/WhatsAppShare'
 
 export const revalidate = 0
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://trixer.app'
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'Brazil': '🇧🇷', 'Norway': '🇳🇴', 'Germany': '🇩🇪', 'Belgium': '🇧🇪',
@@ -63,13 +64,6 @@ export default async function ElencoPage() {
           <p className="text-sm text-[var(--color-muted)] mt-1">{t('subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
-          {portfolio.length > 0 && (
-            <WhatsAppShare 
-              text={`Veja meu elenco no Trixer!\n\n${portfolio.map(p => `• ${(p.athlete as any)?.name}`).join('\n')}\n\nPatrimônio: T$${netWorth.toFixed(0)}`}
-              label="Compartilhar"
-              variant="outline"
-            />
-          )}
           <Link
             href="/atletas"
             className="flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"

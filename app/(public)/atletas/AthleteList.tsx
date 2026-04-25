@@ -11,14 +11,17 @@ export default function AthleteList({
   ownedMap,
   wallet,
   marketLocked,
+  startlistIds = [],
 }: {
   athletes: any[]
   ownedMap: Record<string, number>
   wallet: number | null
   marketLocked: boolean
+  startlistIds?: string[]
 }) {
   const t = useTranslations('market')
   const owned = useMemo(() => new Map(Object.entries(ownedMap)), [ownedMap])
+  const inStartlist = useMemo(() => new Set(startlistIds), [startlistIds])
   const rosterCount = owned.size
 
   const [search, setSearch]   = useState('')
@@ -46,7 +49,13 @@ export default function AthleteList({
       case 'name':  r.sort((a, b) => a.name.localeCompare(b.name)); break
       case 'pto':   r.sort((a, b) => (a.pto_rank ?? 9999) - (b.pto_rank ?? 9999)); break
       case 'trend': r.sort((a, b) => Number(b.price_change) - Number(a.price_change)); break
-      default:      r.sort((a, b) => Number(b.current_price) - Number(a.current_price))
+      default:      r.sort((a, b) => {
+        // Startlist athletes first, then by price
+        const aIn = inStartlist.has(a.id) ? 0 : 1
+        const bIn = inStartlist.has(b.id) ? 0 : 1
+        if (aIn !== bIn) return aIn - bIn
+        return Number(b.current_price) - Number(a.current_price)
+      })
     }
 
     return r
@@ -166,6 +175,7 @@ export default function AthleteList({
                 wallet={wallet}
                 rosterCount={rosterCount}
                 marketLocked={marketLocked}
+                inStartlist={inStartlist.has(a.id)}
               />
             ))
           )}

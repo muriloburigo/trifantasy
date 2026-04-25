@@ -18,7 +18,7 @@ export default async function AtletasPage() {
 
   const market = await getMarketStatus(supabase)
 
-  const [athletesRes, portfolioRes, profileRes, feedRes] = await Promise.all([
+  const [athletesRes, portfolioRes, profileRes, feedRes, startlistRes] = await Promise.all([
     pub.from('athletes')
       .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url, pto_rank, wtcs_rank')
       .order('current_price', { ascending: false }),
@@ -32,12 +32,17 @@ export default async function AtletasPage() {
       .select('id, change, reason, recorded_at, athlete:athletes(id, name), race:races(name)')
       .order('recorded_at', { ascending: false })
       .limit(14),
+    // Athletes in startlists of open/upcoming races with registered athletes
+    pub.from('race_athletes')
+      .select('athlete_id, race:races!inner(status)')
+      .in('race.status', ['open', 'upcoming']),
   ])
 
   const athletes = athletesRes.data ?? []
   const portfolio = portfolioRes.data ?? []
   const wallet: number | null = user ? Number(profileRes.data?.wallet ?? 0) : null
   const feed = feedRes.data ?? []
+  const startlistIds = new Set((startlistRes.data ?? []).map((r: any) => r.athlete_id))
 
   const ownedMap = Object.fromEntries((portfolio ?? []).map((p: any) => [p.athlete_id, Number(p.bought_price)]))
 
@@ -121,6 +126,7 @@ export default async function AtletasPage() {
         ownedMap={ownedMap}
         wallet={wallet}
         marketLocked={market.locked}
+        startlistIds={[...startlistIds]}
       />
     </div>
   )

@@ -2,7 +2,7 @@
 import { MessageCircle } from 'lucide-react'
 
 interface WhatsAppShareProps {
-  text: string
+  text?: string
   url?: string
   label?: string
   variant?: 'primary' | 'outline' | 'ghost'
@@ -11,9 +11,9 @@ interface WhatsAppShareProps {
 export default function WhatsAppShare({ text, url, label, variant = 'primary' }: WhatsAppShareProps) {
   function handleShare() {
     const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '')
-    const fullText = `🔥 ${text}\n\n🏆 Veja no Trixer:\n${shareUrl}`
-    const waUrl = `https://wa.me/?text=${encodeURIComponent(fullText)}`
-    window.open(waUrl, '_blank')
+    // URL on its own line so WhatsApp renders the link preview card
+    const fullText = text ? `${text}\n\n${shareUrl}` : shareUrl
+    window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank')
   }
 
   const styles = {
