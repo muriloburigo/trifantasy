@@ -1,30 +1,36 @@
 'use client'
 import { useState } from 'react'
-import { User, Mail, Tag, Clock } from 'lucide-react'
+import { User, Mail, Clock, Loader2, CheckCircle2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
-type StatusMap = Record<string, { label: string; color: string; icon: any }>
-
-export default function TicketDetail({
-  ticket,
-  updateTicket,
-  statusLabel,
-}: {
-  ticket: any
-  updateTicket: (formData: FormData) => Promise<void>
-  statusLabel: StatusMap
-}) {
+export default function TicketDetail({ ticket }: { ticket: any }) {
+  const router = useRouter()
   const [note, setNote] = useState(ticket.admin_note ?? '')
   const [status, setStatus] = useState(ticket.status)
+  const [loading, setLoading] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setSaved(false)
+    await fetch('/api/admin/support', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: ticket.id, status, admin_note: note }),
+    })
+    setLoading(false)
+    setSaved(true)
+    router.refresh()
+  }
 
   return (
     <div className="w-96 shrink-0 bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-6 space-y-5">
-      {/* Header */}
       <div>
         <p className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-wider mb-1">Assunto</p>
         <p className="font-bold text-base leading-snug">{ticket.subject}</p>
       </div>
 
-      {/* Meta */}
       <div className="space-y-2 text-xs text-[var(--color-muted)]">
         <div className="flex items-center gap-2">
           <User size={12} />
@@ -40,22 +46,17 @@ export default function TicketDetail({
         </div>
       </div>
 
-      {/* Message */}
       <div>
         <p className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-wider mb-2">Mensagem</p>
-        <div className="bg-[var(--color-navy-elevated)] rounded-xl p-4 text-sm leading-relaxed whitespace-pre-wrap">
+        <div className="bg-[var(--color-navy-elevated)] rounded-xl p-4 text-sm leading-relaxed whitespace-pre-wrap max-h-48 overflow-y-auto">
           {ticket.message}
         </div>
       </div>
 
-      {/* Update form */}
-      <form action={updateTicket} className="space-y-4">
-        <input type="hidden" name="id" value={ticket.id} />
-
+      <form onSubmit={handleSave} className="space-y-4">
         <div>
           <label className="block text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-wider mb-1.5">Status</label>
           <select
-            name="status"
             value={status}
             onChange={e => setStatus(e.target.value)}
             className="w-full bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-orange)] transition-colors"
@@ -69,7 +70,6 @@ export default function TicketDetail({
         <div>
           <label className="block text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-wider mb-1.5">Nota interna</label>
           <textarea
-            name="admin_note"
             rows={3}
             value={note}
             onChange={e => setNote(e.target.value)}
@@ -79,10 +79,11 @@ export default function TicketDetail({
         </div>
 
         <button
-          type="submit"
-          className="w-full bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-semibold rounded-lg py-2 text-sm transition-colors"
+          type="submit" disabled={loading}
+          className="w-full flex items-center justify-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] disabled:opacity-50 text-white font-semibold rounded-lg py-2 text-sm transition-colors"
         >
-          Salvar
+          {loading ? <Loader2 size={14} className="animate-spin" /> : saved ? <CheckCircle2 size={14} /> : null}
+          {loading ? 'Salvando...' : saved ? 'Salvo!' : 'Salvar'}
         </button>
       </form>
     </div>

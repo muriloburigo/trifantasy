@@ -1,26 +1,15 @@
 import { requireAdmin } from '~/lib/auth/require-admin'
 import { createAdminClient } from '~/lib/supabase/server'
 import { MessageCircle, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
-import { revalidatePath } from 'next/cache'
+import Link from 'next/link'
 import TicketDetail from './TicketDetail'
 
 export const revalidate = 0
 
-async function updateTicket(formData: FormData) {
-  'use server'
-  await requireAdmin()
-  const id = formData.get('id') as string
-  const status = formData.get('status') as string
-  const admin_note = formData.get('admin_note') as string
-  const admin = createAdminClient()
-  await admin.from('support_tickets').update({ status, admin_note, updated_at: new Date().toISOString() }).eq('id', id)
-  revalidatePath('/admin/suporte')
-}
-
 const STATUS_LABEL: Record<string, { label: string; color: string; icon: typeof Clock }> = {
-  open:        { label: 'Aberto',      color: 'text-yellow-400 bg-yellow-900/20 border-yellow-800/30', icon: AlertCircle },
-  in_progress: { label: 'Em andamento', color: 'text-blue-400 bg-blue-900/20 border-blue-800/30',     icon: Clock },
-  closed:      { label: 'Resolvido',   color: 'text-green-400 bg-green-900/20 border-green-800/30',   icon: CheckCircle2 },
+  open:        { label: 'Aberto',       color: 'text-yellow-400 bg-yellow-900/20 border-yellow-800/30', icon: AlertCircle },
+  in_progress: { label: 'Em andamento', color: 'text-blue-400 bg-blue-900/20 border-blue-800/30',      icon: Clock },
+  closed:      { label: 'Resolvido',    color: 'text-green-400 bg-green-900/20 border-green-800/30',   icon: CheckCircle2 },
 }
 
 export default async function AdminSuportePage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
@@ -34,11 +23,10 @@ export default async function AdminSuportePage({ searchParams }: { searchParams:
     .order('created_at', { ascending: false })
 
   const all = tickets ?? []
-  const openCount = all.filter(t => t.status === 'open').length
+  const openCount       = all.filter(t => t.status === 'open').length
   const inProgressCount = all.filter(t => t.status === 'in_progress').length
-  const closedCount = all.filter(t => t.status === 'closed').length
-
-  const selected = selectedId ? all.find(t => t.id === selectedId) : null
+  const closedCount     = all.filter(t => t.status === 'closed').length
+  const selected        = selectedId ? all.find(t => t.id === selectedId) ?? null : null
 
   return (
     <div className="p-8 max-w-6xl space-y-6">
@@ -53,9 +41,9 @@ export default async function AdminSuportePage({ searchParams }: { searchParams:
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Abertos',       value: openCount,       color: 'text-yellow-400' },
-          { label: 'Em andamento',  value: inProgressCount, color: 'text-blue-400' },
-          { label: 'Resolvidos',    value: closedCount,     color: 'text-green-400' },
+          { label: 'Abertos',      value: openCount,       color: 'text-yellow-400' },
+          { label: 'Em andamento', value: inProgressCount, color: 'text-blue-400' },
+          { label: 'Resolvidos',   value: closedCount,     color: 'text-green-400' },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4 text-center">
             <p className={`text-2xl font-black ${color}`}>{value}</p>
@@ -79,7 +67,7 @@ export default async function AdminSuportePage({ searchParams }: { searchParams:
                 const Icon = s.icon
                 const isSelected = ticket.id === selectedId
                 return (
-                  <a
+                  <Link
                     key={ticket.id}
                     href={`/admin/suporte?id=${ticket.id}`}
                     className={`flex items-start gap-4 px-5 py-4 hover:bg-[var(--color-navy-elevated)] transition-colors ${isSelected ? 'bg-[var(--color-navy-elevated)]' : ''}`}
@@ -95,7 +83,7 @@ export default async function AdminSuportePage({ searchParams }: { searchParams:
                     <p className="text-[10px] text-[var(--color-muted)] shrink-0 mt-1">
                       {new Date(ticket.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                     </p>
-                  </a>
+                  </Link>
                 )
               })}
             </div>
@@ -103,9 +91,7 @@ export default async function AdminSuportePage({ searchParams }: { searchParams:
         </div>
 
         {/* Detail panel */}
-        {selected && (
-          <TicketDetail ticket={selected} updateTicket={updateTicket} statusLabel={STATUS_LABEL} />
-        )}
+        {selected && <TicketDetail ticket={selected} />}
       </div>
     </div>
   )
