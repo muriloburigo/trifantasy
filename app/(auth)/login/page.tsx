@@ -1,11 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '~/lib/supabase/client'
 import { useTranslations } from 'next-intl'
 import LocaleSwitcher from '~/app/components/LocaleSwitcher'
-import { Turnstile } from '@marsidev/react-turnstile'
 import { ShieldCheck } from 'lucide-react'
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''
@@ -18,6 +17,24 @@ export default function LoginPage() {
   const [captchaToken, setCaptchaToken] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const turnstileRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY || !turnstileRef.current) return
+    const script = document.createElement('script')
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+    script.async = true
+    script.onload = () => {
+      ;(window as any).turnstile?.render(turnstileRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token: string) => setCaptchaToken(token),
+        'expired-callback': () => setCaptchaToken(''),
+        'error-callback': () => setCaptchaToken(''),
+      })
+    }
+    document.head.appendChild(script)
+    return () => { document.head.removeChild(script) }
+  }, [])
 
   // MFA challenge state
   const [mfaRequired, setMfaRequired] = useState(false)
@@ -163,12 +180,7 @@ export default function LoginPage() {
 
           {TURNSTILE_SITE_KEY && (
             <div className="flex justify-center">
-              <Turnstile
-                siteKey={TURNSTILE_SITE_KEY}
-                onSuccess={setCaptchaToken}
-                onError={() => setCaptchaToken('')}
-                onExpire={() => setCaptchaToken('')}
-              />
+              <div ref={turnstileRef} />
             </div>
           )}
 
