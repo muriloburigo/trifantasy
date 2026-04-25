@@ -42,7 +42,12 @@ export default async function PublicShell({ children }: { children: React.ReactN
           <div className="flex items-center gap-2">
             {user && <PushNotificationManager />}
             <MobileMenu />
-            <UserMenu user={user} wallet={wallet} />
+            <UserMenu 
+              user={user} 
+              wallet={wallet} 
+              name={profileData?.name} 
+              photoUrl={profileData?.photo_url} 
+            />
           </div>
         </div>
       </header>
