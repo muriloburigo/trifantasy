@@ -99,3 +99,39 @@ export async function removeRaceAthlete(raceAthleteId: string) {
   await supabase.from('race_athletes').delete().eq('id', raceAthleteId)
   revalidatePath('/admin/atletas')
 }
+
+/** Update athlete global data */
+export async function updateAthlete(athleteId: string, formData: FormData) {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  const updates: Record<string, unknown> = {}
+
+  const name = (formData.get('name') as string)?.trim()
+  if (name) updates.name = normalizeName(name)
+
+  const gender = formData.get('gender') as string
+  if (gender) updates.gender = gender
+
+  const country = (formData.get('country') as string | null) ?? ''
+  updates.country = country || null
+
+  const country_code = ((formData.get('country_code') as string) ?? '').trim().toUpperCase()
+  updates.country_code = country_code || null
+
+  const pto_rank_raw = formData.get('pto_rank')
+  updates.pto_rank = pto_rank_raw && String(pto_rank_raw).trim() ? Number(pto_rank_raw) : null
+
+  const price_raw = formData.get('current_price')
+  if (price_raw && String(price_raw).trim()) updates.current_price = Number(price_raw)
+
+  const photo_url = (formData.get('photo_url') as string | null) ?? ''
+  updates.photo_url = photo_url || null
+
+  const { error } = await supabase.from('athletes').update(updates).eq('id', athleteId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/admin/atletas')
+  revalidatePath('/admin/mercado')
+  return { success: true }
+}

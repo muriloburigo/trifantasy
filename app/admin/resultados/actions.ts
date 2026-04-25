@@ -108,3 +108,50 @@ export async function bulkImportResults(raceId: string, json: string) {
   revalidatePath('/admin/resultados')
   return { success: true, inserted, errors }
 }
+
+export async function deleteResult(raceId: string, athleteId: string) {
+  await requireAdmin()
+  const supabase = createAdminClient()
+  await supabase.from('results').delete().eq('race_id', raceId).eq('athlete_id', athleteId)
+  revalidatePath('/admin/resultados')
+  return { success: true }
+}
+
+export async function upsertResultData(data: {
+  raceId: string
+  athleteId: string
+  proPos?: number | null
+  swimTime?: number | null
+  bikeTime?: number | null
+  runTime?: number | null
+  finishTime?: number | null
+  dnf?: boolean
+  dns?: boolean
+}) {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  const { error } = await supabase.from('results').upsert(
+    {
+      race_id: data.raceId,
+      athlete_id: data.athleteId,
+      pro_pos: data.proPos ?? null,
+      swim_time: data.swimTime ?? null,
+      bike_time: data.bikeTime ?? null,
+      run_time: data.runTime ?? null,
+      finish_time: data.finishTime ?? null,
+      overall_pos: null,
+      ag_pos: null,
+      t1_time: null,
+      t2_time: null,
+      dnf: data.dnf ?? false,
+      dns: data.dns ?? false,
+      kona_slot: false,
+    },
+    { onConflict: 'race_id,athlete_id' }
+  )
+
+  if (error) return { error: error.message }
+  revalidatePath('/admin/resultados')
+  return { success: true }
+}
