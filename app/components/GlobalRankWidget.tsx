@@ -15,7 +15,7 @@ export default function GlobalRankWidget({
   entries,
   currentUserId,
 }: {
-  entries: { name: string; total: number; raceCount: number; userId: string }[]
+  entries: { name: string; total: number; raceCount: number; userId: string; photoUrl: string | null }[]
   currentUserId?: string | null
 }) {
   const t = useTranslations('home')
@@ -50,12 +50,16 @@ export default function GlobalRankWidget({
               {globalPos === 0 ? '🥇' : globalPos === 1 ? '🥈' : globalPos === 2 ? '🥉'
                 : <span className="text-sm text-[var(--color-muted)] font-bold">{globalPos + 1}</span>}
             </span>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 overflow-hidden border border-white/5 ${
               globalPos < 3
                 ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)] text-white'
                 : 'bg-[var(--color-navy-elevated)] text-[var(--color-muted)]'
             }`}>
-              {initials(e.name)}
+              {e.photoUrl ? (
+                <img src={e.photoUrl} alt={e.name} className="w-full h-full object-cover" />
+              ) : (
+                initials(e.name)
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">

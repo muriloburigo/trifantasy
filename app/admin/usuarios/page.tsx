@@ -55,8 +55,14 @@ export default async function AdminUsersPage() {
               <tr key={u.id} className="hover:bg-white/5 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)] flex items-center justify-center text-[10px] font-black text-white">
-                      {u.name?.charAt(0).toUpperCase() || '?'}
+                    <div className={`w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-black text-white shrink-0 border border-white/5 ${
+                      !u.photo_url ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)]' : ''
+                    }`}>
+                      {u.photo_url ? (
+                        <img src={u.photo_url} alt={u.name} className="w-full h-full object-cover" />
+                      ) : (
+                        u.name?.charAt(0).toUpperCase() || '?'
+                      )}
                     </div>
                     <div>
                       <p className="font-bold text-white leading-tight">{u.name || 'Sem nome'}</p>
