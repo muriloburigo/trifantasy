@@ -497,7 +497,7 @@
     "send": "Send message",
     "sending": "Sending...",
     "successTitle": "Message sent!",
-    "successDesc": "We received your message and will get back to you shortly at {email}.",
+    "successDesc": "We received your message and will get back to you shortly at:",
     "backHome": "Back to home",
     "errorSubject": "Please select a subject.",
     "errorMinLength": "Please describe your issue with at least 20 characters.",

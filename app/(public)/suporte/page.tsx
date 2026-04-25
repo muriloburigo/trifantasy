@@ -60,7 +60,7 @@ export default function SuportePage() {
         </div>
         <h1 className="text-2xl font-bold mb-2">{t('successTitle')}</h1>
         <p className="text-[var(--color-muted)] text-sm mb-8 leading-relaxed">
-          {t('successDesc', { email: <strong key="email">{email}</strong> })}
+          {t('successDesc')} <strong>{email}</strong>
         </p>
         <Link href="/" className="text-[var(--color-orange)] font-semibold hover:underline">
           {t('backHome')}

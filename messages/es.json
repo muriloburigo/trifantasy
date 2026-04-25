@@ -494,7 +494,7 @@
     "send": "Enviar mensaje",
     "sending": "Enviando...",
     "successTitle": "¡Mensaje enviado!",
-    "successDesc": "Recibimos tu mensaje y te responderemos pronto al correo {email}.",
+    "successDesc": "Recibimos tu mensaje y te responderemos pronto al correo:",
     "backHome": "Volver al inicio",
     "errorSubject": "Selecciona un asunto.",
     "errorMinLength": "Describe tu problema con al menos 20 caracteres.",
