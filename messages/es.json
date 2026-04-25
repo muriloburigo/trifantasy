@@ -480,5 +480,32 @@
     "title": "Seguridad",
     "subtitle": "Gestiona la seguridad de tu cuenta.",
     "back": "Volver"
+  },
+  "support": {
+    "title": "Soporte",
+    "subtitle": "¿Tienes alguna duda o problema? Completa el formulario y te contactaremos.",
+    "nameLabel": "Nombre",
+    "namePlaceholder": "Tu nombre",
+    "subjectLabel": "Asunto",
+    "subjectPlaceholder": "Selecciona un asunto...",
+    "messageLabel": "Mensaje",
+    "messagePlaceholder": "Describe tu duda o problema con el mayor detalle posible...",
+    "messageChars": "caracteres",
+    "send": "Enviar mensaje",
+    "sending": "Enviando...",
+    "successTitle": "¡Mensaje enviado!",
+    "successDesc": "Recibimos tu mensaje y te responderemos pronto al correo {email}.",
+    "backHome": "Volver al inicio",
+    "errorSubject": "Selecciona un asunto.",
+    "errorMinLength": "Describe tu problema con al menos 20 caracteres.",
+    "errorSend": "Error al enviar. Inténtalo de nuevo.",
+    "subjects": [
+      "Pregunta sobre las reglas",
+      "Problema con mi equipo",
+      "Problema con la puntuación",
+      "Sugerencia de mejora",
+      "Error o bug en el sitio",
+      "Otro"
+    ]
   }
 }
