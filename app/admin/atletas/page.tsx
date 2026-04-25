@@ -62,7 +62,7 @@ export default async function AdminAtletasPage({
       .select('id, bib, price, athlete:athletes(id, name, gender, type, age_group, country, pto_rank)')
       .eq('race_id', selectedRaceId)
       .order('price', { ascending: false })
-    raceAthletes = (data ?? []) as RaceAthleteRow[]
+    raceAthletes = (data ?? []) as any[]
   }
 
   const returnUrl = `/admin/atletas?race_id=${selectedRaceId}`
