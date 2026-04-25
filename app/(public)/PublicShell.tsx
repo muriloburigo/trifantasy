@@ -15,7 +15,7 @@ export default async function PublicShell({ children }: { children: React.ReactN
 
   let profileData = null
   if (user) {
-    const { data } = await supabase.from('profiles').select('wallet, has_seen_tour, name').eq('id', user.id).single()
+    const { data } = await supabase.from('profiles').select('wallet, has_seen_tour, name, photo_url').eq('id', user.id).single()
     profileData = data
   }
 
