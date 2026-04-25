@@ -11,6 +11,7 @@ export default async function PublicShell({ children }: { children: React.ReactN
   const { data: { user } } = await supabase.auth.getUser()
   const t = await getTranslations('nav')
   const tHome = await getTranslations('home')
+  const tFooter = await getTranslations('footer')
 
   let profileData = null
   if (user) {
@@ -55,9 +56,9 @@ export default async function PublicShell({ children }: { children: React.ReactN
             <span className="ml-2">— {tHome('tagline')}</span>
           </span>
           <div className="flex items-center gap-4">
-            <Link href="/regras" className="hover:text-white transition-colors">Regras</Link>
-            <Link href="/suporte" className="hover:text-white transition-colors">Suporte</Link>
-            <span>Não afiliado ao Ironman/WTC. Apenas para fins recreativos.</span>
+            <Link href="/regras" className="hover:text-white transition-colors">{tFooter('rules')}</Link>
+            <Link href="/suporte" className="hover:text-white transition-colors">{tFooter('support')}</Link>
+            <span>{tFooter('disclaimer')}</span>
           </div>
         </div>
       </footer>
