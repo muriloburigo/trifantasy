@@ -8,7 +8,14 @@ import { ChevronDown, LogOut, User as UserIcon, Wallet, Users, ShieldCheck, Play
 import LocaleSwitcher from '~/app/components/LocaleSwitcher'
 import { useTranslations } from 'next-intl'
 
-export default function UserMenu({ user, wallet }: { user: User | null; wallet?: number | null }) {
+export default function UserMenu({ 
+  user, wallet, name: propName, photoUrl 
+}: { 
+  user: User | null; 
+  wallet?: number | null;
+  name?: string | null;
+  photoUrl?: string | null;
+}) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const t = useTranslations('nav')
@@ -35,7 +42,7 @@ export default function UserMenu({ user, wallet }: { user: User | null; wallet?:
     )
   }
 
-  const name = user.user_metadata?.name ?? user.email?.split('@')[0]
+  const displayName = propName || user.user_metadata?.name || user.email?.split('@')[0]
 
   return (
     <div className="relative">
@@ -43,27 +50,41 @@ export default function UserMenu({ user, wallet }: { user: User | null; wallet?:
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 text-sm hover:text-[var(--color-orange)] transition-colors"
       >
-        <div className="w-7 h-7 rounded-full bg-[var(--color-orange-dim)] border border-[var(--color-orange)]/30 flex items-center justify-center">
-          <UserIcon size={14} className="text-[var(--color-orange)]" />
+        <div className="w-8 h-8 rounded-full bg-[var(--color-orange-dim)] border border-[var(--color-orange)]/30 flex items-center justify-center overflow-hidden shrink-0">
+          {photoUrl ? (
+            <img src={photoUrl} alt={displayName} className="w-full h-full object-cover" />
+          ) : (
+            <UserIcon size={15} className="text-[var(--color-orange)]" />
+          )}
         </div>
         <div className="hidden md:flex flex-col items-start leading-none">
-          <span className="max-w-[100px] truncate text-xs">{name}</span>
+          <span className="max-w-[100px] truncate text-xs font-bold">{displayName}</span>
           {wallet != null && <span className="text-[10px] text-[var(--color-orange)] font-bold">T${wallet.toFixed(0)}</span>}
         </div>
-        <ChevronDown size={14} />
+        <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-10 z-20 w-44 bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-xl shadow-xl py-1">
+          <div className="absolute right-0 top-11 z-20 w-48 bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-2xl shadow-2xl py-1 animate-in fade-in zoom-in-95 duration-100">
             <div className="px-4 py-2 border-b border-[var(--color-navy-border)]">
               <LocaleSwitcher />
             </div>
+            
+            <Link
+              href="/perfil"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors"
+            >
+              <UserIcon size={14} className="text-[var(--color-muted)]" />
+              <span>Meu Perfil</span>
+            </Link>
+
             <Link
               href="/elenco"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--color-navy-border)]/40 transition-colors"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors"
             >
               <Wallet size={14} className="text-[var(--color-orange)]" />
               <span>{t('team')}</span>
