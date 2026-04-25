@@ -510,5 +510,10 @@
       "Erro ou bug no site",
       "Outro"
     ]
+  },
+  "footer": {
+    "rules": "Regras",
+    "support": "Suporte",
+    "disclaimer": "Não afiliado ao Ironman/WTC. Apenas para fins recreativos."
   }
 }
