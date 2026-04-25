@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createClient, createAdminClient } from '~/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { LayoutDashboard, Flag, Users, FileText, BarChart2, TrendingUp, BookOpen, Bell, LogOut, MessageCircle, Download } from 'lucide-react'
+import { LayoutDashboard, Flag, Users, FileText, BarChart2, TrendingUp, BookOpen, Bell, LogOut, MessageCircle, Download, Zap } from 'lucide-react'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -21,7 +21,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: '/admin/importar',   label: 'Importar',   icon: Download },
     { href: '/admin/pontuacao', label: 'Pontuação', icon: BarChart2 },
     { href: '/admin/mercado',   label: 'Mercado',   icon: TrendingUp },
-    { href: '/admin/regras',         label: 'Regras',         icon: BookOpen },
+    { href: '/admin/skills',          label: 'Skills',         icon: Zap },
+    { href: '/admin/regras',          label: 'Regras',         icon: BookOpen },
     { href: '/admin/notificacoes',   label: 'Notificações',   icon: Bell },
     { href: '/admin/suporte',        label: 'Suporte',        icon: MessageCircle },
   ]

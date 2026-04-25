@@ -183,7 +183,7 @@ export default async function HomePage() {
         if (!members?.length) return { data: [] }
         const userIds = members.map((m: any) => m.user_id)
         const [{ data: profiles }, { data: teams }] = await Promise.all([
-          admin.from('profiles').select('id, name').in('id', userIds),
+          admin.from('profiles').select('id, name, photo_url').in('id', userIds),
           admin.from('teams').select('id, user_id, scores(total_points)').in('user_id', userIds),
         ])
         return { data: { members, profiles, teams } }
@@ -203,17 +203,19 @@ export default async function HomePage() {
 
   // Transform globalRankRaw into a sorted list of scores
   const globalRankData = globalRankRaw as any
-  const globalRank: { name: string; total: number; raceCount: number; userId: string }[] = (() => {
+  const globalRank: { name: string; total: number; raceCount: number; userId: string; photoUrl: string | null }[] = (() => {
     if (!globalRankData?.members) return []
-    const profileMap = new Map((globalRankData.profiles ?? []).map((p: any) => [p.id, p.name]))
+    const profileMap = new Map((globalRankData.profiles ?? []).map((p: any) => [p.id, { name: p.name, photoUrl: p.photo_url }]))
     const teamMap = new Map((globalRankData.teams ?? []).map((t: any) => [t.user_id, t]))
     return (globalRankData.members as any[]).map((m: any) => {
       const team = teamMap.get(m.user_id) as any
       const scores = team?.scores ?? []
       const total = scores.reduce((acc: number, s: any) => acc + Number(s.total_points ?? 0), 0)
+      const p = profileMap.get(m.user_id) as any
       return {
         userId: m.user_id,
-        name: (profileMap.get(m.user_id) as string) ?? 'Trixer',
+        name: p?.name ?? 'Trixer',
+        photoUrl: p?.photoUrl ?? null,
         total,
         raceCount: scores.length,
       }
