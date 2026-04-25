@@ -25,11 +25,12 @@ export async function getMarketStatus(supabase: SupabaseClient): Promise<MarketS
 
   const race = races[0]
 
-  // Race date at midnight UTC
-  const raceDate = new Date(race.date + 'T00:00:00Z')
+  // Race start is assumed at 23:00 UTC (= 20:00 BRT / 08:00 AEST) on race day.
+  // Market locks 24h before that, i.e. 23:00 UTC the day before.
+  const raceDate = new Date(race.date + 'T23:00:00Z')
   const hoursUntil = (raceDate.getTime() - now.getTime()) / (1000 * 60 * 60)
 
-  // Lock if race status is 'locked' OR within 24h
+  // Lock if race status is 'locked' OR within 24h of race start
   if (race.status === 'locked' || hoursUntil <= 24) {
     return {
       locked: true,
@@ -43,7 +44,7 @@ export async function getMarketStatus(supabase: SupabaseClient): Promise<MarketS
 
 export function formatHoursUntil(dateStr: string): string {
   const now = new Date()
-  const raceDate = new Date(dateStr + 'T00:00:00Z')
+  const raceDate = new Date(dateStr + 'T23:00:00Z')
   const h = Math.round((raceDate.getTime() - now.getTime()) / (1000 * 60 * 60))
   if (h <= 0) return 'Em andamento'
   if (h < 24) return `${h}h`
