@@ -89,7 +89,7 @@ export default function UserMenu({ user, wallet }: { user: User | null; wallet?:
               onClick={async () => {
                 setOpen(false)
                 await fetch('/api/tour/reset', { method: 'POST' })
-                router.refresh()
+                window.location.href = '/'
               }}
               className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--color-navy-border)]/40 transition-colors"
             >
