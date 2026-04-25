@@ -400,7 +400,7 @@
     "s5li3": "Você pode trocar atletas do elenco sempre que o mercado estiver aberto.",
     "s5example": "Seu elenco tem 5 atletas. 3 deles estão no IRONMAN Texas. No dia da prova, esses 3 pontuam para você. Se quiser trocar os outros 2, deve fazer antes do mercado fechar.",
     "s6Title": "Pontuação (Trix Score)",
-    "s6p1": "A pontuação é calculada pela posição no campo profissional (PRO) da prova.",
+    "s6p1": "A pontuação é calculada pela posição no campo profissional (PRO) da prova:",
     "s6bonus": "+6 pts para o segmento mais rápido (natação, bike ou corrida) entre todos os PROs.",
     "s7Title": "Trix Leagues",
     "s7p1": "Dispute com amigos quem tem o melhor elenco acumulado ou em provas específicas.",
@@ -414,7 +414,18 @@
     "s9Title": "Observações Gerais",
     "s9li1": "O Trixer é um jogo recreativo — sem premiação em dinheiro.",
     "s9li2": "Não somos afiliados ao Ironman/WTC nem a qualquer organização de triathlon.",
-    "s9li3": "Resultados são inseridos manualmente — pode haver atraso após a prova."
+    "s9li3": "Resultados são inseridos manualmente — pode haver atraso após a prova.",
+    "s6tablePos": "Posição",
+    "s6tablePts": "Pontos",
+    "s6row1": "1º lugar",
+    "s6row2": "2º lugar",
+    "s6row3": "3º lugar",
+    "s6row4": "4º lugar",
+    "s6row5": "5º lugar",
+    "s6row6": "6º – 10º",
+    "s6row7": "11º – 20º",
+    "s6row8": "21º+",
+    "s6row9": "DNF / DNS"
   },
   "privacy": {
     "title": "Política de Privacidade",

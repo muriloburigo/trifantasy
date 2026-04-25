@@ -113,7 +113,21 @@ export default async function RegrasPage() {
 
         <Section n="6" title={t('s6Title')}>
           <p>{t('s6p1')}</p>
-          <p className="font-bold text-white mt-2">{t('s6bonus')}</p>
+          <div className="grid grid-cols-2 gap-4 max-w-xs my-2">
+            <div className="bg-[var(--color-navy-elevated)] p-3 rounded-xl border border-[var(--color-navy-border)]">
+              <p className="text-[10px] uppercase font-bold text-[var(--color-muted)] mb-1">{t('s6tablePos')}</p>
+              {[t('s6row1'),t('s6row2'),t('s6row3'),t('s6row4'),t('s6row5'),t('s6row6'),t('s6row7'),t('s6row8'),t('s6row9')].map(r => (
+                <p key={r} className="text-sm text-white">{r}</p>
+              ))}
+            </div>
+            <div className="bg-[var(--color-navy-elevated)] p-3 rounded-xl border border-[var(--color-navy-border)] text-right">
+              <p className="text-[10px] uppercase font-bold text-[var(--color-muted)] mb-1">{t('s6tablePts')}</p>
+              {[['50','orange'],['40','orange'],['33','orange'],['27','orange'],['22','orange'],['15','orange'],['8','white'],['3','white'],['0','muted']].map(([pts, color]) => (
+                <p key={pts+color} className={`text-sm font-black ${color === 'orange' ? 'text-[var(--color-orange)]' : color === 'white' ? 'text-white' : 'text-[var(--color-muted)]'}`}>{pts}</p>
+              ))}
+            </div>
+          </div>
+          <p className="font-bold text-white mt-1">{t('s6bonus')}</p>
         </Section>
 
         <Section n="7" title={t('s7Title')}>
