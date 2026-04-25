@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '~/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
-import { ChevronDown, LogOut, User as UserIcon, BarChart2, Wallet, Users, ShieldCheck } from 'lucide-react'
+import { ChevronDown, LogOut, User as UserIcon, Wallet, Users, ShieldCheck, PlayCircle } from 'lucide-react'
 import LocaleSwitcher from '~/app/components/LocaleSwitcher'
 import { useTranslations } from 'next-intl'
 
@@ -83,8 +83,19 @@ export default function UserMenu({ user, wallet }: { user: User | null; wallet?:
               className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--color-navy-border)]/40 transition-colors"
             >
               <ShieldCheck size={14} className="text-[var(--color-muted)]" />
-              Segurança
+              {t('security')}
             </Link>
+            <button
+              onClick={async () => {
+                setOpen(false)
+                await fetch('/api/tour/reset', { method: 'POST' })
+                router.refresh()
+              }}
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--color-navy-border)]/40 transition-colors"
+            >
+              <PlayCircle size={14} className="text-[var(--color-muted)]" />
+              {t('tour')}
+            </button>
             <hr className="border-[var(--color-navy-border)] my-1" />
             <button
               onClick={handleLogout}
