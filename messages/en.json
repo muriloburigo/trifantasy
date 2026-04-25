@@ -483,5 +483,32 @@
     "title": "Security",
     "subtitle": "Manage your account security.",
     "back": "Back"
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Have a question or issue? Fill out the form and we will get back to you.",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your name",
+    "subjectLabel": "Subject",
+    "subjectPlaceholder": "Select a subject...",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Describe your question or issue in as much detail as possible...",
+    "messageChars": "characters",
+    "send": "Send message",
+    "sending": "Sending...",
+    "successTitle": "Message sent!",
+    "successDesc": "We received your message and will get back to you shortly at {email}.",
+    "backHome": "Back to home",
+    "errorSubject": "Please select a subject.",
+    "errorMinLength": "Please describe your issue with at least 20 characters.",
+    "errorSend": "Error sending. Please try again.",
+    "subjects": [
+      "Question about the rules",
+      "Problem with my team",
+      "Problem with scoring",
+      "Improvement suggestion",
+      "Bug or site error",
+      "Other"
+    ]
   }
 }
