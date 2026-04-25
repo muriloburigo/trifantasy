@@ -274,17 +274,17 @@ export default async function HomePage() {
           </div>
 
           {/* Right: stats */}
-          <div className="grid grid-cols-3 gap-3 md:w-64 w-full">
+          <div className="grid grid-cols-3 md:grid-cols-3 gap-2 sm:gap-3 w-full md:w-auto">
             {[
               { label: t('statsAthletes'), value: athleteCount ?? 0, icon: Zap,    color: 'text-[var(--color-orange)]', href: '/atletas' },
               { label: t('statsTrixers'), value: trixerCount ?? 0,  icon: Users,  color: 'text-[var(--color-purple)]', href: '/trixers' },
               { label: t('statsLeagues'),   value: leagueCount ?? 0,  icon: Trophy, color: 'text-yellow-400',            href: '/ligas' },
             ].map(({ label, value, icon: Icon, color, href }) => (
               <Link key={label} href={href}
-                className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/40 rounded-xl p-3 text-center transition-all hover:bg-[var(--color-navy-card)] group">
-                <Icon size={14} className={`mx-auto mb-1 ${color}`} />
-                <p className="text-xl font-black group-hover:text-[var(--color-orange)] transition-colors">{value}</p>
-                <p className="text-[10px] text-[var(--color-muted)] mt-0.5">{label}</p>
+                className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/40 rounded-2xl p-2.5 sm:p-4 text-center transition-all hover:bg-[var(--color-navy-card)] group flex-1">
+                <Icon size={14} className={`mx-auto mb-1.5 ${color}`} />
+                <p className="text-lg sm:text-2xl font-black group-hover:text-[var(--color-orange)] transition-colors leading-none">{value}</p>
+                <p className="text-[9px] sm:text-[10px] text-[var(--color-muted)] uppercase font-bold tracking-widest mt-1.5">{label}</p>
               </Link>
             ))}
           </div>

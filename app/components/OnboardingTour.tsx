@@ -1,8 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { X, ChevronRight, ChevronLeft, Wallet, ShoppingBag, Trophy, Play, TrendingUp } from 'lucide-react'
+import { X, ChevronRight, ChevronLeft, Wallet, ShoppingBag, Trophy, Play } from 'lucide-react'
 import { createClient } from '~/lib/supabase/client'
-import { useTranslations } from 'next-intl'
 
 interface Step {
   title: string
@@ -14,10 +13,8 @@ export default function OnboardingTour({ userName }: { userName: string }) {
   const [isOpen, setIsOpen] = useState(false)
   const [step, setStep] = useState(0)
   const supabase = createClient()
-  const t = useTranslations('tour')
 
   useEffect(() => {
-    // Show tour if it's the first time
     const hasSeen = localStorage.getItem('trixer_tour_seen')
     if (!hasSeen) {
       setIsOpen(true)
@@ -26,28 +23,23 @@ export default function OnboardingTour({ userName }: { userName: string }) {
 
   const steps: Step[] = [
     {
-      title: t('step0Title', { name: userName }),
-      content: t('step0Content'),
+      title: `Bem-vindo, ${userName}!`,
+      content: 'O fantasy game definitivo para amantes de Triathlon. Vamos te mostrar como começar sua jornada.',
       icon: <Play className="text-[var(--color-orange)]" size={32} />,
     },
     {
-      title: t('step1Title'),
-      content: t('step1Content'),
+      title: 'Sua Carteira',
+      content: 'Você começa com T$100. Use esse saldo para comprar seus primeiros atletas PRO no mercado.',
       icon: <Wallet className="text-yellow-400" size={32} />,
     },
     {
-      title: t('step2Title'),
-      content: t('step2Content'),
+      title: 'Monte seu Elenco',
+      content: 'Você deve ter exatamente 5 atletas. Seu elenco atual é seu time para todas as provas.',
       icon: <ShoppingBag className="text-[var(--color-purple)]" size={32} />,
     },
     {
-      title: t('step3Title'),
-      content: t('step3Content'),
-      icon: <TrendingUp className="text-green-400" size={32} />,
-    },
-    {
-      title: t('step4Title'),
-      content: t('step4Content'),
+      title: 'Ligas e Ranking',
+      content: 'Você já está na Liga Global! Pontue nas provas reais e dispute com outros Trixers.',
       icon: <Trophy className="text-amber-500" size={32} />,
     },
   ]
@@ -55,8 +47,6 @@ export default function OnboardingTour({ userName }: { userName: string }) {
   async function handleFinish() {
     localStorage.setItem('trixer_tour_seen', 'true')
     setIsOpen(false)
-
-    // Update DB flag
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       await supabase.from('profiles').update({ has_seen_tour: true }).eq('id', user.id)
@@ -64,66 +54,42 @@ export default function OnboardingTour({ userName }: { userName: string }) {
   }
 
   if (!isOpen) return null
-
   const currentStep = steps[step]
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
-        {/* Progress bar */}
-        <div className="flex h-1.5 w-full bg-[var(--color-navy-elevated)]">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm">
+      <div className="w-full max-w-sm sm:max-w-md bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-[2rem] sm:rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300 relative">
+        <div className="flex h-1 w-full bg-[var(--color-navy-elevated)]">
           {steps.map((_, i) => (
-            <div
-              key={i}
-              className={`flex-1 transition-all duration-500 ${i <= step ? 'bg-gradient-to-r from-[var(--color-orange)] to-[var(--color-purple)]' : ''}`}
-            />
+            <div key={i} className={`flex-1 transition-all duration-500 ${i <= step ? 'bg-gradient-to-r from-[var(--color-orange)] to-[var(--color-purple)]' : ''}`} />
           ))}
         </div>
 
-        <div className="p-8 text-center">
-          <div className="w-20 h-20 bg-[var(--color-navy-elevated)] rounded-2xl flex items-center justify-center mx-auto mb-6 border border-[var(--color-navy-border)]">
+        <div className="p-6 sm:p-8 text-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[var(--color-navy-elevated)] rounded-2xl flex items-center justify-center mx-auto mb-5 sm:mb-6 border border-[var(--color-navy-border)]">
             {currentStep.icon}
           </div>
-
-          <h2 className="text-2xl font-black mb-3" style={{ fontFamily: 'var(--font-sora)' }}>
-            {currentStep.title}
-          </h2>
-
-          <p className="text-[var(--color-muted)] leading-relaxed mb-8">
-            {currentStep.content}
-          </p>
+          <h2 className="text-xl sm:text-2xl font-black mb-3 leading-tight" style={{ fontFamily: 'var(--font-sora)' }}>{currentStep.title}</h2>
+          <p className="text-sm sm:text-base text-[var(--color-muted)] leading-relaxed mb-6 sm:mb-8">{currentStep.content}</p>
 
           <div className="flex items-center justify-between gap-4">
-            <button
-              onClick={() => step > 0 && setStep(step - 1)}
-              className={`text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] hover:text-white transition-colors ${step === 0 ? 'invisible' : ''}`}
-            >
-              <ChevronLeft size={16} className="inline mr-1" /> {t('back')}
+            <button onClick={() => step > 0 && setStep(step - 1)} className={`text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] hover:text-white transition-colors ${step === 0 ? 'invisible' : ''}`}>
+              <ChevronLeft size={14} className="inline mr-1" /> Voltar
             </button>
-
             {step < steps.length - 1 ? (
-              <button
-                onClick={() => setStep(step + 1)}
-                className="bg-white text-black px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-[var(--color-orange)] hover:text-white transition-all flex items-center gap-2"
-              >
-                {t('next')} <ChevronRight size={16} />
+              <button onClick={() => setStep(step + 1)} className="bg-white text-black px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold hover:bg-[var(--color-orange)] hover:text-white transition-all flex items-center gap-2">
+                Próximo <ChevronRight size={14} />
               </button>
             ) : (
-              <button
-                onClick={handleFinish}
-                className="bg-[var(--color-orange)] text-white px-8 py-2.5 rounded-xl text-sm font-bold hover:bg-[var(--color-orange-light)] transition-all animate-bounce"
-              >
-                {t('start')}
+              <button onClick={handleFinish} className="bg-[var(--color-orange)] text-white px-6 sm:px-8 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold hover:bg-[var(--color-orange-light)] transition-all">
+                Começar a Jogar!
               </button>
             )}
           </div>
         </div>
 
-        <button
-          onClick={handleFinish}
-          className="absolute top-6 right-6 text-[var(--color-muted)] hover:text-white transition-colors"
-        >
-          <X size={20} />
+        <button onClick={handleFinish} className="absolute top-4 right-4 sm:top-6 sm:right-6 text-[var(--color-muted)] hover:text-white transition-colors">
+          <X size={18} />
         </button>
       </div>
     </div>
