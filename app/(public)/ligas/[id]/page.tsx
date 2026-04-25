@@ -6,6 +6,7 @@ import { Trophy, Users, Medal, Globe, Lock, Share2 } from 'lucide-react'
 import CopyButton from './CopyButton'
 import AddMemberForm from './AddMemberForm'
 import BackLink from '~/app/components/BackLink'
+import WhatsAppShare from '~/app/components/WhatsAppShare'
 import { getTranslations } from 'next-intl/server'
 
 export const dynamic = 'force-dynamic'
@@ -59,7 +60,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
 
   if (!isMember && !league.is_public) redirect('/ligas')
 
-  // Fetch all members using admin (user_id → auth.users, not profiles, so join separately)
+  // Fetch all members using admin
   const { data: membersRaw } = await admin
     .from('league_members')
     .select('user_id, joined_at')
@@ -67,7 +68,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
 
   const memberUserIds = (membersRaw ?? []).map((m: any) => m.user_id)
   const { data: memberProfiles } = memberUserIds.length > 0
-    ? await admin.from('profiles').select('id, name').in('id', memberUserIds)
+    ? await admin.from('profiles').select('id, name, photo_url').in('id', memberUserIds)
     : { data: [] }
   const profileMap = new Map((memberProfiles ?? []).map((p: any) => [p.id, p]))
 
@@ -140,7 +141,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
               : <Lock size={13} className="text-[var(--color-muted)]" />}
             <span className="text-xs text-[var(--color-muted)]">{league.is_public ? t('public') : t('private')}</span>
           </div>
-          <h1 className="text-2xl font-bold">{league.name}</h1>
+          <h1 className="text-2xl font-bold">{league.is_global ? t('globalLeagueName') : league.name}</h1>
           <p className="text-sm text-[var(--color-muted)] mt-0.5 flex items-center gap-1">
             <Users size={12} />{ranked.length !== 1 ? t('participantsPlural', { n: ranked.length }) : t('participants', { n: ranked.length })}
           </p>
@@ -152,6 +153,11 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
           </div>
           <div className="flex items-center gap-1">
             <CopyButton code={league.invite_code} />
+            <WhatsAppShare 
+              text={`Entre na minha liga "${league.name}" no Trixer! Use o código de convite: ${league.invite_code}`}
+              label=""
+              variant="ghost"
+            />
           </div>
         </div>
       </div>
@@ -182,6 +188,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
           <div className="divide-y divide-[var(--color-navy-border)]">
             {ranked.map((member: any, i: number) => {
               const isMe = member.user_id === user.id
+              const p = member.profile
               return (
                 <div
                   key={member.user_id}
@@ -195,9 +202,20 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
                       : <span className="text-sm text-[var(--color-muted)] font-bold">{i + 1}</span>}
                   </div>
 
+                  {/* Avatar */}
+                  <div className={`w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-black text-white shrink-0 border border-white/5 ${
+                    !p?.photo_url ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)]' : ''
+                  }`}>
+                    {p?.photo_url ? (
+                      <img src={p.photo_url} alt={p.name} className="w-full h-full object-cover" />
+                    ) : (
+                      p?.name?.charAt(0).toUpperCase() || '?'
+                    )}
+                  </div>
+
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-xs sm:text-sm truncate leading-tight">
-                      {member.profile?.name ?? 'Usuário'}
+                      {p?.name ?? 'Usuário'}
                       {isMe && <span className="text-[var(--color-orange)] ml-1 text-[10px]">{t('youLabel')}</span>}
                     </p>
                     <p className="text-[10px] text-[var(--color-muted)] mt-0.5 uppercase tracking-tighter">
