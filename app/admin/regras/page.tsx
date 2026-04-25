@@ -65,16 +65,26 @@ export default async function AdminRegrasPage() {
             </div>
 
             <div className="px-4 py-3">
-              <p className="text-xs font-bold text-white mb-1">Variação pós-prova (price_change)</p>
-              <ul className="text-xs text-[var(--color-muted)] space-y-1 list-disc list-inside">
-                <li>1º lugar PRO/FPRO: <span className="text-[var(--color-success)] font-semibold">+T$5</span></li>
-                <li>2º lugar: <span className="text-[var(--color-success)] font-semibold">+T$3</span></li>
-                <li>3º lugar: <span className="text-[var(--color-success)] font-semibold">+T$2</span></li>
-                <li>DNF/DNS ou desempenho ruim: definir manualmente no script de insert-results ou via admin/mercado</li>
-              </ul>
-              <p className="text-[11px] text-[var(--color-muted)] mt-2 italic">
-                Script: scripts/insert-texas-results.mjs como referência. Para re-precificar tudo pelo ranking PTO: scripts/reprice-athletes.mjs
-              </p>
+              <p className="text-xs font-bold text-white mb-2">Variação pós-prova (price_change) — fonte: lib/scoring/market.ts</p>
+              <table className="w-full text-xs text-[var(--color-muted)]">
+                <tbody className="divide-y divide-[var(--color-navy-border)]">
+                  {[
+                    ['1º lugar', '+T$4', 'text-[var(--color-success)]'],
+                    ['2º–3º lugar', '+T$3', 'text-[var(--color-success)]'],
+                    ['4º–5º lugar', '+T$2', 'text-[var(--color-success)]'],
+                    ['6º–10º lugar', '+T$1', 'text-[var(--color-success)]'],
+                    ['11º–20º lugar', '0', 'text-[var(--color-muted)]'],
+                    ['21º+', '−T$1', 'text-red-400'],
+                    ['DNF/DNS', '−T$2', 'text-red-400'],
+                  ].map(([p, v, c]) => (
+                    <tr key={p}>
+                      <td className="py-1 pr-4">{p}</td>
+                      <td className={`py-1 font-semibold ${c}`}>{v}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="text-[10px] text-[var(--color-muted)] mt-2">Segmento mais rápido: +T$1 por segmento (swim/bike/run). Preço mínimo: T$1.</p>
             </div>
 
             <Row label="price_change" value="Armazena variação da última prova. Reset para 0 em cada rodada de repricing PTO. Exibido como ↑↓ na UI." />
@@ -104,12 +114,12 @@ export default async function AdminRegrasPage() {
               <p className="text-xs font-bold text-white mb-2">PRO (por posição no campo PRO)</p>
               <table className="w-full text-xs text-[var(--color-muted)]">
                 <tbody className="divide-y divide-[var(--color-navy-border)]">
-                  {[['1º','50'],['2º','40'],['3º','33'],['4º','27'],['5º','22'],['6–10','15'],['11–15','10'],['16–20','6'],['21+','3'],['DNF/DNS','0']].map(([p,s])=>(
+                  {[['1º','50'],['2º','40'],['3º','33'],['4º','27'],['5º','22'],['6–10','15'],['11–20','8'],['21+','3'],['DNF/DNS','0']].map(([p,s])=>(
                     <tr key={p}><td className="py-1 pr-4">{p}</td><td className="py-1 font-semibold text-white">{s} pts</td></tr>
                   ))}
                 </tbody>
               </table>
-              <p className="text-[10px] text-[var(--color-success)] mt-1.5">+6 pts segmento mais rápido (nado/bike/run)</p>
+              <p className="text-[10px] text-[var(--color-success)] mt-1.5">+6 pts segmento mais rápido (nado/bike/run) — fonte: lib/scoring/calculate.ts</p>
             </div>
 
             <Row label="Cálculo" value="Trigger manual: admin/pontuacao → calcula scores para todos os teams de uma prova após inserir resultados" />

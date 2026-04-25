@@ -400,7 +400,7 @@
     "s5li3": "You can swap roster athletes whenever the market is open.",
     "s5example": "Your roster has 5 athletes. 3 of them are in IRONMAN Texas. On race day, those 3 score for you. If you want to swap the other 2, you must do it before the market closes.",
     "s6Title": "Scoring (Trix Score)",
-    "s6p1": "Scoring is calculated by position in the PRO field of the race.",
+    "s6p1": "Scoring is calculated by position in the PRO field:",
     "s6bonus": "+6 pts for the fastest segment (swim, bike or run) among all PROs.",
     "s7Title": "Trix Leagues",
     "s7p1": "Compete with friends on who has the best accumulated roster or in specific races.",
@@ -414,7 +414,18 @@
     "s9Title": "General Notes",
     "s9li1": "Trixer is a recreational game — no cash prizes.",
     "s9li2": "We are not affiliated with Ironman/WTC or any triathlon organisation.",
-    "s9li3": "Results are entered manually — there may be a delay after the race."
+    "s9li3": "Results are entered manually — there may be a delay after the race.",
+    "s6tablePos": "Position",
+    "s6tablePts": "Points",
+    "s6row1": "1st place",
+    "s6row2": "2nd place",
+    "s6row3": "3rd place",
+    "s6row4": "4th place",
+    "s6row5": "5th place",
+    "s6row6": "6th – 10th",
+    "s6row7": "11th – 20th",
+    "s6row8": "21st+",
+    "s6row9": "DNF / DNS"
   },
   "privacy": {
     "title": "Privacy Policy",
