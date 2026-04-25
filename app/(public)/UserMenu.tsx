@@ -88,10 +88,13 @@ export default function UserMenu({ user, wallet }: { user: User | null; wallet?:
             <button
               onClick={async () => {
                 setOpen(false)
-                await fetch('/api/tour/reset', { method: 'POST' })
-                window.location.href = '/'
+                const res = await fetch('/api/tour/reset', { method: 'POST' })
+                if (res.ok) {
+                  localStorage.removeItem('trixer_tour_seen')
+                  window.location.replace('/')
+                }
               }}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--color-navy-border)]/40 transition-colors"
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--color-navy-border)]/40 transition-colors cursor-pointer"
             >
               <PlayCircle size={14} className="text-[var(--color-muted)]" />
               {t('tour')}
