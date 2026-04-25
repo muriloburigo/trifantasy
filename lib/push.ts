@@ -1,16 +1,16 @@
-import webpush from 'web-push'
 import { createAdminClient } from '~/lib/supabase/server'
 
-function initVapid() {
+async function getWebpush() {
+  const webpush = (await import('web-push')).default
   const pub = process.env.VAPID_PUBLIC_KEY
   const priv = process.env.VAPID_PRIVATE_KEY
-  if (!pub || !priv) return false
+  if (!pub || !priv) return null
   webpush.setVapidDetails(
     process.env.VAPID_EMAIL ?? 'mailto:contato@trixer.app',
     pub,
     priv,
   )
-  return true
+  return webpush
 }
 
 export interface PushPayload {
@@ -28,7 +28,8 @@ export interface PushSubscription {
 
 /** Send to one subscription. Returns false if subscription is expired/invalid. */
 export async function sendOne(sub: PushSubscription, payload: PushPayload): Promise<boolean> {
-  if (!initVapid()) return false
+  const webpush = await getWebpush()
+  if (!webpush) return false
   try {
     await webpush.sendNotification(
       { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
