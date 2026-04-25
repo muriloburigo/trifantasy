@@ -91,7 +91,7 @@ export function SellButton({
     startTransition(async () => {
       const res = await sellAthlete(athleteId)
       if (res.error) { setMsg(res.error) }
-      else { setMsg(t('soldSuccess', { price: res.price as number })); router.refresh() }
+      else { setMsg(t('soldSuccess', { price: res.price as number })) }
     })
   }
 

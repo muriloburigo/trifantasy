@@ -60,10 +60,7 @@ export async function buyAthlete(athleteId: string) {
     wallet_after: walletAfter,
   })
 
-  revalidatePath('/atletas')
-  revalidatePath('/elenco')
-  revalidatePath('/provas')
-  revalidatePath('/atletas/[id]', 'layout')
+  revalidatePath('/', 'layout')
   return { success: true, price, name: athleteRes.data.name }
 }
 
@@ -104,9 +101,6 @@ export async function sellAthlete(athleteId: string) {
     wallet_after: walletAfter,
   })
 
-  revalidatePath('/atletas')
-  revalidatePath('/elenco')
-  revalidatePath('/provas')
-  revalidatePath('/atletas/[id]', 'layout')
+  revalidatePath('/', 'layout')
   return { success: true, price, name: athleteRes.data.name }
 }
