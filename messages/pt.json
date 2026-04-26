@@ -24,6 +24,7 @@
     "logout": "Sair",
     "admin": "Admin",
     "createAccount": "Criar conta",
+    "myProfile": "Meu Perfil",
     "myLeagues": "Minhas Ligas",
     "home": "Home",
     "security": "Segurança",
@@ -267,6 +268,17 @@
     "filterClear": "Limpar",
     "publicCount": "{n} ligas públicas",
     "globalLeagueName": "Liga Global Trixer"
+  },
+  "profile": {
+    "title": "Meu Perfil",
+    "subtitle": "Personalize sua conta e imagem de exibição",
+    "nameLabel": "Nome de Exibição",
+    "emailLabel": "E-mail (Não editável)",
+    "uploadNote": "Toque para alterar sua foto",
+    "saveButton": "Salvar Alterações",
+    "saving": "Salvando...",
+    "success": "Perfil atualizado com sucesso!",
+    "uploadSuccess": "Foto carregada! Não esqueça de salvar as alterações."
   },
   "auth": {
     "loginTitle": "Entrar na sua conta",

@@ -78,7 +78,7 @@ export default function UserMenu({
               className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors"
             >
               <UserIcon size={14} className="text-[var(--color-muted)]" />
-              <span>Meu Perfil</span>
+              <span>{t('myProfile')}</span>
             </Link>
 
             <Link

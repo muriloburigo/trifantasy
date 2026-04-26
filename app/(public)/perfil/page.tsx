@@ -3,10 +3,12 @@ import { createClient } from '~/lib/supabase/server'
 import BackLink from '~/app/components/BackLink'
 import PublicShell from '../PublicShell'
 import ProfileForm from './ProfileForm'
+import { getTranslations } from 'next-intl/server'
 
 export const dynamic = 'force-dynamic'
 
 export default async function PerfilPage() {
+  const t = await getTranslations('profile')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -23,9 +25,9 @@ export default async function PerfilPage() {
       <div className="max-w-xl mx-auto px-4 py-10">
         <BackLink href="/" />
         <div className="mb-8">
-          <h1 className="text-2xl font-bold">Meu Perfil</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-[var(--color-muted)] mt-1">
-            Personalize sua conta e imagem de exibição
+            {t('subtitle')}
           </p>
         </div>
 

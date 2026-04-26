@@ -267,6 +267,17 @@
     "publicCount": "{n} ligas públicas",
     "globalLeagueName": "Liga Global Trixer"
   },
+  "profile": {
+    "title": "Mi Perfil",
+    "subtitle": "Personaliza tu cuenta e imagen de perfil",
+    "nameLabel": "Nombre de Usuario",
+    "emailLabel": "E-mail (No editable)",
+    "uploadNote": "Toca para cambiar tu foto",
+    "saveButton": "Guardar Cambios",
+    "saving": "Guardando...",
+    "success": "¡Perfil actualizado con éxito!",
+    "uploadSuccess": "¡Foto cargada! No olvides guardar los cambios."
+  },
   "auth": {
     "loginTitle": "Iniciar sesión en tu cuenta",
     "emailLabel": "Email",
