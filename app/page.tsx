@@ -182,10 +182,14 @@ export default async function HomePage() {
           .eq('league_id', globalLeague.id)
         if (!members?.length) return { data: [] }
         const userIds = members.map((m: any) => m.user_id)
-        const [{ data: profiles }, { data: teams }] = await Promise.all([
+        const [profilesRes, { data: teams }] = await Promise.all([
           admin.from('profiles').select('id, name, photo_url').in('id', userIds),
           admin.from('teams').select('id, user_id, scores(total_points)').in('user_id', userIds),
         ])
+        // If photo_url column missing, fall back to name-only query
+        const profiles = profilesRes.data ?? (profilesRes.error
+          ? (await admin.from('profiles').select('id, name').in('id', userIds)).data
+          : [])
         return { data: { members, profiles, teams } }
       }),
 
