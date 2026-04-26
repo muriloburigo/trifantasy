@@ -143,7 +143,7 @@ export default async function HomePage() {
     { data: risingRaw },
     { data: fallingRaw },
     { data: topAthletesRaw },
-    globalRankData,
+    globalRank,
     { data: races },
     { count: trixerCount },
     { count: athleteCount },
@@ -177,28 +177,38 @@ export default async function HomePage() {
       .single()
       .then(async ({ data: globalLeague }) => {
         if (!globalLeague) return []
+        
+        // 1. Get all members in global league with profiles
         const { data: members } = await admin
           .from('league_members')
-          .select(`
-            user_id,
-            profile:profiles(name, photo_url),
-            teams:teams(
-              scores(total_points)
-            )
-          `)
+          .select('user_id, profile:profiles(name, photo_url)')
           .eq('league_id', globalLeague.id)
         
-        if (!members) return []
+        if (!members?.length) return []
+        const userIds = members.map(m => m.user_id)
+
+        // 2. Get all scores for these users (via teams)
+        const { data: teams } = await admin
+          .from('teams')
+          .select('user_id, scores(total_points)')
+          .in('user_id', userIds)
+
+        const scoresByUser: Record<string, { total: number; count: number }> = {}
+        teams?.forEach(t => {
+          const total = (t.scores as any[] ?? []).reduce((acc, s) => acc + Number(s.total_points ?? 0), 0)
+          if (!scoresByUser[t.user_id]) scoresByUser[t.user_id] = { total: 0, count: 0 }
+          scoresByUser[t.user_id].total += total
+          scoresByUser[t.user_id].count += (t.scores as any[] ?? []).length
+        })
         
         return members.map((m: any) => {
-          const scores = m.teams?.flatMap((t: any) => t.scores) ?? []
-          const total = scores.reduce((acc: number, s: any) => acc + Number(s.total_points ?? 0), 0)
+          const stats = scoresByUser[m.user_id] || { total: 0, count: 0 }
           return {
             userId: m.user_id,
             name: m.profile?.name ?? 'Trixer',
             photoUrl: m.profile?.photo_url ?? null,
-            total,
-            raceCount: scores.length
+            total: stats.total,
+            raceCount: stats.count
           }
         }).sort((a, b) => b.total - a.total)
       }),
@@ -215,7 +225,6 @@ export default async function HomePage() {
     admin.from('teams').select('*', { count: 'exact', head: true }),
   ])
 
-  const globalRank = globalRankData as any[]
   const rising  = risingRaw ?? []
 
   // My portfolio — fetched separately (needs auth client)
@@ -431,7 +440,7 @@ export default async function HomePage() {
                   {t('rankingViewAll')} <ArrowRight size={11} />
                 </Link>
               </div>
-              <GlobalRankWidget entries={globalRank} currentUserId={loggedUser?.id ?? null} />
+              <GlobalRankWidget entries={globalRank as any[]} currentUserId={loggedUser?.id ?? null} />
             </section>
           </div>
 
@@ -497,7 +506,7 @@ export default async function HomePage() {
                             <p className="text-xs font-medium flex-1 truncate">{a?.name ?? '—'}</p>
                             <div className="text-right shrink-0">
                               <p className="text-xs font-bold">T${Number(a?.current_price ?? 0)}</p>
-                              <p className={`text-[9px] font-bold ${change > 0 ? 'text-[var(--color-success)]' : change < 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-muted)]'}`}>
+                              <p className={`text-[9px] font-bold ${change > 0 ? 'text-[var(--color-success)]' : change < 0 ? 'text-[var(--color-danger)]' : change < 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-muted)]'}`}>
                                 {change > 0 ? '+' : ''}{change.toFixed(0)}
                               </p>
                             </div>
