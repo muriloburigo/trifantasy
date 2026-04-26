@@ -1,6 +1,6 @@
 import { requireAdmin } from '~/lib/auth/require-admin'
 import { createAdminClient } from '~/lib/supabase/server'
-import { Bell, Users, Clock, Send, CheckCircle, AlertCircle, TrendingUp, Calendar, ShieldAlert, Trophy } from 'lucide-react'
+import { Bell, Users, Clock, Send, CheckCircle, AlertCircle, TrendingUp, Calendar, ShieldAlert, Trophy, Lock } from 'lucide-react'
 import SendTestNotification from './SendTestNotification'
 
 export const revalidate = 0
@@ -58,9 +58,17 @@ export default async function AdminNotificacoesPage() {
       icon: TrendingUp,
       type: 'market_open',
       title: 'Mercado aberto',
-      desc: 'Enviada quando uma prova muda para status "open" e já tem atletas no startlist. Indica que a lista oficial está disponível.',
+      desc: 'Enviada quando uma prova muda para status "open" e já tem atletas no startlist. Indica que a lista oficial está disponível e o mercado de compra/venda está ativo.',
       color: 'text-green-400',
       bg: 'bg-green-900/20 border-green-800/30',
+    },
+    {
+      icon: Lock,
+      type: 'market_locked',
+      title: 'Mercado fechado',
+      desc: 'Disparada quando a prova entra em status "locked". Avisa que não é mais possível realizar trocas e que a prova está prestes a começar.',
+      color: 'text-red-400',
+      bg: 'bg-red-900/20 border-red-800/30',
     },
     {
       icon: ShieldAlert,
