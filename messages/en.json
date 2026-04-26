@@ -83,7 +83,8 @@
     "marketLoading": "Market is being set up...",
     "marketLoadingDesc": "Athletes will appear here once races are configured.",
     "moreRacesCount": "View {n} more",
-    "athleteAvailable": "athletes available"
+    "athleteAvailable": "athletes available",
+    "viewAllRaces": "View race calendar"
   },
   "market": {
     "title": "Athlete Market",
