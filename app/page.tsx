@@ -4,7 +4,7 @@ import { formatDate, daysUntil } from '~/lib/utils'
 import type { Race } from '~/lib/types'
 import {
   TrendingUp, TrendingDown, Trophy, MapPin, Calendar,
-  Users, ChevronRight, Zap, ArrowRight, Star, Lock,
+  Users, ChevronRight, Zap, ArrowRight, Star, Lock, ShoppingBag,
 } from 'lucide-react'
 import PublicShell from './(public)/PublicShell'
 import GlobalRankWidget from './components/GlobalRankWidget'
@@ -136,18 +136,19 @@ export default async function HomePage() {
   const admin = createAdminClient()
   const auth = await createClient()
 
+  const authRes = await auth.auth.getUser()
+  const loggedUser = authRes.data.user
+
   const [
-    { data: { user } },
     { data: risingRaw },
     { data: fallingRaw },
     { data: topAthletesRaw },
-    { data: globalRankRaw },
+    globalRankData,
     { data: races },
     { count: trixerCount },
     { count: athleteCount },
     { count: teamCount },
   ] = await Promise.all([
-    auth.auth.getUser(),
     // Market: rising
     pub.from('athletes')
       .select('id, name, type, gender, age_group, country, current_price, price_change, photo_url, pto_rank, wtcs_rank')
@@ -169,31 +170,40 @@ export default async function HomePage() {
       .order('current_price', { ascending: false })
       .limit(16),
 
-    // Global League Rank — fetch members, then profiles + scores separately
+    // Global League Rank
     admin.from('leagues')
       .select('id')
       .eq('is_global', true)
       .single()
       .then(async ({ data: globalLeague }) => {
-        if (!globalLeague) return { data: [] }
+        if (!globalLeague) return []
         const { data: members } = await admin
           .from('league_members')
-          .select('user_id')
+          .select(`
+            user_id,
+            profile:profiles(name, photo_url),
+            teams:teams(
+              scores(total_points)
+            )
+          `)
           .eq('league_id', globalLeague.id)
-        if (!members?.length) return { data: [] }
-        const userIds = members.map((m: any) => m.user_id)
-        const [profilesRes, { data: teams }] = await Promise.all([
-          admin.from('profiles').select('id, name, photo_url').in('id', userIds),
-          admin.from('teams').select('id, user_id, scores(total_points)').in('user_id', userIds),
-        ])
-        // If photo_url column missing, fall back to name-only query
-        const profiles = profilesRes.data ?? (profilesRes.error
-          ? (await admin.from('profiles').select('id, name').in('id', userIds)).data
-          : [])
-        return { data: { members, profiles, teams } }
+        
+        if (!members) return []
+        
+        return members.map((m: any) => {
+          const scores = m.teams?.flatMap((t: any) => t.scores) ?? []
+          const total = scores.reduce((acc: number, s: any) => acc + Number(s.total_points ?? 0), 0)
+          return {
+            userId: m.user_id,
+            name: m.profile?.name ?? 'Trixer',
+            photoUrl: m.profile?.photo_url ?? null,
+            total,
+            raceCount: scores.length
+          }
+        }).sort((a, b) => b.total - a.total)
       }),
 
-    // Races (enough to count beyond 7-day window)
+    // Races
     pub.from('races')
       .select('*, race_athletes(athlete_id)')
       .in('status', ['open', 'upcoming'])
@@ -205,45 +215,40 @@ export default async function HomePage() {
     admin.from('teams').select('*', { count: 'exact', head: true }),
   ])
 
-  // Transform globalRankRaw into a sorted list of scores
-  const globalRankData = globalRankRaw as any
-  const globalRank: { name: string; total: number; raceCount: number; userId: string; photoUrl: string | null }[] = (() => {
-    if (!globalRankData?.members) return []
-    const profileMap = new Map((globalRankData.profiles ?? []).map((p: any) => [p.id, { name: p.name, photoUrl: p.photo_url }]))
-    const teamMap = new Map((globalRankData.teams ?? []).map((t: any) => [t.user_id, t]))
-    return (globalRankData.members as any[]).map((m: any) => {
-      const team = teamMap.get(m.user_id) as any
-      const scores = team?.scores ?? []
-      const total = scores.reduce((acc: number, s: any) => acc + Number(s.total_points ?? 0), 0)
-      const p = profileMap.get(m.user_id) as any
-      return {
-        userId: m.user_id,
-        name: p?.name ?? 'Trixer',
-        photoUrl: p?.photoUrl ?? null,
-        total,
-        raceCount: scores.length,
-      }
-    }).sort((a: any, b: any) => b.total - a.total)
-  })()
-
+  const globalRank = globalRankData as any[]
   const rising  = risingRaw ?? []
+
+  // My portfolio — fetched separately (needs auth client)
+  let myPortfolio: any[] = []
+  let myNetWorth = 0
+  if (loggedUser) {
+    const [portfolioRes, profileRes] = await Promise.all([
+      auth.from('portfolio')
+        .select('bought_price, athlete:athletes(id, name, country, type, current_price, photo_url)')
+        .eq('user_id', loggedUser.id)
+        .order('created_at', { ascending: false }),
+      auth.from('profiles').select('wallet').eq('id', loggedUser.id).single(),
+    ])
+    myPortfolio = (portfolioRes.data ?? []).map(p => ({ ...p, athlete: p.athlete as any }))
+    const wallet = Number((profileRes.data as any)?.wallet ?? 0)
+    const totalValue = myPortfolio.reduce((s, p) => s + Number(p.athlete?.current_price ?? 0), 0)
+    myNetWorth = wallet + totalValue
+  }
+
   const falling = fallingRaw ?? []
 
   const today = new Date()
   const in7   = new Date(today); in7.setDate(today.getDate() + 7)
 
   const allActive = (races ?? []).filter(r => r.status === 'open' || r.status === 'upcoming') as Race[]
-  // Only count races that already have a startlist registered
   const withStartlist = allActive.filter(r => ((r as any).race_athletes?.length ?? 0) > 0)
   const openRaces  = withStartlist.filter(r => r.status === 'open')
   const next7Races = withStartlist.filter(r => new Date(r.date) <= in7)
   const remainingCount = allActive.length - next7Races.length
 
   const featuredAthletes = (topAthletesRaw ?? []).slice(0, 12)
-
   const hasMarket = rising.length > 0 || falling.length > 0
 
-  // Next race for hero countdown — prefer open, fall back to upcoming
   const nextRace = openRaces[0] ?? withStartlist[0] ?? allActive[0] ?? null
   const nextRaceDays = nextRace ? daysUntil(nextRace.date) : null
 
@@ -270,10 +275,10 @@ export default async function HomePage() {
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               <Link
-                href={user ? "/atletas" : "/register"}
+                href={loggedUser ? "/atletas" : "/register"}
                 className="bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-colors"
               >
-                {user ? t('ctaLogged') : t('ctaPrimary')}
+                {loggedUser ? t('ctaLogged') : t('ctaPrimary')}
               </Link>
               <Link href="/regras" className="text-sm text-[var(--color-muted)] hover:text-white transition-colors flex items-center gap-1">
                 {t('ctaSecondary')} <ArrowRight size={12} />
@@ -426,7 +431,7 @@ export default async function HomePage() {
                   {t('rankingViewAll')} <ArrowRight size={11} />
                 </Link>
               </div>
-              <GlobalRankWidget entries={globalRank} currentUserId={user?.id ?? null} />
+              <GlobalRankWidget entries={globalRank} currentUserId={loggedUser?.id ?? null} />
             </section>
           </div>
 
@@ -457,6 +462,58 @@ export default async function HomePage() {
               </Link>
             )}
 
+            {/* Meu Elenco */}
+            {loggedUser && (
+              <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-navy-border)]">
+                  <span className="font-semibold text-sm flex items-center gap-2">
+                    <ShoppingBag size={14} className="text-[var(--color-orange)]" />
+                    {t('myRosterTitle')}
+                  </span>
+                  <Link href="/elenco" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors flex items-center gap-1">
+                    {t('myRosterViewAll')} <ChevronRight size={11} />
+                  </Link>
+                </div>
+                {myPortfolio.length === 0 ? (
+                  <div className="px-4 py-6 text-center">
+                    <p className="text-xs text-[var(--color-muted)] mb-3">{t('myRosterEmpty')}</p>
+                    <Link href="/atletas" className="text-xs font-bold text-[var(--color-orange)] hover:underline">
+                      {t('myRosterCta')}
+                    </Link>
+                  </div>
+                ) : (
+                  <>
+                    <div className="divide-y divide-[var(--color-navy-border)]">
+                      {myPortfolio.slice(0, 5).map((p, i) => {
+                        const a = p.athlete
+                        const change = Number(a?.current_price ?? 0) - Number(p.bought_price)
+                        return (
+                          <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                            <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 bg-[var(--color-navy-elevated)] flex items-center justify-center text-[9px] font-black text-[var(--color-muted)] border border-white/5">
+                              {a?.photo_url
+                                ? <img src={a.photo_url} alt={a.name} className="w-full h-full object-cover" />
+                                : (a?.name?.charAt(0) ?? '?')}
+                            </div>
+                            <p className="text-xs font-medium flex-1 truncate">{a?.name ?? '—'}</p>
+                            <div className="text-right shrink-0">
+                              <p className="text-xs font-bold">T${Number(a?.current_price ?? 0)}</p>
+                              <p className={`text-[9px] font-bold ${change > 0 ? 'text-[var(--color-success)]' : change < 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-muted)]'}`}>
+                                {change > 0 ? '+' : ''}{change.toFixed(0)}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <div className="px-4 py-2.5 border-t border-[var(--color-navy-border)] flex items-center justify-between bg-[var(--color-navy-elevated)]/40">
+                      <span className="text-[10px] text-[var(--color-muted)] uppercase font-bold tracking-wider">{t('myRosterNetWorth')}</span>
+                      <span className="text-sm font-black text-[var(--color-orange)]">T${myNetWorth.toFixed(0)}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
             {/* Liga CTA */}
             <div className="bg-gradient-to-br from-[var(--color-orange)]/10 to-[var(--color-purple)]/10 border border-[var(--color-orange)]/20 rounded-2xl p-5 text-center">
               <Trophy size={24} className="mx-auto mb-2 text-yellow-400 opacity-80" />
@@ -464,7 +521,7 @@ export default async function HomePage() {
               <p className="text-[11px] text-[var(--color-muted)] mb-4 leading-relaxed">
                 {t('leagueCtaDesc')}
               </p>
-              {user ? (
+              {loggedUser ? (
                 <>
                   <Link href="/ligas"
                     className="block w-full text-center bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-xs font-bold py-2.5 rounded-lg transition-colors mb-2">
