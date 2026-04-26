@@ -4,14 +4,13 @@ import { createClient } from '~/lib/supabase/server'
 import BackLink from '~/app/components/BackLink'
 import MarketBanner from '~/app/components/MarketBanner'
 import { SellButton } from './TradeButton'
+import ShareRoster from './ShareRoster'
 import { getMarketStatus } from '~/lib/market'
-import { TrendingUp, TrendingDown, Minus, Wallet, ShoppingBag, Share2 } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, Wallet, ShoppingBag } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { TEAM_SIZE } from '~/lib/types'
 
 export const revalidate = 0
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://trixer.app'
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'Brazil': '🇧🇷', 'Norway': '🇳🇴', 'Germany': '🇩🇪', 'Belgium': '🇧🇪',
@@ -64,6 +63,7 @@ export default async function ElencoPage() {
           <p className="text-sm text-[var(--color-muted)] mt-1">{t('subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
+          <ShareRoster userName={profileRes.data?.name || 'Trixer'} portfolio={portfolio} netWorth={netWorth} />
           <Link
             href="/atletas"
             className="flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
