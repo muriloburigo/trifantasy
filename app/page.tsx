@@ -143,9 +143,9 @@ export default async function HomePage() {
     { data: topAthletesRaw },
     { data: globalRankRaw },
     { data: races },
-    { count: leagueCount },
     { count: trixerCount },
     { count: athleteCount },
+    { count: teamCount },
   ] = await Promise.all([
     auth.auth.getUser(),
     // Market: rising
@@ -200,9 +200,9 @@ export default async function HomePage() {
       .order('date', { ascending: true })
       .limit(30),
 
-    admin.from('leagues').select('*', { count: 'exact', head: true }),
     pub.from('profiles').select('*', { count: 'exact', head: true }),
     pub.from('athletes').select('*', { count: 'exact', head: true }),
+    admin.from('teams').select('*', { count: 'exact', head: true }),
   ])
 
   // Transform globalRankRaw into a sorted list of scores
@@ -243,6 +243,10 @@ export default async function HomePage() {
 
   const hasMarket = rising.length > 0 || falling.length > 0
 
+  // Next race for hero countdown — prefer open, fall back to upcoming
+  const nextRace = openRaces[0] ?? withStartlist[0] ?? allActive[0] ?? null
+  const nextRaceDays = nextRace ? daysUntil(nextRace.date) : null
+
   return (
     <PublicShell>
 
@@ -278,19 +282,40 @@ export default async function HomePage() {
           </div>
 
           {/* Right: stats */}
-          <div className="grid grid-cols-3 md:grid-cols-3 gap-2 sm:gap-3 w-full md:w-auto">
-            {[
-              { label: t('statsAthletes'), value: athleteCount ?? 0, icon: Zap,    color: 'text-[var(--color-orange)]', href: '/atletas' },
-              { label: t('statsTrixers'), value: trixerCount ?? 0,  icon: Users,  color: 'text-[var(--color-purple)]', href: '/trixers' },
-              { label: t('statsLeagues'),   value: leagueCount ?? 0,  icon: Trophy, color: 'text-yellow-400',            href: '/ligas' },
-            ].map(({ label, value, icon: Icon, color, href }) => (
-              <Link key={label} href={href}
-                className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/40 rounded-2xl p-2.5 sm:p-4 text-center transition-all hover:bg-[var(--color-navy-card)] group flex-1">
-                <Icon size={14} className={`mx-auto mb-1.5 ${color}`} />
-                <p className="text-lg sm:text-2xl font-black group-hover:text-[var(--color-orange)] transition-colors leading-none">{value}</p>
-                <p className="text-[9px] sm:text-[10px] text-[var(--color-muted)] uppercase font-bold tracking-widest mt-1.5">{label}</p>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full md:w-auto">
+            <Link href="/atletas"
+              className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/40 rounded-2xl p-2.5 sm:p-4 text-center transition-all hover:bg-[var(--color-navy-card)] group">
+              <Zap size={14} className="mx-auto mb-1.5 text-[var(--color-orange)]" />
+              <p className="text-lg sm:text-2xl font-black group-hover:text-[var(--color-orange)] transition-colors leading-none">{athleteCount ?? 0}</p>
+              <p className="text-[9px] sm:text-[10px] text-[var(--color-muted)] uppercase font-bold tracking-widest mt-1.5">{t('statsAthletes')}</p>
+            </Link>
+
+            <Link href="/trixers"
+              className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/40 rounded-2xl p-2.5 sm:p-4 text-center transition-all hover:bg-[var(--color-navy-card)] group">
+              <Users size={14} className="mx-auto mb-1.5 text-[var(--color-purple)]" />
+              <p className="text-lg sm:text-2xl font-black group-hover:text-[var(--color-orange)] transition-colors leading-none">{trixerCount ?? 0}</p>
+              <p className="text-[9px] sm:text-[10px] text-[var(--color-muted)] uppercase font-bold tracking-widest mt-1.5">{t('statsTrixers')}</p>
+            </Link>
+
+            {nextRace && nextRaceDays !== null ? (
+              <Link href={`/provas/${nextRace.slug}`}
+                className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/40 rounded-2xl p-2.5 sm:p-4 text-center transition-all hover:bg-[var(--color-navy-card)] group">
+                <Calendar size={14} className="mx-auto mb-1.5 text-[var(--color-success)]" />
+                <p className="text-lg sm:text-2xl font-black group-hover:text-[var(--color-orange)] transition-colors leading-none">
+                  {nextRaceDays <= 0 ? t('statsNextRaceToday') : nextRaceDays}
+                </p>
+                <p className="text-[9px] sm:text-[10px] text-[var(--color-muted)] uppercase font-bold tracking-widest mt-1.5">
+                  {nextRaceDays <= 0 ? t('statsNextRaceLive') : t('statsNextRaceDays')}
+                </p>
               </Link>
-            ))}
+            ) : (
+              <Link href="/ligas"
+                className="bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/40 rounded-2xl p-2.5 sm:p-4 text-center transition-all hover:bg-[var(--color-navy-card)] group">
+                <Trophy size={14} className="mx-auto mb-1.5 text-yellow-400" />
+                <p className="text-lg sm:text-2xl font-black group-hover:text-[var(--color-orange)] transition-colors leading-none">{teamCount ?? 0}</p>
+                <p className="text-[9px] sm:text-[10px] text-[var(--color-muted)] uppercase font-bold tracking-widest mt-1.5">{t('statsTeams')}</p>
+              </Link>
+            )}
           </div>
         </div>
       </div>
