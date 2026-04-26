@@ -4,8 +4,6 @@ import Link from 'next/link'
 import PageHeader from '../_components/PageHeader'
 import StatCard from '../_components/StatCard'
 import AdminBadge from '../_components/AdminBadge'
-import SystemIndicators from './SystemIndicators'
-import AthleteIndicators from './AthleteIndicators'
 import { Flag, Users, Trophy, Globe, ArrowRight, Clock, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { formatDate } from '~/lib/utils'
 
@@ -13,159 +11,19 @@ export default async function AdminDashboard() {
   await requireAdmin()
   const supabase = createAdminClient()
 
-  // ── Portfolio data (base para múltiplos cálculos) ──────────────────────────
-  const { data: portfolioData } = await supabase
-    .from('portfolio')
-    .select('athlete_id, user_id, athlete:athletes(name, current_price, pto_rank, wtcs_rank)')
-
-  const athleteCounts: Record<string, { name: string; count: number; price: number; rank: number }> = {}
-  portfolioData?.forEach(p => {
-    const a = p.athlete as any
-    if (!a) return
-    if (!athleteCounts[p.athlete_id]) {
-      const bestRank = Math.min(a.pto_rank ?? 1000, a.wtcs_rank ?? 1000)
-      athleteCounts[p.athlete_id] = { name: a.name, count: 0, price: Number(a.current_price), rank: bestRank }
-    }
-    athleteCounts[p.athlete_id].count++
-  })
-
-  const topPicked = Object.values(athleteCounts).sort((a, b) => b.count - a.count).slice(0, 5)
-
-  // ── Parallel fetches ────────────────────────────────────────────────────────
   const [
     racesRes, athletesRes, teamsRes, usersRes,
-    upcomingRes, recentScoresRes, openTicketsRes, lastRaceRes,
-    profilesRes,
-    allProsRes,
-    risingAthletesRes, fallingAthletesRes,
-    teamsUserIdsRes,
-    scoreTeamsRes,
-    leagueMembersRes,
-    racesStartlistRes,
-    lockedRacesRes,
+    upcomingRes, recentScoresRes, openTicketsRes,
   ] = await Promise.all([
-    // Stat cards
     supabase.from('races').select('id', { count: 'exact', head: true }),
     supabase.from('athletes').select('id', { count: 'exact', head: true }).eq('type', 'pro'),
     supabase.from('teams').select('id', { count: 'exact', head: true }),
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
-
-    // Upcoming races list
-    supabase.from('races').select('id, name, date, status')
-      .in('status', ['upcoming', 'open', 'locked'])
-      .order('date', { ascending: true }).limit(5),
-
-    // Recent scores
-    supabase.from('scores')
-      .select('team_id, total_points, calculated_at, teams!inner(user_id, profile:profiles(name))')
-      .order('calculated_at', { ascending: false }).limit(8),
-
-    // Support tickets
+    supabase.from('races').select('id, name, date, status').in('status', ['upcoming', 'open', 'locked']).order('date', { ascending: true }).limit(5),
+    supabase.from('scores').select('team_id, total_points, calculated_at, teams!inner(user_id, profile:profiles(name))').order('calculated_at', { ascending: false }).limit(8),
     supabase.from('support_tickets').select('id', { count: 'exact', head: true }).eq('status', 'open'),
-
-    // Last finished race
-    supabase.from('races').select('id, name')
-      .eq('status', 'finished').order('date', { ascending: false }).limit(1).single(),
-
-    // Profiles wallets (for economy)
-    supabase.from('profiles').select('wallet'),
-
-    // All top-ranked PROs (for sleepers)
-    supabase.from('athletes').select('id, name, current_price, pto_rank, wtcs_rank')
-      .eq('type', 'pro').or('pto_rank.lte.40,wtcs_rank.lte.40'),
-
-    // Price dynamics: risers
-    supabase.from('athletes').select('id, name, current_price, price_change')
-      .eq('type', 'pro').gt('price_change', 0)
-      .order('price_change', { ascending: false }).limit(5),
-
-    // Price dynamics: fallers
-    supabase.from('athletes').select('id, name, current_price, price_change')
-      .eq('type', 'pro').lt('price_change', 0)
-      .order('price_change', { ascending: true }).limit(5),
-
-    // Funnel: users with at least one team
-    supabase.from('teams').select('user_id'),
-
-    // Funnel: users who played (have a score)
-    supabase.from('scores').select('teams!inner(user_id)'),
-
-    // League engagement: members per league
-    supabase.from('league_members').select('league_id').neq('league_id', ''),
-
-    // Operational: races open/upcoming with startlist info
-    supabase.from('races').select('id, name, date, status, race_athletes(athlete_id)')
-      .in('status', ['open', 'upcoming']),
-
-    // Operational: locked races (pending score calculation)
-    supabase.from('races').select('id, name, date').eq('status', 'locked'),
   ])
 
-  // ── Funnel ─────────────────────────────────────────────────────────────────
-  const usersTotal = usersRes.count ?? 0
-  const usersWithTeam = new Set((teamsUserIdsRes.data ?? []).map((t: any) => t.user_id)).size
-  const usersWhoPlayed = new Set(
-    (scoreTeamsRes.data ?? []).map((s: any) => (s.teams as any)?.user_id).filter(Boolean)
-  ).size
-
-  // ── Economy ─────────────────────────────────────────────────────────────────
-  const inWallets = (profilesRes.data ?? []).reduce((acc, p) => acc + Number(p.wallet), 0)
-  const inAthletes = (portfolioData ?? []).reduce((acc, p) => acc + Number((p.athlete as any)?.current_price ?? 0), 0)
-  const totalCoins = inWallets + inAthletes
-  const avgNetWorth = usersTotal > 0 ? totalCoins / usersTotal : 0
-  const liquidityPct = totalCoins > 0 ? (inWallets / totalCoins) * 100 : 0
-
-  // ── Concentration ──────────────────────────────────────────────────────────
-  const top1Ownership = usersTotal > 0 && topPicked[0]
-    ? Math.round((topPicked[0].count / usersTotal) * 100)
-    : 0
-  const top3Combined = usersTotal > 0
-    ? topPicked.slice(0, 3).reduce((acc, a) => acc + a.count, 0)
-    : 0
-
-  // ── Sleepers ────────────────────────────────────────────────────────────────
-  const sleepers = (allProsRes.data ?? [])
-    .map(a => {
-      const ownership = athleteCounts[a.id]?.count ?? 0
-      const bestRank = Math.min(a.pto_rank ?? 1000, a.wtcs_rank ?? 1000)
-      return { ...a, ownership, bestRank, ownershipPct: usersTotal > 0 ? Math.round((ownership / usersTotal) * 100) : 0 }
-    })
-    .filter(a => a.ownership < usersTotal * 0.15)
-    .sort((a, b) => a.bestRank - b.bestRank)
-    .slice(0, 5)
-
-  // ── Top performers last race ────────────────────────────────────────────────
-  let topPerformers: any[] = []
-  if (lastRaceRes.data) {
-    const { data: lastScores } = await supabase
-      .from('scores')
-      .select('total_points, teams!inner(user_id, profile:profiles(name))')
-      .eq('race_id', lastRaceRes.data.id)
-      .order('total_points', { ascending: false })
-      .limit(5)
-    topPerformers = lastScores?.map(s => ({
-      name: (s.teams as any)?.profile?.name ?? 'Trixter',
-      points: s.total_points,
-    })) ?? []
-  }
-
-  // ── Leagues ────────────────────────────────────────────────────────────────
-  const membersByLeague: Record<string, number> = {}
-  ;(leagueMembersRes.data ?? []).forEach((m: any) => {
-    membersByLeague[m.league_id] = (membersByLeague[m.league_id] ?? 0) + 1
-  })
-  const leagueCounts = Object.values(membersByLeague)
-  const activeLeagues = leagueCounts.filter(n => n >= 2).length
-  const avgMembers = leagueCounts.length > 0
-    ? leagueCounts.reduce((a, b) => a + b, 0) / leagueCounts.length
-    : 0
-
-  // ── Operational alerts ─────────────────────────────────────────────────────
-  const racesWithoutStartlist = (racesStartlistRes.data ?? [])
-    .filter((r: any) => (r.race_athletes?.length ?? 0) === 0)
-  const pendingScoreRaces = lockedRacesRes.data ?? []
-
-  // ── Stat cards ─────────────────────────────────────────────────────────────
   const stats = [
     { label: 'Provas cadastradas', value: racesRes.count ?? 0, icon: Flag, href: '/admin/provas' },
     { label: 'Atletas PRO', value: athletesRes.count ?? 0, icon: Users, href: '/admin/atletas?race_id=all' },
@@ -178,36 +36,16 @@ export default async function AdminDashboard() {
   const openTickets = openTicketsRes.count ?? 0
 
   return (
-    <div className="p-6 max-w-6xl">
-      <PageHeader title="Dashboard" description="Visão operacional do Trixer" />
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+      <PageHeader
+        title="Dashboard"
+        description="Visão operacional do Trixer"
+      />
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map(s => <StatCard key={s.label} {...s} />)}
       </div>
-
-      {/* ── Linha 1: Saúde do Sistema ── */}
-      <SystemIndicators
-        funnel={{ usersTotal, usersWithTeam, usersWhoPlayed }}
-        economy={{ avgNetWorth, liquidityPct, inWallets, inAthletes }}
-        concentration={{ top1Pct: top1Ownership, top3Combined, totalUsers: usersTotal }}
-        leagues={{ activeLeagues, avgMembers, totalLeagues: leagueCounts.length }}
-        alerts={{
-          racesWithoutStartlist,
-          pendingScoreRaces,
-          openTickets,
-        }}
-      />
-
-      {/* ── Linha 2: Dinâmicas de Atletas ── */}
-      <AthleteIndicators
-        topPicked={topPicked.map(a => ({ ...a, ownershipPct: usersTotal > 0 ? Math.round((a.count / usersTotal) * 100) : 0 }))}
-        rising={risingAthletesRes.data ?? []}
-        falling={fallingAthletesRes.data ?? []}
-        sleepers={sleepers}
-        topPerformers={topPerformers}
-        lastRaceName={lastRaceRes.data?.name ?? null}
-      />
 
       {/* Alerts */}
       {openTickets > 0 && (
