@@ -65,6 +65,14 @@ export async function sendToUser(userId: string, payload: PushPayload) {
 export async function alreadySent(userId: string, type: string, refId: string): Promise<boolean> {
   const admin = createAdminClient()
   const { error } = await admin.from('push_notification_log').insert({ user_id: userId, type, ref_id: refId })
-  // unique constraint violation = already sent
-  return !!error
+  
+  if (!error) return false
+  
+  // 23505 = unique_violation in Postgres
+  if (error.code === '23505') return true
+  
+  // For other errors, log it and return true to be safe (don't spam on DB issues)
+  // but at least we know it wasn't a deduplication trigger
+  console.error(`[Push] Log error: ${error.code} - ${error.message}`)
+  return true
 }
