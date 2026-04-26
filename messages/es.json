@@ -82,7 +82,8 @@
     "marketLoading": "El mercado está siendo configurado...",
     "marketLoadingDesc": "Los atletas aparecerán aquí cuando se configuren las carreras.",
     "moreRacesCount": "Ver {n} más",
-    "athleteAvailable": "atletas disponibles"
+    "athleteAvailable": "atletas disponibles",
+    "viewAllRaces": "Ver calendario de carreras"
   },
   "market": {
     "title": "Mercado de Atletas",

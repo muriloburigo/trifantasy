@@ -269,12 +269,27 @@ export default async function HomePage() {
           </div>
 
           <div className="space-y-4">
-            {next7Races.length > 0 && (
-              <section>
-                <h2 className="font-bold text-sm mb-3 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[var(--color-success)] animate-pulse" />{t('next7Days')}</h2>
-                <div className="space-y-3">{next7Races.map(r => <RaceCard key={r.id} race={r} t={t} />)}</div>
-              </section>
-            )}
+            {/* Próximas Provas */}
+            <section>
+              <h2 className="font-bold text-sm mb-3 flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${next7Races.length > 0 ? 'bg-[var(--color-success)] animate-pulse' : 'bg-[var(--color-muted)]'}`} />
+                {t('next7Days')}
+              </h2>
+              
+              {next7Races.length > 0 ? (
+                <div className="space-y-3">
+                  {next7Races.map(r => <RaceCard key={r.id} race={r} t={t} />)}
+                </div>
+              ) : (
+                <Link
+                  href="/provas"
+                  className="flex items-center justify-between w-full bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] hover:border-[var(--color-orange)]/40 rounded-xl px-4 py-3 text-sm text-[var(--color-muted)] hover:text-white transition-all"
+                >
+                  <span>{t('viewAllRaces') || 'Ver calendário de provas'}</span>
+                  <ChevronRight size={14} />
+                </Link>
+              )}
+            </section>
 
             {loggedUser && (
               <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">

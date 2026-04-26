@@ -83,7 +83,8 @@
     "marketLoading": "Mercado sendo montado...",
     "marketLoadingDesc": "Atletas aparecerão aqui assim que as provas forem configuradas.",
     "moreRacesCount": "Ver mais {n} {n, plural, one {prova} other {provas}}",
-    "athleteAvailable": "atletas disponíveis"
+    "athleteAvailable": "athletes disponíveis",
+    "viewAllRaces": "Ver calendário de provas"
   },
   "market": {
     "title": "Mercado de Atletas",
