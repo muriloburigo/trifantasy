@@ -4,12 +4,34 @@ import Link from 'next/link'
 import PageHeader from '../_components/PageHeader'
 import StatCard from '../_components/StatCard'
 import AdminBadge from '../_components/AdminBadge'
+import Indicators from './Indicators'
 import { Flag, Users, Trophy, Globe, ArrowRight, Clock, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { formatDate } from '~/lib/utils'
 
 export default async function AdminDashboard() {
   await requireAdmin()
   const supabase = createAdminClient()
+
+  // 1. Fetch current portfolio for popularity metrics
+  const { data: portfolioData } = await supabase
+    .from('portfolio')
+    .select('athlete_id, athlete:athletes(name, current_price)')
+
+  const athleteCounts: Record<string, { name: string; count: number; price: number }> = {}
+  portfolioData?.forEach(p => {
+    const a = p.athlete as any
+    if (!a) return
+    if (!athleteCounts[p.athlete_id]) {
+      athleteCounts[p.athlete_id] = { name: a.name, count: 0, price: Number(a.current_price) }
+    }
+    athleteCounts[p.athlete_id].count++
+  })
+  const topPicked = Object.values(athleteCounts).sort((a, b) => b.count - a.count).slice(0, 5)
+
+  // 2. Fetch all profiles for economy metrics
+  const { data: profiles } = await supabase.from('profiles').select('wallet')
+  const inWallets = (profiles ?? []).reduce((acc, p) => acc + Number(p.wallet), 0)
+  const inAthletes = (portfolioData ?? []).reduce((acc, p) => acc + Number((p.athlete as any)?.current_price ?? 0), 0)
 
   const [
     racesRes, athletesRes, teamsRes, usersRes,
@@ -45,6 +67,19 @@ export default async function AdminDashboard() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map(s => <StatCard key={s.label} {...s} />)}
+      </div>
+
+      {/* NEW: Intelligence Indicators */}
+      <div className="mb-10">
+        <Indicators 
+          topPicked={topPicked} 
+          marketInsights={{
+            totalCoins: inWallets + inAthletes,
+            inWallets,
+            inAthletes,
+            userCount: usersRes.count ?? 1
+          }}
+        />
       </div>
 
       {/* Alerts */}
@@ -85,14 +120,6 @@ export default async function AdminDashboard() {
               ))}
             </div>
           )}
-          <div className="px-5 py-3 border-t border-[var(--color-navy-border)]">
-            <Link
-              href="/admin/provas/nova"
-              className="text-xs text-[var(--color-orange)] hover:text-[var(--color-orange-light)] font-medium transition-colors"
-            >
-              + Cadastrar nova prova
-            </Link>
-          </div>
         </div>
 
         {/* Quick actions */}
@@ -102,10 +129,10 @@ export default async function AdminDashboard() {
           </div>
           <div className="p-4 space-y-2">
             {[
-              { href: '/admin/importar',   label: 'Importar startlist via URL', icon: Flag,         desc: 'Scraping automático PTO / Ironman' },
-              { href: '/admin/resultados', label: 'Gerenciar resultados',        icon: CheckCircle2, desc: 'Adicionar / editar / deletar' },
-              { href: '/admin/pontuacao',  label: 'Calcular pontuação',          icon: Trophy,       desc: 'Após importar resultados' },
-              { href: '/admin/mercado',    label: 'Ajustar preços',              icon: Users,        desc: 'Editar preços manualmente' },
+              { href: '/admin/importar',   label: 'Importar dados via URL', icon: Flag,         desc: 'Startlist e Resultados (Scraping)' },
+              { href: '/admin/resultados', label: 'Gerenciar resultados',    icon: CheckCircle2, desc: 'Adicionar / editar / deletar' },
+              { href: '/admin/pontuacao',  label: 'Calcular pontuação',      icon: Trophy,       desc: 'Após importar resultados' },
+              { href: '/admin/mercado',    label: 'Ajustar preços',          icon: Users,        desc: 'Editar preços manualmente' },
             ].map(({ href, label, icon: Icon, desc }) => (
               <Link key={href} href={href} className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[var(--color-navy-elevated)] transition-colors group">
                 <div className="w-8 h-8 rounded-lg bg-[var(--color-orange)]/10 flex items-center justify-center shrink-0">
