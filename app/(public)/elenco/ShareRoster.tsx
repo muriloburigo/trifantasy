@@ -22,20 +22,29 @@ export default function ShareRoster({
     setLoading(true)
 
     try {
-      // Create image
+      // 1. Wait a tiny bit to ensure the ref is rendered
+      await new Promise(resolve => setTimeout(resolve, 200))
+
+      // 2. Generate Image
+      // Note: skipFonts and skipImages can help if CORS is an issue,
+      // but let's try a robust approach first.
       const dataUrl = await toPng(rosterRef.current, {
         cacheBust: true,
         backgroundColor: '#050414',
-        pixelRatio: 2, // Higher quality
+        pixelRatio: 2,
       })
 
-      // Download
+      // 3. Trigger Download
       const link = document.createElement('a')
-      link.download = `meu-elenco-trixer.png`
+      link.download = `meu-elenco-${userName.toLowerCase().replace(/\s+/g, '-')}.png`
       link.href = dataUrl
+      document.body.appendChild(link)
       link.click()
+      document.body.removeChild(link)
+      
     } catch (err) {
       console.error('Erro ao gerar imagem:', err)
+      alert('Não foi possível gerar a imagem. Tente novamente em instantes.')
     } finally {
       setLoading(false)
     }
@@ -46,14 +55,15 @@ export default function ShareRoster({
       <button
         onClick={handleShare}
         disabled={loading || portfolio.length === 0}
-        className="flex items-center gap-2 bg-[var(--color-navy-elevated)] hover:bg-white/10 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all border border-white/10 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed shadow-lg"
+        className="flex items-center gap-2 bg-[var(--color-navy-elevated)] hover:bg-white/10 text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-2 rounded-lg transition-all border border-white/10 active:scale-95 disabled:opacity-30 shadow-lg"
       >
         {loading ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} className="text-[var(--color-orange)]" />}
-        {t('shareRoster')}
+        {t('shareRoster') || 'Compartilhar'}
       </button>
 
-      {/* Hidden Roster Card for Image Generation (Off-screen) */}
-      <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
+      {/* Hidden Roster Card for Image Generation (Off-screen but rendered) */}
+      {/* We use visibility: hidden instead of display: none to ensure toPng works */}
+      <div style={{ position: 'fixed', left: '-2000px', top: '0', visibility: 'visible' }}>
         <div 
           ref={rosterRef}
           className="w-[450px] bg-[#050414] p-10 flex flex-col gap-8 font-sans text-white"
@@ -77,26 +87,21 @@ export default function ShareRoster({
             </div>
           </div>
 
-          {/* Title */}
           <div className="text-center py-2">
              <h2 className="text-sm font-black uppercase tracking-[0.4em] text-white/30 italic">Meu Elenco Oficial</h2>
           </div>
 
-          {/* Athletes List */}
           <div className="flex-1 space-y-4">
             {portfolio.map((p, i) => {
               const ath = p.athlete as any
               return (
-                <div key={i} className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 flex items-center gap-5 shadow-2xl">
+                <div key={i} className="bg-white/[0.03] border border-white/5 rounded-2xl p-4 flex items-center gap-5">
                   <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-[var(--color-orange)]/40 p-0.5 bg-[#050414]">
-                    <div className="w-full h-full rounded-full overflow-hidden">
-                      {ath?.photo_url ? (
-                        <img src={ath.photo_url} alt={ath.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)] flex items-center justify-center text-xl font-black">
-                          {ath?.name?.split(' ').slice(0,2).map((w: string) => w[0]).join('').toUpperCase()}
-                        </div>
-                      )}
+                    <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-[var(--color-orange)]/20 to-[var(--color-purple)]/20">
+                      {/* Using only initials in the exported image if images fail to load due to CORS */}
+                      <div className="text-xl font-black text-white/80">
+                        {ath?.name?.split(' ').slice(0,2).map((w: string) => w[0]).join('').toUpperCase()}
+                      </div>
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -115,7 +120,6 @@ export default function ShareRoster({
             })}
           </div>
 
-          {/* Footer */}
           <div className="mt-8 pt-8 border-t border-white/10 flex justify-between items-center">
             <div>
               <p className="text-[11px] font-medium text-white/40 mb-1">Crie seu elenco em</p>
