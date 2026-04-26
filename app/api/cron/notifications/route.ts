@@ -87,25 +87,34 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // ── 2. Market opens (race status changed to 'open') ──────────────────────────
-  const { data: openRaces } = await admin
+  // ── 2. Market opens/closes (race status changed) ─────────────────────────────
+  const { data: statusRaces } = await admin
     .from('races')
-    .select('id, name, slug, race_athletes(athlete_id)')
-    .eq('status', 'open')
-  const openWithStartlist = (openRaces ?? []).filter(
-    (r: any) => (r.race_athletes?.length ?? 0) > 0
-  )
-  for (const race of openWithStartlist) {
+    .select('id, name, slug, status, race_athletes(athlete_id)')
+    .in('status', ['open', 'locked'])
+
+  for (const race of statusRaces ?? []) {
+    const hasStartlist = (race.race_athletes?.length ?? 0) > 0
+    if (!hasStartlist) continue
+
+    const type = race.status === 'open' ? 'market_open' : 'market_locked'
+    const title = race.status === 'open' ? '📈 Mercado aberto!' : '🔒 Mercado fechado!'
+    const body = race.status === 'open'
+      ? `A lista de inscritos para ${race.name} está disponível. Hora de montar seu elenco!`
+      : `O mercado para ${race.name} está fechado. Agora é torcer pelos seus atletas!`
+    const url = race.status === 'open' ? '/atletas' : `/provas/${race.slug}`
+
     for (const uid of userIds) {
-      const done = await alreadySent(uid, 'market_open', race.id)
+      const done = await alreadySent(uid, type, race.id)
       if (done) continue
+      
       await sendToUser(uid, {
-        title: '📈 Mercado aberto!',
-        body: `A lista de inscritos para ${race.name} está disponível. Hora de montar seu elenco!`,
-        url: `/atletas`,
-        tag: `market_${race.id}`,
+        title,
+        body,
+        url,
+        tag: `${type}_${race.id}`,
       })
-      results.push(`market_open → ${uid} → ${race.name}`)
+      results.push(`${type} → ${uid} → ${race.name}`)
     }
   }
 
