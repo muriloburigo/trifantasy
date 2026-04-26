@@ -37,23 +37,53 @@ export async function GET(req: NextRequest) {
     .in('status', ['upcoming', 'open'])
     .gte('date', todayStr)
     .lte('date', in7dStr)
+
   const races7dWithStartlist = (races7d ?? []).filter(
     (r: any) => (r.race_athletes?.length ?? 0) > 0
   )
+
   for (const race of races7dWithStartlist) {
-    const daysUntil = Math.round((new Date(race.date).getTime() - today.getTime()) / 86400000)
-    const type = daysUntil <= 1 ? 'race_1d' : 'race_7d'
+    // Calculate exact day difference (ignoring hours)
+    // race.date is "YYYY-MM-DD", new Date(race.date) is midnight UTC
+    // we compare it with midnight UTC of "today"
+    const raceDate = new Date(race.date).getTime()
+    const midnightToday = new Date(todayStr).getTime()
+    const diffDays = Math.round((raceDate - midnightToday) / 86400000)
+
+    if (diffDays < 0) continue // Race already passed
+
+    let type = ''
+    let label = ''
+    let title = '🏁 Prova se aproximando!'
+    let body = ''
+
+    if (diffDays === 0) {
+      type = 'race_today'
+      label = 'HOJE'
+      body = `É dia de prova! ${race.name} acontece hoje. Boa sorte com seu elenco!`
+    } else if (diffDays === 1) {
+      type = 'race_1d'
+      label = 'amanhã'
+      body = `${race.name} acontece ${label}. O mercado vai fechar em breve — revise seu elenco!`
+    } else if (diffDays <= 7) {
+      type = 'race_7d'
+      label = `em ${diffDays} dias`
+      body = `${race.name} acontece ${label}. A lista de inscritos já está disponível!`
+    }
+
+    if (!type) continue
+
     for (const uid of userIds) {
       const done = await alreadySent(uid, type, race.id)
       if (done) continue
-      const label = daysUntil <= 1 ? 'amanhã' : `em ${daysUntil} dias`
+      
       await sendToUser(uid, {
-        title: '🏁 Prova se aproximando!',
-        body: `${race.name} acontece ${label}. O mercado vai fechar em breve — revise seu elenco!`,
+        title,
+        body,
         url: `/provas/${race.slug}`,
-        tag: `race_${race.id}`,
+        tag: `race_${race.id}_${type}`,
       })
-      results.push(`race_upcoming → ${uid} → ${race.name}`)
+      results.push(`${type} → ${uid} → ${race.name}`)
     }
   }
 
