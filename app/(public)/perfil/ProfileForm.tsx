@@ -3,8 +3,10 @@ import { useState } from 'react'
 import { createClient } from '~/lib/supabase/client'
 import { updateProfile } from './actions'
 import { Camera, Loader, CheckCircle2, AlertCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function ProfileForm({ profile }: { profile: any }) {
+  const t = useTranslations('profile')
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [photoUrl, setPhotoUrl] = useState(profile.photo_url || '')
@@ -33,9 +35,9 @@ export default function ProfileForm({ profile }: { profile: any }) {
         .getPublicUrl(filePath)
 
       setPhotoUrl(publicUrl)
-      setMsg({ type: 'success', text: 'Foto carregada! Não esqueça de salvar as alterações.' })
+      setMsg({ type: 'success', text: t('uploadSuccess') })
     } catch (error: any) {
-      setMsg({ type: 'error', text: 'Erro ao subir foto: ' + error.message })
+      setMsg({ type: 'error', text: 'Erro: ' + error.message })
     } finally {
       setUploading(false)
     }
@@ -53,7 +55,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
     if (res?.error) {
       setMsg({ type: 'error', text: res.error })
     } else {
-      setMsg({ type: 'success', text: 'Perfil atualizado com sucesso!' })
+      setMsg({ type: 'success', text: t('success') })
     }
     setLoading(false)
   }
@@ -93,12 +95,12 @@ export default function ProfileForm({ profile }: { profile: any }) {
             <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} disabled={uploading} />
           </label>
         </div>
-        <p className="text-[10px] text-[var(--color-muted)] uppercase font-bold tracking-widest">Toque para alterar sua foto</p>
+        <p className="text-[10px] text-[var(--color-muted)] uppercase font-bold tracking-widest">{t('uploadNote')}</p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-1.5">Nome de Exibição</label>
+          <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-1.5">{t('nameLabel')}</label>
           <input
             type="text" name="name" required
             defaultValue={profile.name}
@@ -107,7 +109,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-1.5">E-mail (Não editável)</label>
+          <label className="block text-xs font-bold text-[var(--color-muted)] uppercase tracking-wider mb-1.5">{t('emailLabel')}</label>
           <input
             type="email" disabled
             value={profile.email || ''}
@@ -120,7 +122,7 @@ export default function ProfileForm({ profile }: { profile: any }) {
         type="submit" disabled={loading || uploading}
         className="w-full bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] disabled:opacity-50 text-white font-bold rounded-xl py-3 text-sm transition-all shadow-lg shadow-[var(--color-orange)]/10"
       >
-        {loading ? 'Salvando...' : 'Salvar Alterações'}
+        {loading ? t('saving') : t('saveButton')}
       </button>
     </form>
   )
