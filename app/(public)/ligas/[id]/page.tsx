@@ -67,10 +67,15 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
     .eq('league_id', id)
 
   const memberUserIds = (membersRaw ?? []).map((m: any) => m.user_id)
-  const { data: memberProfiles } = memberUserIds.length > 0
-    ? await admin.from('profiles').select('id, name, photo_url').in('id', memberUserIds)
-    : { data: [] }
-  const profileMap = new Map((memberProfiles ?? []).map((p: any) => [p.id, p]))
+  let memberProfiles: any[] = []
+  if (memberUserIds.length > 0) {
+    const profilesRes = await admin.from('profiles').select('id, name, photo_url').in('id', memberUserIds)
+    // If photo_url column missing, fall back to name-only query
+    memberProfiles = profilesRes.data ?? (profilesRes.error
+      ? ((await admin.from('profiles').select('id, name').in('id', memberUserIds)).data ?? [])
+      : [])
+  }
+  const profileMap = new Map(memberProfiles.map((p: any) => [p.id, p]))
 
   const members = (membersRaw ?? []).map((m: any) => ({
     ...m,

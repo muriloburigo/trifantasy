@@ -15,18 +15,27 @@ export default async function AdminDashboard() {
   // 1. Fetch current portfolio for popularity metrics
   const { data: portfolioData } = await supabase
     .from('portfolio')
-    .select('athlete_id, athlete:athletes(name, current_price)')
+    .select('athlete_id, athlete:athletes(name, current_price, pto_rank, wtcs_rank)')
 
-  const athleteCounts: Record<string, { name: string; count: number; price: number }> = {}
+  const athleteCounts: Record<string, { name: string; count: number; price: number; rank: number }> = {}
   portfolioData?.forEach(p => {
     const a = p.athlete as any
     if (!a) return
     if (!athleteCounts[p.athlete_id]) {
-      athleteCounts[p.athlete_id] = { name: a.name, count: 0, price: Number(a.current_price) }
+      const bestRank = Math.min(a.pto_rank ?? 1000, a.wtcs_rank ?? 1000)
+      athleteCounts[p.athlete_id] = { name: a.name, count: 0, price: Number(a.current_price), rank: bestRank }
     }
     athleteCounts[p.athlete_id].count++
   })
+  
   const topPicked = Object.values(athleteCounts).sort((a, b) => b.count - a.count).slice(0, 5)
+
+  // Sleepers: Rank <= 30 but ownership < 10% (or just lowest ownership among top 50 ranked)
+  const { data: allPros } = await supabase
+    .from('athletes')
+    .select('id, name, current_price, pto_rank, wtcs_rank')
+    .eq('type', 'pro')
+    .or('pto_rank.lte.40,wtcs_rank.lte.40')
 
   // 2. Fetch all profiles for economy metrics
   const { data: profiles } = await supabase.from('profiles').select('wallet')
@@ -36,6 +45,7 @@ export default async function AdminDashboard() {
   const [
     racesRes, athletesRes, teamsRes, usersRes,
     upcomingRes, recentScoresRes, openTicketsRes,
+    lastRaceRes
   ] = await Promise.all([
     supabase.from('races').select('id', { count: 'exact', head: true }),
     supabase.from('athletes').select('id', { count: 'exact', head: true }).eq('type', 'pro'),
@@ -44,7 +54,34 @@ export default async function AdminDashboard() {
     supabase.from('races').select('id, name, date, status').in('status', ['upcoming', 'open', 'locked']).order('date', { ascending: true }).limit(5),
     supabase.from('scores').select('team_id, total_points, calculated_at, teams!inner(user_id, profile:profiles(name))').order('calculated_at', { ascending: false }).limit(8),
     supabase.from('support_tickets').select('id', { count: 'exact', head: true }).eq('status', 'open'),
+    supabase.from('races').select('id, name').eq('status', 'finished').order('date', { ascending: false }).limit(1).single()
   ])
+
+  const sleepers = (allPros ?? [])
+    .map(a => {
+      const ownership = athleteCounts[a.id]?.count ?? 0
+      const bestRank = Math.min(a.pto_rank ?? 1000, a.wtcs_rank ?? 1000)
+      return { ...a, ownership, bestRank }
+    })
+    .filter(a => a.ownership < (usersRes.count ?? 0) * 0.15)
+    .sort((a, b) => a.bestRank - b.bestRank)
+    .slice(0, 5)
+
+  // Top performers in the last race
+  let topPerformers: any[] = []
+  if (lastRaceRes.data) {
+    const { data: lastScores } = await supabase
+      .from('scores')
+      .select('total_points, teams!inner(profile:profiles(name))')
+      .eq('race_id', lastRaceRes.data.id)
+      .order('total_points', { ascending: false })
+      .limit(5)
+    
+    topPerformers = lastScores?.map(s => ({
+      name: (s.teams as any).profile.name,
+      points: s.total_points
+    })) ?? []
+  }
 
   const stats = [
     { label: 'Provas cadastradas', value: racesRes.count ?? 0, icon: Flag, href: '/admin/provas' },
@@ -73,6 +110,8 @@ export default async function AdminDashboard() {
       <div className="mb-10">
         <Indicators 
           topPicked={topPicked} 
+          sleepers={sleepers}
+          topPerformers={topPerformers}
           marketInsights={{
             totalCoins: inWallets + inAthletes,
             inWallets,
