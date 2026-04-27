@@ -1,7 +1,7 @@
 'use client'
 import { useRef, useState, useEffect } from 'react'
 import { toPng } from 'html-to-image'
-import { Share2, Loader2 } from 'lucide-react'
+import { Share2, Loader2, Check } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 export default function ShareRoster({ 
@@ -15,33 +15,53 @@ export default function ShareRoster({
 }) {
   const t = useTranslations('home')
   const [loading, setLoading] = useState(false)
+  const [imagesReady, setImagesReady] = useState(false)
   const [base64Photos, setBase64Photos] = useState<Record<string, string>>({})
   const rosterRef = useRef<HTMLDivElement>(null)
 
-  // Pre-load images as Base64 to bypass CORS issues
+  // Robust image to Base64 converter
+  const getBase64Image = (url: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.setAttribute('crossOrigin', 'anonymous')
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(img, 0, 0)
+        resolve(canvas.toDataURL('image/png'))
+      }
+      img.onerror = () => reject(new Error('Could not load image'))
+      img.src = url + (url.includes('?') ? '&' : '?') + 'not-from-cache-please'
+    })
+  }
+
   useEffect(() => {
-    const loadImages = async () => {
+    const loadAll = async () => {
       const photos: Record<string, string> = {}
-      for (const p of portfolio) {
-        const url = p.athlete?.photo_url
-        if (url && !photos[url]) {
-          try {
-            // Using fetch with no-cache and cors mode to force fresh permissions
-            const res = await fetch(url, { method: 'GET', mode: 'cors', cache: 'no-cache' })
-            if (!res.ok) throw new Error('CORS error')
-            const blob = await res.blob()
-            const reader = new FileReader()
-            reader.onloadend = () => {
-              setBase64Photos(prev => ({ ...prev, [url]: reader.result as string }))
-            }
-            reader.readAsDataURL(blob)
-          } catch (e) {
-            console.warn('[Share] Failed to preload image:', url)
-          }
+      let loadedCount = 0
+      
+      const urls = portfolio.map(p => p.athlete?.photo_url).filter(Boolean)
+      if (urls.length === 0) {
+        setImagesReady(true)
+        return
+      }
+
+      for (const url of urls) {
+        try {
+          const b64 = await getBase64Image(url)
+          photos[url] = b64
+          loadedCount++
+        } catch (e) {
+          console.warn('[Share] Missing photo:', url)
         }
       }
+      
+      setBase64Photos(photos)
+      setImagesReady(true)
     }
-    if (portfolio.length > 0) loadImages()
+    loadAll()
   }, [portfolio])
 
   const handleShare = async () => {
@@ -49,18 +69,18 @@ export default function ShareRoster({
     setLoading(true)
 
     try {
-      // Small delay to ensure any state updates are painted
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Final render sync
+      await new Promise(resolve => setTimeout(resolve, 800))
 
       const dataUrl = await toPng(rosterRef.current, {
         cacheBust: true,
         backgroundColor: '#050414',
-        pixelRatio: 3, // High quality export
+        pixelRatio: 3,
         skipFonts: false,
       })
 
       const link = document.createElement('a')
-      link.download = `meu-elenco-trixer.png`
+      link.download = `trixer-roster-${userName.toLowerCase()}.png`
       link.href = dataUrl
       document.body.appendChild(link)
       link.click()
@@ -68,7 +88,7 @@ export default function ShareRoster({
       
     } catch (err) {
       console.error('Export error:', err)
-      alert('Erro ao gerar imagem. Tente recarregar a página.')
+      alert('Houve um erro ao processar as imagens. Tente recarregar a página.')
     } finally {
       setLoading(false)
     }
@@ -79,10 +99,16 @@ export default function ShareRoster({
       <button
         onClick={handleShare}
         disabled={loading || portfolio.length === 0}
-        className="flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-[10px] sm:text-xs font-black px-3 sm:px-4 py-2 rounded-lg transition-all active:scale-95 disabled:opacity-30 shadow-lg shadow-[var(--color-orange)]/20"
+        className="flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-[10px] sm:text-xs font-black px-3 sm:px-4 py-2 rounded-lg transition-all active:scale-95 disabled:opacity-50 shadow-lg shadow-[var(--color-orange)]/20"
       >
-        {loading ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} />}
-        {t('shareRoster') || 'Compartilhar'}
+        {loading ? (
+          <Loader2 size={14} className="animate-spin" />
+        ) : !imagesReady ? (
+          <Loader2 size={14} className="animate-spin opacity-50" />
+        ) : (
+          <Share2 size={14} />
+        )}
+        {!imagesReady ? 'Processando...' : t('shareRoster') || 'Compartilhar'}
       </button>
 
       {/* ── Export Card ── */}
@@ -95,7 +121,6 @@ export default function ShareRoster({
             minHeight: '800px'
           }}
         >
-          {/* Background Branding */}
           <div className="absolute top-[15%] left-1/2 -translate-x-1/2 opacity-[0.03] pointer-events-none w-full text-center">
             <span className="text-[140px] font-black tracking-tighter">TRIXER</span>
           </div>
@@ -121,7 +146,7 @@ export default function ShareRoster({
           </div>
 
           <div className="text-center mb-8">
-             <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 italic">Meu Elenco Oficial</h2>
+             <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 italic">Meu Elenco Oficial</h2>
           </div>
 
           {/* ── Athletes ── */}
@@ -163,7 +188,6 @@ export default function ShareRoster({
             })}
           </div>
 
-          {/* ── Footer ── */}
           <div className="mt-10 pt-8 border-t border-white/10 flex justify-between items-center relative z-10">
             <div>
               <p className="text-[10px] font-medium text-white/40 mb-1">Crie seu elenco em</p>
