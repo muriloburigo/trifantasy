@@ -1,7 +1,7 @@
 'use client'
 import { useRef, useState, useEffect } from 'react'
-import { toPng } from 'html-to-image'
-import { Share2, Loader2 } from 'lucide-react'
+import { toPng, toBlob } from 'html-to-image'
+import { Share2, Loader2, MessageCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 export default function ShareRoster({ 
@@ -16,7 +16,7 @@ export default function ShareRoster({
   variant?: 'default' | 'compact'
 }) {
   const t = useTranslations('home')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<'share' | 'whatsapp' | null>(null)
   const [imagesReady, setImagesReady] = useState(false)
   const [base64Photos, setBase64Photos] = useState<Record<string, string>>({})
   const rosterRef = useRef<HTMLDivElement>(null)
@@ -34,7 +34,7 @@ export default function ShareRoster({
         resolve(canvas.toDataURL('image/png'))
       }
       img.onerror = () => reject(new Error('Could not load image'))
-      img.src = url + (url.includes('?') ? '&' : '?') + 'v=4'
+      img.src = url + (url.includes('?') ? '&' : '?') + 'v=5'
     })
   }
 
@@ -43,14 +43,11 @@ export default function ShareRoster({
       const photos: Record<string, string> = {}
       const urls = portfolio.map(p => p.athlete?.photo_url).filter(Boolean)
       if (urls.length === 0) { setImagesReady(true); return }
-
       for (const url of urls) {
         try {
           const b64 = await getBase64Image(url)
           photos[url] = b64
-        } catch (e) {
-          console.warn('[Share] Photo skip:', url)
-        }
+        } catch (e) { console.warn('[Share] Photo skip:', url) }
       }
       setBase64Photos(photos)
       setImagesReady(true)
@@ -58,26 +55,50 @@ export default function ShareRoster({
     loadAll()
   }, [portfolio])
 
-  const handleShare = async () => {
+  const handleShare = async (mode: 'download' | 'whatsapp') => {
     if (!rosterRef.current) return
-    setLoading(true)
+    setLoading(mode === 'whatsapp' ? 'whatsapp' : 'share')
+    
     try {
       await new Promise(resolve => setTimeout(resolve, 600))
-      const dataUrl = await toPng(rosterRef.current, {
+      
+      const blob = await toBlob(rosterRef.current, {
         cacheBust: true,
         backgroundColor: '#050414',
         pixelRatio: 2.5,
       })
-      const link = document.createElement('a')
-      link.download = `trixer-roster.png`
-      link.href = dataUrl
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+
+      if (!blob) throw new Error('Failed to generate image')
+
+      const fileName = `elenco-trixer-${userName.toLowerCase().replace(/\s+/g, '-')}.png`
+      const file = new File([blob], fileName, { type: 'image/png' })
+      const shareText = `Confira meu elenco no Trixer - The Triathlon Game! 🏊‍♂️🚴‍♂️🏃‍♂️\n\nMonte o seu em: https://www.trixer.app`
+
+      // Try native share (mobile)
+      if (mode === 'whatsapp' && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          text: shareText,
+        })
+      } else {
+        // Fallback: Download and Open WhatsApp link (for text)
+        const dataUrl = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.download = fileName
+        link.href = dataUrl
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
+        if (mode === 'whatsapp') {
+          const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`
+          window.open(waUrl, '_blank')
+        }
+      }
     } catch (err) {
       console.error('Export error:', err)
     } finally {
-      setLoading(false)
+      setLoading(null)
     }
   }
 
@@ -85,24 +106,39 @@ export default function ShareRoster({
 
   return (
     <>
-      <button
-        onClick={handleShare}
-        disabled={loading || portfolio.length === 0}
-        className={`
-          flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-40
-          ${isCompact 
-            ? 'p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[var(--color-orange)]' 
-            : 'px-4 py-2 rounded-lg border-2 border-[var(--color-navy-border)] bg-white/5 hover:bg-white/10 text-white text-xs font-bold'
-          }
-        `}
-      >
-        {loading || !imagesReady ? (
-          <Loader2 size={14} className="animate-spin" />
-        ) : (
-          <Share2 size={14} className={isCompact ? 'text-[var(--color-orange)]' : 'text-[var(--color-orange)]'} />
-        )}
-        {!isCompact && (imagesReady ? (t('shareRoster') || 'Compartilhar') : 'Processando...')}
-      </button>
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* WhatsApp Button */}
+        <button
+          onClick={() => handleShare('whatsapp')}
+          disabled={!!loading || portfolio.length === 0 || !imagesReady}
+          className={`
+            flex items-center justify-center transition-all active:scale-95 disabled:opacity-40
+            ${isCompact 
+              ? 'p-1.5 rounded-lg bg-green-500/10 hover:bg-green-500/20 text-green-500' 
+              : 'px-3 py-2 rounded-lg border-2 border-green-500/30 bg-green-500/5 hover:bg-green-500/10 text-green-500 text-xs font-bold gap-2'
+            }
+          `}
+        >
+          {loading === 'whatsapp' ? <Loader2 size={14} className="animate-spin" /> : <MessageCircle size={14} fill={isCompact ? 'none' : 'currentColor'} />}
+          {!isCompact && 'WhatsApp'}
+        </button>
+
+        {/* Default Share/Download Button */}
+        <button
+          onClick={() => handleShare('download')}
+          disabled={!!loading || portfolio.length === 0 || !imagesReady}
+          className={`
+            flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-40
+            ${isCompact 
+              ? 'p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[var(--color-orange)]' 
+              : 'px-3 py-2 rounded-lg border-2 border-[var(--color-navy-border)] bg-white/5 hover:bg-white/10 text-white text-xs font-bold'
+            }
+          `}
+        >
+          {loading === 'share' ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} className="text-[var(--color-orange)]" />}
+          {!isCompact && (imagesReady ? t('shareRoster') || 'Compartilhar' : '...')}
+        </button>
+      </div>
 
       {/* ── Export Card ── */}
       <div style={{ position: 'fixed', left: '-9999px', top: '0', pointerEvents: 'none', visibility: 'visible' }}>
@@ -145,7 +181,7 @@ export default function ShareRoster({
                     <p className="text-lg font-black truncate leading-none mb-2 tracking-tight">{ath.name.toUpperCase()}</p>
                     <div className="flex gap-2">
                       <div className="bg-white/5 px-2 py-0.5 rounded text-[10px] font-bold text-white/40 border border-white/5 uppercase">PTO #{ath.pto_rank || '—'}</div>
-                      <div className="bg-white/5 px-2 py-0.5 rounded text-[10px] font-bold text-white/40 border border-white/5 uppercase">WTCS #{ath.wtcs_rank || '—'}</div>
+                      <div className="bg-white/5 px-2 py-0.5 rounded text-[10px] font-bold text-white/50 border border-white/5 uppercase">WTCS #{ath.wtcs_rank || '—'}</div>
                     </div>
                   </div>
                   <div className="text-right"><p className="text-xl font-black text-white tracking-tight">T${Number(ath.current_price).toFixed(0)}</p><p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Valor</p></div>
