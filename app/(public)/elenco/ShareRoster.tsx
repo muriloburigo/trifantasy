@@ -22,27 +22,24 @@ export default function ShareRoster({
     setLoading(true)
 
     try {
-      // 1. Give extra time for any remaining images to be processed by the browser
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Small delay for rendering
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       const dataUrl = await toPng(rosterRef.current, {
         cacheBust: true,
         backgroundColor: '#050414',
         pixelRatio: 2,
-        // This is key for CORS images
-        includeQueryParams: true,
       })
 
       const link = document.createElement('a')
-      link.download = `trixer-elenco-${userName.toLowerCase().replace(/\s+/g, '-')}.png`
+      link.download = `trixer-roster.png`
       link.href = dataUrl
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
       
     } catch (err) {
-      console.error('Erro ao gerar imagem:', err)
-      alert('Erro ao gerar imagem. Tente novamente.')
+      console.error('Share error:', err)
     } finally {
       setLoading(false)
     }
@@ -53,17 +50,17 @@ export default function ShareRoster({
       <button
         onClick={handleShare}
         disabled={loading || portfolio.length === 0}
-        className="flex items-center gap-2 bg-[var(--color-navy-elevated)] hover:bg-white/10 text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-2 rounded-lg transition-all border border-white/10 active:scale-95 disabled:opacity-30 shadow-lg"
+        className="flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-2 rounded-lg transition-all active:scale-95 disabled:opacity-30 shadow-lg shadow-[var(--color-orange)]/20"
       >
-        {loading ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} className="text-[var(--color-orange)]" />}
+        {loading ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} />}
         {t('shareRoster') || 'Compartilhar'}
       </button>
 
       {/* ── Story Card (1080x1920) ── */}
-      <div style={{ position: 'fixed', left: '-5000px', top: '0', visibility: 'visible' }}>
+      <div style={{ position: 'fixed', left: '-9999px', top: '0', visibility: 'visible' }}>
         <div 
           ref={rosterRef}
-          className="w-[1080px] h-[1920px] bg-[#050414] flex flex-col justify-center px-16 py-52 font-sans text-white relative overflow-hidden"
+          className="w-[1080px] h-[1920px] bg-[#050414] flex flex-col justify-center px-16 py-64 font-sans text-white relative overflow-hidden"
           style={{ 
             backgroundImage: 'radial-gradient(circle at 20% 10%, rgba(255, 92, 0, 0.1), transparent), radial-gradient(circle at 80% 90%, rgba(107, 33, 168, 0.15), transparent)'
           }}
