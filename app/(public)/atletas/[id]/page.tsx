@@ -272,7 +272,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div>
                       <p className="text-[10px] font-semibold text-[var(--color-orange)] uppercase tracking-wider">
-                        {race.distance === 'full' ? 'Full Triathlon' : '70.3'}
+                        {race.distance === 'full' ? 'Full Triathlon' : race.distance === 'T100' ? 'T100' : '70.3'}
                       </p>
                       <p className="font-bold text-sm">{race.name}</p>
                       <p className="text-[11px] text-[var(--color-muted)] mt-0.5">

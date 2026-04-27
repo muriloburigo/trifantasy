@@ -7,7 +7,7 @@ import { formatDate, daysUntil } from '~/lib/utils'
 import type { Race } from '~/lib/types'
 
 type StatusFilter = 'all' | 'open' | 'upcoming' | 'finished'
-type DistanceFilter = 'all' | 'full' | 'middle'
+type DistanceFilter = 'all' | 'full' | '70.3' | 'T100'
 
 function RaceCard({ race, t }: { race: Race; t: ReturnType<typeof useTranslations<'races'>> }) {
   const days = daysUntil(race.date)
@@ -29,7 +29,7 @@ function RaceCard({ race, t }: { race: Race; t: ReturnType<typeof useTranslation
       <div className="flex items-start justify-between gap-2">
         <div>
           <span className="text-xs font-semibold text-[var(--color-orange)] uppercase tracking-wider">
-            {race.distance === 'full' ? t('full') : t('middle')}
+            {race.distance === 'full' ? t('full') : race.distance === 'T100' ? 'T100' : t('middle')}
           </span>
           <h3 className="font-bold text-base mt-0.5 leading-tight group-hover:text-[var(--color-orange)] transition-colors">
             {race.name}
@@ -77,8 +77,7 @@ export default function RaceList({ races }: { races: Race[] }) {
       )
     }
     if (status !== 'all')   r = r.filter(race => race.status === status)
-    if (distance === 'full')   r = r.filter(race => race.distance === 'full')
-    if (distance === 'middle') r = r.filter(race => race.distance !== 'full')
+    if (distance !== 'all') r = r.filter(race => race.distance === distance)
 
     return r
   }, [races, search, status, distance])
@@ -123,11 +122,12 @@ export default function RaceList({ races }: { races: Race[] }) {
         <button onClick={() => setStatus('upcoming')} className={chip(status === 'upcoming')}>{t('filterUpcoming')}</button>
         <button onClick={() => setStatus('finished')} className={chip(status === 'finished')}>{t('filterFinished')}</button>
 
-        <div className="w-px h-4 bg-[var(--color-navy-border)]" />
+        <div className="w-px h-4 bg-[var(--color-navy-border)] mx-1" />
 
         {/* Distance */}
-        <button onClick={() => setDistance(distance === 'full' ? 'all' : 'full')}   className={chip(distance === 'full')}>{t('filterFull')}</button>
-        <button onClick={() => setDistance(distance === 'middle' ? 'all' : 'middle')} className={chip(distance === 'middle')}>{t('filterMiddle')}</button>
+        <button onClick={() => setDistance(distance === 'full' ? 'all' : 'full')}   className={chip(distance === 'full')}>Full</button>
+        <button onClick={() => setDistance(distance === '70.3' ? 'all' : '70.3')}   className={chip(distance === '70.3')}>70.3</button>
+        <button onClick={() => setDistance(distance === 'T100' ? 'all' : 'T100')}   className={chip(distance === 'T100')}>T100</button>
 
         {hasFilters && (
           <button onClick={clear} className="ml-auto flex items-center gap-1 text-xs text-[var(--color-muted)] hover:text-white transition-colors">
@@ -172,7 +172,6 @@ export default function RaceList({ races }: { races: Race[] }) {
             </section>
           )}
 
-          {/* Locked races (no separate section, included in upcoming filter visually) */}
           {filtered.filter(r => r.status === 'locked' && status === 'all').length > 0 && (
             <section className="mb-10">
               <h2 className="text-sm font-bold uppercase tracking-wider text-yellow-400 mb-4">{t('statusLocked')}</h2>

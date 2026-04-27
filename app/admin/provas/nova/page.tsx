@@ -32,6 +32,9 @@ export default async function NovaProvaPage() {
               className="w-full bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-orange)]">
               <option value="full">Full (Ironman)</option>
               <option value="70.3">70.3 (Half)</option>
+              <option value="T100">T100 Series</option>
+              <option value="ows">OWS / Open Water</option>
+              <option value="other">Outra</option>
             </select>
           </div>
 

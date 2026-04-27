@@ -84,7 +84,7 @@ function RaceCard({ race, athleteCount, t }: { race: Race; athleteCount?: number
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex-1 min-w-0">
           <span className={`text-[10px] font-bold uppercase tracking-wider ${isOpen ? 'text-[var(--color-success)]' : 'text-[var(--color-muted)]'}`}>
-            {race.distance === 'full' ? 'Full · ' : '70.3 · '}{isOpen ? t('raceOpen') : t('raceUpcoming')}
+            {race.distance === 'full' ? 'Full · ' : race.distance === 'T100' ? 'T100 · ' : '70.3 · '}{isOpen ? t('raceOpen') : t('raceUpcoming')}
           </span>
           <h3 className="font-bold text-sm mt-0.5 leading-tight group-hover:text-[var(--color-orange)] transition-colors line-clamp-2">{race.name}</h3>
         </div>

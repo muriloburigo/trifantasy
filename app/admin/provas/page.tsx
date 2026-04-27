@@ -52,7 +52,7 @@ export default async function AdminProvasPage() {
                 <td className="px-4 py-3 text-[var(--color-muted)]">{formatDate(race.date)}</td>
                 <td className="px-4 py-3">
                   <span className="text-xs border border-[var(--color-navy-border)] rounded-full px-2 py-0.5">
-                    {race.distance === 'full' ? 'Full' : '70.3'}
+                    {race.distance === 'full' ? 'Full' : race.distance === 'T100' ? 'T100' : '70.3'}
                   </span>
                 </td>
                 <td className="px-4 py-3">
