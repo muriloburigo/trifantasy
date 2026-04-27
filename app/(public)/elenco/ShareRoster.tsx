@@ -1,7 +1,7 @@
 'use client'
 import { useRef, useState, useEffect } from 'react'
-import { toBlob } from 'html-to-image'
-import { Share2, Loader2, MessageCircle } from 'lucide-react'
+import { toPng } from 'html-to-image'
+import { Share2, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 export default function ShareRoster({ 
@@ -16,7 +16,7 @@ export default function ShareRoster({
   variant?: 'default' | 'compact'
 }) {
   const t = useTranslations('home')
-  const [loading, setLoading] = useState<'share' | 'whatsapp' | null>(null)
+  const [loading, setLoading] = useState(false)
   const [imagesReady, setImagesReady] = useState(false)
   const [base64Photos, setBase64Photos] = useState<Record<string, string>>({})
   const rosterRef = useRef<HTMLDivElement>(null)
@@ -34,7 +34,7 @@ export default function ShareRoster({
         resolve(canvas.toDataURL('image/png'))
       }
       img.onerror = () => reject(new Error('Could not load image'))
-      img.src = url + (url.includes('?') ? '&' : '?') + 'v=7'
+      img.src = url + (url.includes('?') ? '&' : '?') + 'v=8'
     })
   }
 
@@ -55,63 +55,26 @@ export default function ShareRoster({
     loadAll()
   }, [portfolio])
 
-  const handleShare = async (mode: 'download' | 'whatsapp') => {
+  const handleShare = async () => {
     if (!rosterRef.current) return
-    setLoading(mode === 'whatsapp' ? 'whatsapp' : 'share')
-    
+    setLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 400))
-      
-      const blob = await toBlob(rosterRef.current, {
+      await new Promise(resolve => setTimeout(resolve, 600))
+      const dataUrl = await toPng(rosterRef.current, {
         cacheBust: true,
         backgroundColor: '#050414',
-        pixelRatio: 2,
+        pixelRatio: 2.5,
       })
-
-      if (!blob) throw new Error('Failed to generate image')
-
-      const fileName = `trixer-${userName.toLowerCase().replace(/\s+/g, '-')}.png`
-      const shareText = `Confira meu elenco no Trixer - The Triathlon Game! 🏊‍♂️🚴‍♂️🏃‍♂️\n\nhttps://www.trixer.app`
-
-      if (mode === 'whatsapp') {
-        const file = new File([blob], fileName, { type: 'image/png' })
-        
-        // 1. Mobile: Native Share
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              text: shareText,
-            })
-            setLoading(null)
-            return
-          } catch (e) { console.log('Native share failed', e) }
-        }
-
-        // 2. Desktop: Copy to clipboard and open WhatsApp
-        try {
-          const item = new ClipboardItem({ 'image/png': blob })
-          await navigator.clipboard.write([item])
-          alert('Imagem copiada! Cole (Ctrl+V) na conversa do WhatsApp.')
-        } catch (e) {
-          console.warn('Clipboard copy failed, falling back to text only', e)
-        }
-
-        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`
-        window.open(waUrl, '_blank')
-      } else {
-        // Pure Download
-        const dataUrl = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = dataUrl
-        link.download = fileName
-        link.click()
-      }
+      const link = document.createElement('a')
+      link.download = `meu-elenco-trixer.png`
+      link.href = dataUrl
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     } catch (err) {
       console.error('Export error:', err)
-      alert('Houve um erro. Tente recarregar a página.')
     } finally {
-      setLoading(null)
+      setLoading(false)
     }
   }
 
@@ -119,39 +82,26 @@ export default function ShareRoster({
 
   return (
     <>
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        <button
-          onClick={() => handleShare('whatsapp')}
-          disabled={!!loading || portfolio.length === 0 || !imagesReady}
-          className={`
-            flex items-center justify-center transition-all active:scale-95 disabled:opacity-40
-            ${isCompact 
-              ? 'p-1.5 rounded-lg bg-green-500/10 hover:bg-green-500/20 text-green-500' 
-              : 'px-3 py-2 rounded-lg border-2 border-green-500/30 bg-green-500/5 hover:bg-green-500/10 text-green-500 text-xs font-bold gap-2'
-            }
-          `}
-        >
-          {loading === 'whatsapp' ? <Loader2 size={14} className="animate-spin" /> : <MessageCircle size={14} fill={isCompact ? 'none' : 'currentColor'} />}
-          {!isCompact && 'WhatsApp'}
-        </button>
+      <button
+        onClick={handleShare}
+        disabled={loading || portfolio.length === 0 || !imagesReady}
+        className={`
+          flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-40
+          ${isCompact 
+            ? 'p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[var(--color-orange)]' 
+            : 'px-3 py-2 rounded-lg border-2 border-[var(--color-navy-border)] bg-white/5 hover:bg-white/10 text-white text-xs font-bold'
+          }
+        `}
+      >
+        {loading || !imagesReady ? (
+          <Loader2 size={14} className="animate-spin" />
+        ) : (
+          <Share2 size={14} className="text-[var(--color-orange)]" />
+        )}
+        {!isCompact && (imagesReady ? t('shareRoster') || 'Compartilhar' : '...')}
+      </button>
 
-        <button
-          onClick={() => handleShare('download')}
-          disabled={!!loading || portfolio.length === 0 || !imagesReady}
-          className={`
-            flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-40
-            ${isCompact 
-              ? 'p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[var(--color-orange)]' 
-              : 'px-3 py-2 rounded-lg border-2 border-[var(--color-navy-border)] bg-white/5 hover:bg-white/10 text-white text-xs font-bold'
-            }
-          `}
-        >
-          {loading === 'share' ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} className="text-[var(--color-orange)]" />}
-          {!isCompact && (imagesReady ? t('shareRoster') || 'Compartilhar' : '...')}
-        </button>
-      </div>
-
-      {/* ── Export Card (Oculto) ── */}
+      {/* ── Export Card ── */}
       <div style={{ position: 'fixed', left: '-9999px', top: '0', pointerEvents: 'none', visibility: 'visible' }}>
         <div ref={rosterRef} className="w-[450px] bg-[#050414] flex flex-col px-10 py-32 font-sans text-white relative overflow-hidden"
           style={{ backgroundImage: 'radial-gradient(circle at 20% 10%, rgba(255, 92, 0, 0.15), transparent), radial-gradient(circle at 80% 90%, rgba(107, 33, 168, 0.12), transparent)', minHeight: '800px' }}>
