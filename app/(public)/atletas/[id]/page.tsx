@@ -128,22 +128,23 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
     .select('*', { count: 'exact', head: true })
     .eq('athlete_id', id)
 
-  // Price change history per race
-  const { data: priceHistory } = await pub
+  // Price change history per race (with breakdown for detailed display)
+  const { data: priceHistory } = await admin
     .from('athlete_price_history')
-    .select('race_id, old_price, new_price, change, recorded_at, race:races(name)')
+    .select('race_id, old_price, new_price, change, breakdown, recorded_at, race:races(name)')
     .eq('athlete_id', id)
     .eq('reason', 'race_result')
     .order('recorded_at', { ascending: false })
 
   // Map race_id → price history entry
-  const priceHistoryByRace: Record<string, { old_price: number; new_price: number; change: number; race_name: string }> = {}
+  const priceHistoryByRace: Record<string, { old_price: number; new_price: number; change: number; race_name: string; breakdown: any[] }> = {}
   for (const h of priceHistory ?? []) {
     priceHistoryByRace[h.race_id] = {
       old_price: Number(h.old_price),
       new_price: Number(h.new_price),
       change: Number(h.change),
       race_name: (h.race as any)?.name ?? '—',
+      breakdown: Array.isArray(h.breakdown) ? h.breakdown : [],
     }
   }
 
@@ -343,17 +344,42 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
                   )}
 
                   {/* Price change indicator (per-race) */}
-                  {isFinished && priceHistoryByRace[ra.race_id] && (
-                    <div className="mt-2 pt-2 border-t border-[var(--color-navy-border)]/50 flex items-center gap-2">
-                      <span className="text-[11px] text-[var(--color-muted)]">{t('priceChangeLabel')}</span>
-                      <span className={`text-[11px] font-bold ${priceHistoryByRace[ra.race_id].change > 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
-                        {priceHistoryByRace[ra.race_id].change > 0 ? '+' : ''}{priceHistoryByRace[ra.race_id].change.toFixed(0)} T$
-                      </span>
-                      <span className="text-[11px] text-[var(--color-muted)]">
-                        (T${priceHistoryByRace[ra.race_id].old_price.toFixed(0)} → T${priceHistoryByRace[ra.race_id].new_price.toFixed(0)})
-                      </span>
-                    </div>
-                  )}
+                  {isFinished && priceHistoryByRace[ra.race_id] && (() => {
+                    const ph = priceHistoryByRace[ra.race_id]
+                    const isUp = ph.change > 0
+                    const isDown = ph.change < 0
+                    return (
+                      <div className="mt-2 pt-2 border-t border-[var(--color-navy-border)]/50">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[11px] text-[var(--color-muted)]">{t('priceChangeLabel')}</span>
+                          <span className={`text-[11px] font-bold ${isUp ? 'text-[var(--color-success)]' : isDown ? 'text-[var(--color-danger)]' : 'text-[var(--color-muted)]'}`}>
+                            {isUp ? '+' : ''}{ph.change.toFixed(0)} T$
+                          </span>
+                          <span className="text-[11px] text-[var(--color-muted)]">
+                            (T${ph.old_price.toFixed(0)} → T${ph.new_price.toFixed(0)})
+                          </span>
+                        </div>
+                        {ph.breakdown.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {ph.breakdown.map((item: any, bi: number) => (
+                              <span
+                                key={bi}
+                                className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                                  item.delta > 0
+                                    ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                                    : item.delta < 0
+                                    ? 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]'
+                                    : 'bg-white/5 text-[var(--color-muted)]'
+                                }`}
+                              >
+                                {item.label}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })()}
                 </div>
               )
             })}
@@ -372,18 +398,40 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
             {(priceHistory ?? []).map((h: any, i: number) => {
               const change = Number(h.change)
               const isUp = change > 0
+              const isDown = change < 0
+              const bd: any[] = Array.isArray(h.breakdown) ? h.breakdown : []
               return (
-                <div key={i} className="px-4 py-3 flex items-center justify-between gap-3">
-                  <p className="text-xs font-semibold truncate">{(h.race as any)?.name ?? '—'}</p>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-[11px] text-[var(--color-muted)]">
-                      T${Number(h.old_price).toFixed(0)} → T${Number(h.new_price).toFixed(0)}
-                    </span>
-                    <span className={`text-sm font-black flex items-center gap-0.5 ${isUp ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
-                      {isUp ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
-                      {isUp ? '+' : ''}{change.toFixed(0)}
-                    </span>
+                <div key={i} className="px-4 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-xs font-semibold truncate">{(h.race as any)?.name ?? '—'}</p>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[11px] text-[var(--color-muted)]">
+                        T${Number(h.old_price).toFixed(0)} → T${Number(h.new_price).toFixed(0)}
+                      </span>
+                      <span className={`text-sm font-black flex items-center gap-0.5 ${isUp ? 'text-[var(--color-success)]' : isDown ? 'text-[var(--color-danger)]' : 'text-[var(--color-muted)]'}`}>
+                        {isUp ? <TrendingUp size={13} /> : isDown ? <TrendingDown size={13} /> : <Minus size={13} />}
+                        {isUp ? '+' : ''}{change.toFixed(0)}
+                      </span>
+                    </div>
                   </div>
+                  {bd.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {bd.map((item: any, bi: number) => (
+                        <span
+                          key={bi}
+                          className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                            item.delta > 0
+                              ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                              : item.delta < 0
+                              ? 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]'
+                              : 'bg-white/5 text-[var(--color-muted)]'
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )
             })}
