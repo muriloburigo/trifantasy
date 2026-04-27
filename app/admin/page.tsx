@@ -33,10 +33,9 @@ export default async function AdminInsightsPage() {
     .or('pto_rank.lte.40,wtcs_rank.lte.40')
 
   // 3. Economy & User counts
-  const [profilesRes, usersRes, lastRaceRes, leaguesRes] = await Promise.all([
+  const [profilesRes, usersRes, leaguesRes] = await Promise.all([
     supabase.from('profiles').select('wallet'),
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
-    supabase.from('races').select('id, name').eq('status', 'finished').order('date', { ascending: false }).limit(1).single(),
     supabase.from('leagues').select('id, member_count').eq('is_public', false)
   ])
 
@@ -54,21 +53,7 @@ export default async function AdminInsightsPage() {
     .sort((a, b) => a.bestRank - b.bestRank)
     .slice(0, 5)
 
-  // Top performers
-  let topPerformers: any[] = []
-  if (lastRaceRes.data) {
-    const { data: lastScores } = await supabase
-      .from('scores')
-      .select('total_points, teams!inner(race_id, profile:profiles(name))')
-      .eq('teams.race_id', lastRaceRes.data.id)
-      .order('total_points', { ascending: false })
-      .limit(5)
-    
-    topPerformers = lastScores?.map(s => ({
-      name: (s.teams as any).profile.name,
-      points: s.total_points
-    })) ?? []
-  }
+  const topPerformers: any[] = []
 
   // Leagues
   const privateLeagues = leaguesRes.data ?? []

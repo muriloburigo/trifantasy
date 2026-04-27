@@ -58,7 +58,7 @@ export default async function LigasPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
       <BackLink href="/" />
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-[var(--color-muted)] mt-1">
@@ -78,13 +78,13 @@ export default async function LigasPage() {
 
       {/* Not logged in CTA */}
       {!user && (
-        <div className="bg-[var(--color-navy-card)] border border-[var(--color-orange)]/30 rounded-2xl p-8 mb-8 text-center">
+        <div className="bg-[var(--color-navy-card)] border border-[var(--color-orange)]/30 rounded-2xl p-5 sm:p-8 mb-8 text-center">
           <Trophy size={36} className="mx-auto mb-3 text-[var(--color-orange)] opacity-80" />
           <h2 className="text-lg font-bold mb-2">{t('notLoggedTitle')}</h2>
           <p className="text-sm text-[var(--color-muted)] max-w-md mx-auto mb-6">
             {t('notLoggedDesc')}
           </p>
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/register" className="bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors">
               {t('notLoggedCta')}
             </Link>

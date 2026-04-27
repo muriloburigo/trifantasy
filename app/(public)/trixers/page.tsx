@@ -29,55 +29,34 @@ export default async function TrixersPage() {
   const admin = createAdminClient()
   const pub   = createPublicClient()
 
-  const [scoresRes, profilesRes, teamsRes] = await Promise.all([
-    admin
-      .from('scores')
-      .select('total_points, race:races(name, date), teams(user_id, profiles(name, country))')
-      .order('total_points', { ascending: false })
-      .limit(500),
+  const [profilesCountRes, teamsRes, allProfilesRes, portfolioRes] = await Promise.all([
     pub.from('profiles').select('id', { count: 'exact', head: true }),
     admin.from('teams').select('user_id', { count: 'exact', head: true }),
+    admin.from('profiles').select('id, name, country, wallet'),
+    admin.from('portfolio').select('user_id, athlete:athletes(current_price)'),
   ])
 
-  const entries = (scoresRes.data ?? []).filter(s => s.teams)
+  const totalTrixers = profilesCountRes.count ?? 0
+  const totalTeams   = teamsRes.count ?? 0
 
-  // Aggregate per user: best score, races played, best race name
-  const byUser: Record<string, {
-    name: string
-    country: string | null
-    bestScore: number
-    bestRace: string
-    racesPlayed: number
-  }> = {}
-
-  for (const s of entries) {
-    const t = s.teams as any
-    const uid = t?.user_id
-    if (!uid) continue
-    const pts = Number(s.total_points ?? 0)
-    if (!byUser[uid]) {
-      byUser[uid] = {
-        name: t.profiles?.name ?? 'Trixter',
-        country: t.profiles?.country ?? null,
-        bestScore: pts,
-        bestRace: (s as any).race?.name ?? '—',
-        racesPlayed: 1,
-      }
-    } else {
-      byUser[uid].racesPlayed++
-      if (pts > byUser[uid].bestScore) {
-        byUser[uid].bestScore = pts
-        byUser[uid].bestRace = (s as any).race?.name ?? '—'
-      }
-    }
+  // Calculate net worth per user: wallet + sum of current portfolio value
+  const portfolioByUser: Record<string, number> = {}
+  for (const p of portfolioRes.data ?? []) {
+    const price = Number((p.athlete as any)?.current_price ?? 0)
+    portfolioByUser[p.user_id] = (portfolioByUser[p.user_id] ?? 0) + price
   }
 
-  const ranked = Object.values(byUser)
-    .sort((a, b) => b.bestScore - a.bestScore)
-
-  const totalTrixers  = profilesRes.count ?? 0
-  const activeTrixers = ranked.length
-  const totalTeams    = teamsRes.count ?? 0
+  const ranked = (allProfilesRes.data ?? [])
+    .map(p => ({
+      id: p.id,
+      name: p.name ?? 'Trixter',
+      country: p.country ?? null,
+      wallet: Number(p.wallet ?? 0),
+      portfolioValue: portfolioByUser[p.id] ?? 0,
+      netWorth: Number(p.wallet ?? 0) + (portfolioByUser[p.id] ?? 0),
+    }))
+    .filter(p => p.netWorth > 0)
+    .sort((a, b) => b.netWorth - a.netWorth)
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
@@ -88,13 +67,13 @@ export default async function TrixersPage() {
       </div>
 
       {/* Stats bar */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-8">
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4 text-center">
           <p className="text-2xl font-black text-[var(--color-orange)]">{totalTrixers}</p>
           <p className="text-xs text-[var(--color-muted)] mt-1">{t('statTrixers')}</p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4 text-center">
-          <p className="text-2xl font-black text-[var(--color-success)]">{activeTrixers}</p>
+          <p className="text-2xl font-black text-[var(--color-success)]">{ranked.length}</p>
           <p className="text-xs text-[var(--color-muted)] mt-1">{t('statPlayed')}</p>
         </div>
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4 text-center">
@@ -105,11 +84,10 @@ export default async function TrixersPage() {
 
       <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-[40px_1fr_60px_70px] gap-2 px-4 py-2.5 border-b border-[var(--color-navy-border)] text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
+        <div className="grid grid-cols-[40px_1fr_90px] gap-2 px-4 py-2.5 border-b border-[var(--color-navy-border)] text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
           <span>{t('colRank')}</span>
           <span>{t('colTrixter')}</span>
-          <span className="text-center">{t('colRaces')}</span>
-          <span className="text-right">{t('colBest')}</span>
+          <span className="text-right">Patrimônio</span>
         </div>
 
         {ranked.length === 0 && (
@@ -124,8 +102,8 @@ export default async function TrixersPage() {
           const top3 = i < 3
           return (
             <div
-              key={i}
-              className={`grid grid-cols-[40px_1fr_60px_70px] gap-2 items-center px-4 py-3.5 border-b border-[var(--color-navy-border)] last:border-0 ${top3 ? 'bg-[var(--color-navy-elevated)]/40' : ''}`}
+              key={trixter.id}
+              className={`grid grid-cols-[40px_1fr_90px] gap-2 items-center px-4 py-3.5 border-b border-[var(--color-navy-border)] last:border-0 ${top3 ? 'bg-[var(--color-navy-elevated)]/40' : ''}`}
             >
               {/* Position */}
               <div className="text-center shrink-0">
@@ -149,21 +127,17 @@ export default async function TrixersPage() {
                     {trixter.name}
                     {trixter.country && <span className="ml-1 text-xs">{flag(trixter.country)}</span>}
                   </p>
-                  <p className="text-[11px] text-[var(--color-muted)] truncate">{trixter.bestRace}</p>
+                  <p className="text-[11px] text-[var(--color-muted)]">
+                    T${trixter.wallet.toFixed(0)} carteira · T${trixter.portfolioValue.toFixed(0)} atletas
+                  </p>
                 </div>
               </div>
 
-              {/* Races played */}
-              <div className="text-center">
-                <span className="text-sm font-semibold tabular-nums">{trixter.racesPlayed}</span>
-              </div>
-
-              {/* Best score */}
+              {/* Net worth */}
               <div className="text-right">
                 <p className={`text-base font-black tabular-nums ${top3 ? 'text-[var(--color-orange)]' : ''}`}>
-                  {trixter.bestScore}
+                  T${trixter.netWorth.toFixed(0)}
                 </p>
-                <p className="text-[10px] text-[var(--color-muted)]">pts</p>
               </div>
             </div>
           )

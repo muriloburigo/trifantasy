@@ -68,13 +68,13 @@ export default async function AdminAtletasPage({
   const returnUrl = `/admin/atletas?race_id=${selectedRaceId}`
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <h1 className="text-2xl font-bold mb-6">Atletas</h1>
 
       {/* Race/view selector */}
       <form method="GET" className="mb-6">
         <label className="block text-sm text-[var(--color-muted)] mb-1">Filtro</label>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <select
             name="race_id"
             defaultValue={selectedRaceId}

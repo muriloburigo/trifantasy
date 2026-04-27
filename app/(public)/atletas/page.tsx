@@ -52,7 +52,7 @@ export default async function AtletasPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
       <BackLink href="/" />
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-[var(--color-muted)] mt-1">
@@ -106,7 +106,7 @@ export default async function AtletasPage() {
       )}
 
       {/* Market summary */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-8">
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-4 text-center">
           <p className="text-2xl font-black text-[var(--color-success)]">{rising.length}</p>
           <p className="text-xs text-[var(--color-muted)] mt-1">{t('rising')}</p>

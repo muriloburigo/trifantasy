@@ -15,7 +15,7 @@ export default function GlobalRankWidget({
   entries,
   currentUserId,
 }: {
-  entries: { name: string; total: number; raceCount: number; userId: string; photoUrl: string | null }[]
+  entries: { name: string; total: number; wallet?: number; portfolioValue?: number; userId: string; photoUrl: string | null }[]
   currentUserId?: string | null
 }) {
   const t = useTranslations('home')
@@ -66,15 +66,16 @@ export default function GlobalRankWidget({
                 {e.name}
                 {isMe && <span className="text-[var(--color-orange)] ml-1 text-[10px]">você</span>}
               </p>
-              <p className="text-[10px] text-[var(--color-muted)]">
-                {e.raceCount} {e.raceCount === 1 ? 'prova' : 'provas'}
-              </p>
+              {(e.wallet !== undefined && e.portfolioValue !== undefined) && (
+                <p className="text-[10px] text-[var(--color-muted)]">
+                  T${e.wallet.toFixed(0)} carteira · T${e.portfolioValue.toFixed(0)} atletas
+                </p>
+              )}
             </div>
             <div className="text-right shrink-0">
               <p className={`text-sm font-black tabular-nums ${globalPos < 3 ? 'text-[var(--color-orange)]' : ''}`}>
-                {e.total}
+                T${Number(e.total).toFixed(0)}
               </p>
-              <p className="text-[10px] text-[var(--color-muted)]">pts</p>
             </div>
           </div>
         )
