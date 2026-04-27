@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import PublicShell from './(public)/PublicShell'
 import GlobalRankWidget from './components/GlobalRankWidget'
+import ShareRoster from './(public)/elenco/ShareRoster'
 import { getTranslations } from 'next-intl/server'
 
 export const dynamic = 'force-dynamic'
