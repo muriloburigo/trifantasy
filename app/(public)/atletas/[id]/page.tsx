@@ -128,28 +128,24 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
     .select('*', { count: 'exact', head: true })
     .eq('athlete_id', id)
 
-  // Best fantasy score contribution from scores.breakdown JSONB
-  const { data: scoreRows } = await admin
-    .from('scores')
-    .select('total_points, breakdown, race:races(name, date)')
-    .not('breakdown', 'is', null)
-    .limit(500)
+  // Price change history per race
+  const { data: priceHistory } = await pub
+    .from('athlete_price_history')
+    .select('race_id, old_price, new_price, change, recorded_at, race:races(name)')
+    .eq('athlete_id', id)
+    .eq('reason', 'race_result')
+    .order('recorded_at', { ascending: false })
 
-  // Find entries where this athlete contributed
-  const contributions: { race: string; points: number; detail: string[] }[] = []
-  for (const row of scoreRows ?? []) {
-    const breakdown = row.breakdown as any[]
-    if (!Array.isArray(breakdown)) continue
-      const entry = breakdown.find((b: any) => b.athlete_id === id)
-      if (entry) {
-        contributions.push({
-        race: (row as any).race?.name ?? '—',
-        points: Number(entry.total ?? entry.base_points ?? 0),
-        detail: entry.detail ?? [],
-      })
+  // Map race_id → price history entry
+  const priceHistoryByRace: Record<string, { old_price: number; new_price: number; change: number; race_name: string }> = {}
+  for (const h of priceHistory ?? []) {
+    priceHistoryByRace[h.race_id] = {
+      old_price: Number(h.old_price),
+      new_price: Number(h.new_price),
+      change: Number(h.change),
+      race_name: (h.race as any)?.name ?? '—',
     }
   }
-  const bestContribution = contributions.sort((a, b) => b.points - a.points)[0] ?? null
 
   // Build result map by race_id
   const resultMap: Record<string, any> = {}
@@ -174,7 +170,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
       <BackLink href="/atletas" />
 
       {/* Hero */}
-      <article className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-6 mb-6 flex gap-5 items-center">
+      <article className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-4 sm:p-6 mb-6 flex flex-col sm:flex-row gap-4 sm:gap-5 items-center sm:items-start">
         {/* Avatar */}
         <div className={`w-20 h-20 rounded-full overflow-hidden shrink-0 flex items-center justify-center text-xl font-black text-white ${
           !athlete.photo_url
@@ -228,7 +224,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
       </article>
 
       {/* Stats bar */}
-      <div className="grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl p-3 text-center">
           <p className="text-xl font-black">{(raceAthletes ?? []).length}</p>
           <p className="text-[11px] text-[var(--color-muted)] mt-0.5">{t('racesLabel')}</p>
@@ -346,12 +342,15 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
                     </span>
                   )}
 
-                  {/* Price change indicator */}
-                  {priceChange !== 0 && isFinished && (
-                    <div className="mt-2 pt-2 border-t border-[var(--color-navy-border)]/50">
-                      <span className="text-[11px] text-[var(--color-muted)]">{t('priceChangeLabel')} </span>
-                      <span className={`text-[11px] font-bold ${priceChange > 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
-                        {priceChange > 0 ? '+' : ''}{priceChange.toFixed(1)} T$
+                  {/* Price change indicator (per-race) */}
+                  {isFinished && priceHistoryByRace[ra.race_id] && (
+                    <div className="mt-2 pt-2 border-t border-[var(--color-navy-border)]/50 flex items-center gap-2">
+                      <span className="text-[11px] text-[var(--color-muted)]">{t('priceChangeLabel')}</span>
+                      <span className={`text-[11px] font-bold ${priceHistoryByRace[ra.race_id].change > 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
+                        {priceHistoryByRace[ra.race_id].change > 0 ? '+' : ''}{priceHistoryByRace[ra.race_id].change.toFixed(0)} T$
+                      </span>
+                      <span className="text-[11px] text-[var(--color-muted)]">
+                        (T${priceHistoryByRace[ra.race_id].old_price.toFixed(0)} → T${priceHistoryByRace[ra.race_id].new_price.toFixed(0)})
                       </span>
                     </div>
                   )}
@@ -362,31 +361,32 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
         )}
       </div>
 
-      {/* Fantasy performance */}
-      {bestContribution && (
+      {/* Valorization history */}
+      {(priceHistory ?? []).length > 0 && (
         <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-[var(--color-navy-border)]">
-            <h2 className="text-sm font-bold">{t('fantasyTitle')}</h2>
+          <div className="px-4 py-3 border-b border-[var(--color-navy-border)] flex items-center gap-2">
+            <TrendingUp size={14} className="text-[var(--color-orange)]" />
+            <h2 className="text-sm font-bold">{t('priceHistoryTitle')}</h2>
           </div>
-          <div className="px-4 py-4">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-semibold">{bestContribution.race}</p>
-              <span className="text-lg font-black text-[var(--color-orange)]">{bestContribution.points} pts</span>
-            </div>
-            {bestContribution.detail.length > 0 && (
-              <ul className="flex flex-col gap-1 mt-2">
-                {bestContribution.detail.map((d: string, i: number) => (
-                  <li key={i} className="text-[11px] text-[var(--color-muted)] flex items-start gap-1.5">
-                    <span className="text-[var(--color-orange)] mt-0.5">·</span>{d}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {contributions.length > 1 && (
-              <p className="text-[11px] text-[var(--color-muted)] mt-3">
-                {t('fantasyContributed', { n: contributions.length })}
-              </p>
-            )}
+          <div className="divide-y divide-[var(--color-navy-border)]">
+            {(priceHistory ?? []).map((h: any, i: number) => {
+              const change = Number(h.change)
+              const isUp = change > 0
+              return (
+                <div key={i} className="px-4 py-3 flex items-center justify-between gap-3">
+                  <p className="text-xs font-semibold truncate">{(h.race as any)?.name ?? '—'}</p>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-[11px] text-[var(--color-muted)]">
+                      T${Number(h.old_price).toFixed(0)} → T${Number(h.new_price).toFixed(0)}
+                    </span>
+                    <span className={`text-sm font-black flex items-center gap-0.5 ${isUp ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}`}>
+                      {isUp ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
+                      {isUp ? '+' : ''}{change.toFixed(0)}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
       )}

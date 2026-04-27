@@ -32,7 +32,7 @@ export default async function AdminUsersPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="space-y-6 text-white">
+    <div className="space-y-6 text-white px-4 sm:px-0 py-2">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <User className="text-[var(--color-orange)]" />
@@ -41,19 +41,20 @@ export default async function AdminUsersPage() {
       </div>
 
       <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
-        <table className="w-full text-left text-sm text-[var(--color-muted)]">
+        <div className="overflow-x-auto scrollbar-thin">
+        <table className="w-full text-left text-sm text-[var(--color-muted)] min-w-[500px]">
           <thead className="bg-[var(--color-navy-elevated)] text-[10px] uppercase font-bold tracking-widest border-b border-[var(--color-navy-border)]">
             <tr>
-              <th className="px-6 py-4">Usuário</th>
-              <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4">Criado em</th>
-              <th className="px-6 py-4 text-right">Ações</th>
+              <th className="px-3 sm:px-6 py-3 sm:py-4">Usuário</th>
+              <th className="px-3 sm:px-6 py-3 sm:py-4">Status</th>
+              <th className="px-3 sm:px-6 py-3 sm:py-4">Criado em</th>
+              <th className="px-3 sm:px-6 py-3 sm:py-4 text-right">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-navy-border)]">
             {profiles?.map((u) => (
               <tr key={u.id} className="hover:bg-white/5 transition-colors">
-                <td className="px-6 py-4">
+                <td className="px-3 sm:px-6 py-3 sm:py-4">
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-black text-white shrink-0 border border-white/5 ${
                       !u.photo_url ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)]' : ''
@@ -70,7 +71,7 @@ export default async function AdminUsersPage() {
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-3 sm:px-6 py-3 sm:py-4">
                   {u.is_admin ? (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-orange-900/30 text-[var(--color-orange)] text-[10px] font-bold">
                       <Shield size={10} /> ADMIN
@@ -79,10 +80,10 @@ export default async function AdminUsersPage() {
                     <span className="text-[10px]">Jogador</span>
                   )}
                 </td>
-                <td className="px-6 py-4 text-[10px]">
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-[10px]">
                   {new Date(u.created_at).toLocaleDateString('pt-BR')}
                 </td>
-                <td className="px-6 py-4 text-right">
+                <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
                   <div className="flex justify-end gap-2">
                     <form action={toggleAdmin.bind(null, u.id, u.is_admin)}>
                       <button className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-[var(--color-navy-border)] hover:bg-white/10 transition-all">
@@ -100,6 +101,7 @@ export default async function AdminUsersPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

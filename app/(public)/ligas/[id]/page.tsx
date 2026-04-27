@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient, createAdminClient } from '~/lib/supabase/server'
-import { Trophy, Users, Medal, Globe, Lock, Share2 } from 'lucide-react'
+import { Trophy, Users, Medal, Globe, Lock } from 'lucide-react'
 import CopyButton from './CopyButton'
 import AddMemberForm from './AddMemberForm'
 import BackLink from '~/app/components/BackLink'
@@ -54,91 +54,59 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
     .eq('user_id', user.id)
     .maybeSingle()
 
-  // Non-members can only see public leagues (not ranked)
   const isMember = !!membership
   const isOwner = league.owner_id === user.id
 
   if (!isMember && !league.is_public) redirect('/ligas')
 
-  // Fetch all members using admin
+  // Fetch all members
   const { data: membersRaw } = await admin
     .from('league_members')
     .select('user_id, joined_at')
     .eq('league_id', id)
 
   const memberUserIds = (membersRaw ?? []).map((m: any) => m.user_id)
-  let memberProfiles: any[] = []
-  if (memberUserIds.length > 0) {
-    const profilesRes = await admin.from('profiles').select('id, name, photo_url').in('id', memberUserIds)
-    // If photo_url column missing, fall back to name-only query
-    memberProfiles = profilesRes.data ?? (profilesRes.error
-      ? ((await admin.from('profiles').select('id, name').in('id', memberUserIds)).data ?? [])
-      : [])
-  }
-  const profileMap = new Map(memberProfiles.map((p: any) => [p.id, p]))
 
-  const members = (membersRaw ?? []).map((m: any) => ({
-    ...m,
-    profile: profileMap.get(m.user_id) ?? null,
-  }))
-
-  // For each member, sum all their team scores
-  const memberIds = (members ?? []).map((m: any) => m.user_id)
-
-  // Fetch teams using admin
-  const { data: memberTeams } = memberIds.length > 0
-    ? await admin
-        .from('teams')
-        .select('id, user_id')
-        .in('user_id', memberIds)
-    : { data: [] }
-
-  const teamIds = (memberTeams ?? []).map((t: any) => t.id)
-
-  // Fetch scores with race info using admin
-  const { data: allScores } = teamIds.length > 0
-    ? await admin
-        .from('scores')
-        .select('id, total_points, team_id, race_id, race:races(name, slug)')
-        .in('team_id', teamIds)
-    : { data: [] }
-
-  const teamMap = new Map((memberTeams ?? []).map((t: any) => [t.id, t]))
-
-  // Aggregate scores per user
-  const scoresByUser: Record<string, { total: number; races: { id: string; name: string; slug: string; pts: number }[] }> = {}
-  for (const score of allScores ?? []) {
-    const team = teamMap.get((score as any).team_id)
-    if (!team) continue
-    const uid = team.user_id
-    if (!scoresByUser[uid]) scoresByUser[uid] = { total: 0, races: [] }
-    scoresByUser[uid].total += Number(score.total_points ?? 0)
-    scoresByUser[uid].races.push({
-      id: score.id,
-      name: (score as any).race?.name ?? '—',
-      slug: (score as any).race?.slug ?? '',
-      pts: Number(score.total_points ?? 0),
-    })
+  if (memberUserIds.length === 0) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        <BackLink href="/ligas" />
+        <h1 className="text-2xl font-bold mt-3 mb-8">{league.is_global ? t('globalLeagueName') : league.name}</h1>
+        <div className="text-center py-12 text-[var(--color-muted)] text-sm">{t('rankingEmpty')}</div>
+      </div>
+    )
   }
 
-  const ranked = (members ?? [])
-    .map((m: any) => ({
-      ...m,
-      total: scoresByUser[m.user_id]?.total ?? null,
-      races: scoresByUser[m.user_id]?.races ?? [],
-    }))
-    .sort((a: any, b: any) => {
-      if (a.total === null && b.total === null) return 0
-      if (a.total === null) return 1
-      if (b.total === null) return -1
-      return b.total - a.total
+  // Fetch profiles + wallets + portfolio values for all members in parallel
+  const [profilesRes, portfolioRes] = await Promise.all([
+    admin.from('profiles').select('id, name, photo_url, wallet').in('id', memberUserIds),
+    admin.from('portfolio').select('user_id, athlete:athletes(current_price)').in('user_id', memberUserIds),
+  ])
+
+  const profileMap = new Map((profilesRes.data ?? []).map((p: any) => [p.id, p]))
+
+  // Portfolio value per user
+  const portfolioByUser: Record<string, number> = {}
+  for (const p of portfolioRes.data ?? []) {
+    const price = Number((p.athlete as any)?.current_price ?? 0)
+    portfolioByUser[p.user_id] = (portfolioByUser[p.user_id] ?? 0) + price
+  }
+
+  const ranked = (membersRaw ?? [])
+    .map((m: any) => {
+      const p = profileMap.get(m.user_id) as any
+      const wallet = Number(p?.wallet ?? 0)
+      const portfolioValue = portfolioByUser[m.user_id] ?? 0
+      const netWorth = wallet + portfolioValue
+      return { user_id: m.user_id, joined_at: m.joined_at, profile: p ?? null, wallet, portfolioValue, netWorth }
     })
+    .sort((a: any, b: any) => b.netWorth - a.netWorth)
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
       {/* Header */}
       <BackLink href="/ligas" />
-      <div className="flex items-start justify-between mt-3 gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row items-start justify-between mt-3 gap-4 mb-8">
         <div>
           <div className="flex items-center gap-2 mb-1">
             {league.is_public
@@ -158,7 +126,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
           </div>
           <div className="flex items-center gap-1">
             <CopyButton code={league.invite_code} />
-            <WhatsAppShare 
+            <WhatsAppShare
               text={`Entre na minha liga "${league.name}" no Trixer! Use o código de convite: ${league.invite_code}`}
               label=""
               variant="ghost"
@@ -169,14 +137,14 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
 
       {/* Join button for non-members of public league */}
       {!isMember && league.is_public && (
-        <form action={`/api/ligas/${id}/join`} method="POST" className="mb-6">
+        <div className="mb-6">
           <Link
             href={`/ligas/${id}/entrar`}
             className="inline-flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors"
           >
             {t('joinButton')}
           </Link>
-        </form>
+        </div>
       )}
 
       {/* Ranking */}
@@ -184,7 +152,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
         <div className="p-4 border-b border-[var(--color-navy-border)] flex items-center gap-2">
           <Trophy size={16} className="text-[var(--color-orange)]" />
           <h2 className="font-bold">{t('rankingTitle')}</h2>
-          <span className="text-xs text-[var(--color-muted)] ml-auto">{t('rankingSubtitle')}</span>
+          <span className="text-xs text-[var(--color-muted)] ml-auto">Patrimônio em T$</span>
         </div>
 
         {ranked.length === 0 ? (
@@ -223,18 +191,16 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
                       {p?.name ?? 'Usuário'}
                       {isMe && <span className="text-[var(--color-orange)] ml-1 text-[10px]">{t('youLabel')}</span>}
                     </p>
-                    <p className="text-[10px] text-[var(--color-muted)] mt-0.5 uppercase tracking-tighter">
-                      {member.races.length} {member.races.length === 1 ? 'prova' : 'provas'}
+                    <p className="text-[10px] text-[var(--color-muted)] mt-0.5">
+                      T${member.wallet.toFixed(0)} carteira · T${member.portfolioValue.toFixed(0)} atletas
                     </p>
                   </div>
 
-                  {/* Total score */}
+                  {/* Net worth */}
                   <div className="text-right shrink-0">
-                    {member.total !== null ? (
-                      <p className="font-bold text-sm sm:text-base text-[var(--color-orange)]">{member.total} <span className="text-[9px] font-normal opacity-70">pts</span></p>
-                    ) : (
-                      <span className="text-[10px] sm:text-xs text-[var(--color-muted)]">—</span>
-                    )}
+                    <p className="font-bold text-sm sm:text-base text-[var(--color-orange)]">
+                      T${member.netWorth.toFixed(0)}
+                    </p>
                   </div>
                 </div>
               )

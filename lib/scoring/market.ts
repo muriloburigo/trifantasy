@@ -258,11 +258,20 @@ export async function updateMarket(raceId: string): Promise<MarketUpdate[]> {
 
   const finishers = results.filter(r => !r.dnf && !r.dns)
 
-  // Best times PRO
+  // Best times PRO — computed separately per gender
   const proFinishers = finishers.filter(r => (r.athlete as any)?.type === 'pro')
-  const bestSwimPro  = Math.min(...proFinishers.map(r => r.swim_time ?? Infinity))
-  const bestBikePro  = Math.min(...proFinishers.map(r => r.bike_time ?? Infinity))
-  const bestRunPro   = Math.min(...proFinishers.map(r => r.run_time  ?? Infinity))
+  const proMen   = proFinishers.filter(r => (r.athlete as any)?.gender === 'M')
+  const proWomen = proFinishers.filter(r => (r.athlete as any)?.gender === 'F')
+
+  const bestOf = (arr: typeof proFinishers, field: 'swim_time' | 'bike_time' | 'run_time') =>
+    Math.min(...arr.map(r => r[field] ?? Infinity))
+
+  const bestSwimM = bestOf(proMen,   'swim_time')
+  const bestBikeM = bestOf(proMen,   'bike_time')
+  const bestRunM  = bestOf(proMen,   'run_time')
+  const bestSwimF = bestOf(proWomen, 'swim_time')
+  const bestBikeF = bestOf(proWomen, 'bike_time')
+  const bestRunF  = bestOf(proWomen, 'run_time')
 
   // Best times per AG
   const agFinishers = finishers.filter(r => (r.athlete as any)?.type === 'age_grouper')
@@ -287,11 +296,15 @@ export async function updateMarket(raceId: string): Promise<MarketUpdate[]> {
     let breakdown: MarketBreakdownItem[] = []
 
     if (athlete.type === 'pro') {
+      const isMale = athlete.gender === 'M'
+      const bSwim = isMale ? bestSwimM : bestSwimF
+      const bBike = isMale ? bestBikeM : bestBikeF
+      const bRun  = isMale ? bestRunM  : bestRunF
       const res = proMarketDelta(
         r.pro_pos, r.dnf, r.dns,
-        r.swim_time === bestSwimPro,
-        r.bike_time === bestBikePro,
-        r.run_time  === bestRunPro,
+        r.swim_time === bSwim,
+        r.bike_time === bBike,
+        r.run_time  === bRun,
         false,
       )
       delta = res.delta; reasons = res.reasons; breakdown = res.breakdown

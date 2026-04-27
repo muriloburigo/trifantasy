@@ -19,7 +19,7 @@ export default async function AdminProvasPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Provas</h1>
         <Link
@@ -32,7 +32,8 @@ export default async function AdminProvasPage() {
       </div>
 
       <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto scrollbar-thin">
+        <table className="w-full text-sm min-w-[600px]">
           <thead>
             <tr className="border-b border-[var(--color-navy-border)] text-[var(--color-muted)] text-xs uppercase tracking-wider">
               <th className="text-left px-4 py-3">Prova</th>
@@ -88,6 +89,7 @@ export default async function AdminProvasPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

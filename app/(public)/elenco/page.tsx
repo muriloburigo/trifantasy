@@ -57,7 +57,7 @@ export default async function ElencoPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
       <BackLink href="/" />
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start justify-between gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-[var(--color-muted)] mt-1">{t('subtitle')}</p>

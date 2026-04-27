@@ -379,8 +379,7 @@
     "upcomingLabel": "Em breve",
     "priceChangeLabel": "Variação de preço após esta prova:",
     "noResult": "Resultado não disponível",
-    "fantasyTitle": "Melhor Performance no Trixer",
-    "fantasyContributed": "Contribuiu em {n} times ao total"
+    "priceHistoryTitle": "Histórico de Valorização"
   },
   "rules": {
     "title": "Como Funciona",

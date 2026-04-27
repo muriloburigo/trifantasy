@@ -13,14 +13,13 @@ export default async function AdminDashboard() {
 
   const [
     racesRes, athletesRes, teamsRes, usersRes,
-    upcomingRes, recentScoresRes, openTicketsRes,
+    upcomingRes, openTicketsRes,
   ] = await Promise.all([
     supabase.from('races').select('id', { count: 'exact', head: true }),
     supabase.from('athletes').select('id', { count: 'exact', head: true }).eq('type', 'pro'),
     supabase.from('teams').select('id', { count: 'exact', head: true }),
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('races').select('id, name, date, status').in('status', ['upcoming', 'open', 'locked']).order('date', { ascending: true }).limit(5),
-    supabase.from('scores').select('team_id, total_points, calculated_at, teams!inner(user_id, profile:profiles(name))').order('calculated_at', { ascending: false }).limit(8),
     supabase.from('support_tickets').select('id', { count: 'exact', head: true }).eq('status', 'open'),
   ])
 
@@ -32,7 +31,6 @@ export default async function AdminDashboard() {
   ]
 
   const upcoming = upcomingRes.data ?? []
-  const recentScores = recentScoresRes.data ?? []
   const openTickets = openTicketsRes.count ?? 0
 
   return (
@@ -113,32 +111,6 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        {/* Recent scores */}
-        {recentScores.length > 0 && (
-          <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl overflow-hidden lg:col-span-2">
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-navy-border)]">
-              <span className="font-semibold text-sm">Pontuações Recentes</span>
-              <Link href="/admin/pontuacao" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors flex items-center gap-1">
-                Gerenciar <ArrowRight size={11} />
-              </Link>
-            </div>
-            <div className="divide-y divide-[var(--color-navy-border)]">
-              {recentScores.map((s: any) => (
-                <div key={s.team_id} className="flex items-center gap-3 px-5 py-2.5">
-                  <span className="text-sm flex-1 text-[var(--color-muted)]">
-                    {(s.teams as any)?.profile?.name ?? 'Usuário'}
-                  </span>
-                  <span className="text-xs text-[var(--color-muted)]">
-                    {new Date(s.calculated_at).toLocaleDateString('pt-BR')}
-                  </span>
-                  <span className="font-bold text-[var(--color-orange)] text-sm w-16 text-right">
-                    {s.total_points} pts
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

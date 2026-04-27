@@ -133,34 +133,37 @@ export default async function HomePage() {
     admin.from('teams').select('*', { count: 'exact', head: true }),
   ])
 
-  // Fetch Global League Ranking (Step-by-step for reliability)
+  // Fetch Global League Ranking by net worth (wallet + portfolio value)
   let globalRank: any[] = []
   const { data: globalLeague } = await admin.from('leagues').select('id').eq('is_global', true).single()
-  
+
   if (globalLeague) {
     const { data: members } = await admin.from('league_members').select('user_id').eq('league_id', globalLeague.id)
     if (members && members.length > 0) {
       const userIds = members.map(m => m.user_id)
-      const [{ data: profiles }, { data: teams }] = await Promise.all([
-        admin.from('profiles').select('id, name, photo_url').in('id', userIds),
-        admin.from('teams').select('id, user_id, scores(total_points)').in('user_id', userIds)
+      const [{ data: profiles }, { data: portfolioRows }] = await Promise.all([
+        admin.from('profiles').select('id, name, photo_url, wallet').in('id', userIds),
+        admin.from('portfolio').select('user_id, athlete:athletes(current_price)').in('user_id', userIds),
       ])
-      
-      const profileMap = new Map(profiles?.map(p => [p.id, p]))
-      const scoresMap = new Map()
-      teams?.forEach(t => {
-        const total = (t.scores as any[] ?? []).reduce((acc, s) => acc + Number(s.total_points ?? 0), 0)
-        scoresMap.set(t.user_id, (scoresMap.get(t.user_id) ?? 0) + total)
-      })
 
+      const portfolioByUser: Record<string, number> = {}
+      for (const p of portfolioRows ?? []) {
+        const price = Number((p.athlete as any)?.current_price ?? 0)
+        portfolioByUser[p.user_id] = (portfolioByUser[p.user_id] ?? 0) + price
+      }
+
+      const profileMap = new Map(profiles?.map(p => [p.id, p]))
       globalRank = members.map(m => {
-        const p = profileMap.get(m.user_id)
+        const p = profileMap.get(m.user_id) as any
+        const wallet = Number(p?.wallet ?? 0)
+        const portfolioValue = portfolioByUser[m.user_id] ?? 0
         return {
           userId: m.user_id,
           name: p?.name ?? 'Trixer',
           photoUrl: p?.photo_url ?? null,
-          total: scoresMap.get(m.user_id) ?? 0,
-          raceCount: (teams?.filter(t => t.user_id === m.user_id) ?? []).length
+          total: wallet + portfolioValue,
+          wallet,
+          portfolioValue,
         }
       }).sort((a, b) => b.total - a.total)
     }
