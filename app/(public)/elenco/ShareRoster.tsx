@@ -59,7 +59,7 @@ export default function ShareRoster({
       >
         {loading ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} />}
         {t('shareRoster') || 'Compartilhar'}
-      </button>
+        </button>
 
       {/* ── Story Card (1080x1920) ── */}
       <div style={{ position: 'fixed', left: '-9999px', top: '0', visibility: 'visible', pointerEvents: 'none' }}>
