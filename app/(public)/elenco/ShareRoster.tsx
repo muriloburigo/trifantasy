@@ -34,7 +34,7 @@ export default function ShareRoster({
         resolve(canvas.toDataURL('image/png'))
       }
       img.onerror = () => reject(new Error('Could not load image'))
-      img.src = url + (url.includes('?') ? '&' : '?') + 'v=3'
+      img.src = url + (url.includes('?') ? '&' : '?') + 'v=4'
     })
   }
 
@@ -69,7 +69,7 @@ export default function ShareRoster({
         pixelRatio: 2.5,
       })
       const link = document.createElement('a')
-      link.download = `meu-elenco-trixer.png`
+      link.download = `trixer-roster.png`
       link.href = dataUrl
       document.body.appendChild(link)
       link.click()
@@ -88,19 +88,18 @@ export default function ShareRoster({
       <button
         onClick={handleShare}
         disabled={loading || portfolio.length === 0}
-        title={!imagesReady ? 'Carregando fotos...' : ''}
         className={`
           flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-40
           ${isCompact 
             ? 'p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[var(--color-orange)]' 
-            : 'px-4 py-2 rounded-xl bg-gradient-to-br from-[var(--color-orange)] to-amber-600 text-white text-xs font-black shadow-lg shadow-orange-950/20 hover:brightness-110'
+            : 'px-4 py-2 rounded-lg border-2 border-[var(--color-navy-border)] bg-white/5 hover:bg-white/10 text-white text-xs font-bold'
           }
         `}
       >
         {loading || !imagesReady ? (
-          <Loader2 size={isCompact ? 14 : 16} className="animate-spin" />
+          <Loader2 size={14} className="animate-spin" />
         ) : (
-          <Share2 size={isCompact ? 14 : 16} />
+          <Share2 size={14} className={isCompact ? 'text-[var(--color-orange)]' : 'text-[var(--color-orange)]'} />
         )}
         {!isCompact && (imagesReady ? (t('shareRoster') || 'Compartilhar') : 'Processando...')}
       </button>
