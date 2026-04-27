@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '~/lib/supabase/server'
 import { requireAdmin } from '~/lib/auth/require-admin'
+import { processNotifications } from '~/lib/notifications-engine'
 
 function toSlug(name: string): string {
   return name
@@ -30,7 +31,13 @@ export async function upsertRace(formData: FormData) {
   const payload = { name, slug, date, location, country, country_code, distance, has_pro_field, status }
 
   if (id) {
+    // Check previous status to detect open/locked transitions
+    const { data: prev } = await supabase.from('races').select('status').eq('id', id).single()
     await supabase.from('races').update(payload).eq('id', id)
+    // Fire notifications when race becomes open or locked
+    if (prev?.status !== status && (status === 'open' || status === 'locked')) {
+      processNotifications().catch(err => console.error('[Notifications] Error on status change:', err))
+    }
   } else {
     await supabase.from('races').insert(payload)
   }

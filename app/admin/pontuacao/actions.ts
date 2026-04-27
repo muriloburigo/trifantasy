@@ -4,6 +4,7 @@ import { createAdminClient } from '~/lib/supabase/server'
 import { requireAdmin } from '~/lib/auth/require-admin'
 import { scoreAthlete, type AthleteForScoring } from '~/lib/scoring/calculate'
 import { updateMarket } from '~/lib/scoring/market'
+import { processNotifications } from '~/lib/notifications-engine'
 
 export async function calculateScores(raceId: string): Promise<{
   success?: boolean
@@ -103,6 +104,9 @@ export async function calculateScores(raceId: string): Promise<{
 
   // 8. Update dynamic market prices
   const marketUpdates = await updateMarket(raceId)
+
+  // 9. Fire notifications (market now open after scoring)
+  processNotifications().catch(err => console.error('[Notifications] Error after scoring:', err))
 
   revalidatePath('/')
   revalidatePath('/admin/pontuacao')
