@@ -296,15 +296,20 @@ export default async function HomePage() {
             </section>
 
             {loggedUser && (
-              <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden">
+              <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl overflow-hidden shadow-sm">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-navy-border)]">
                   <span className="font-semibold text-sm flex items-center gap-2">
                     <ShoppingBag size={14} className="text-[var(--color-orange)]" />
                     {t('myRosterTitle')}
                   </span>
                   <div className="flex items-center gap-2">
-                    <ShareRoster userName={globalRank.find(u => u.userId === loggedUser.id)?.name || 'Trixer'} portfolio={myPortfolio} netWorth={myNetWorth} />
-                    <Link href="/elenco" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors flex items-center gap-1">
+                    <ShareRoster 
+                      userName={globalRank.find(u => u.userId === loggedUser.id)?.name || 'Trixer'} 
+                      portfolio={myPortfolio} 
+                      netWorth={myNetWorth}
+                      variant="compact"
+                    />
+                    <Link href="/elenco" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors flex items-center gap-1 ml-1">
                       {t('myRosterViewAll')} <ChevronRight size={11} />
                     </Link>
                   </div>
