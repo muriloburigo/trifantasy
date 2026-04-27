@@ -15,28 +15,52 @@ export default function ShareRoster({
 }) {
   const t = useTranslations('home')
   const [loading, setLoading] = useState(false)
+  const [base64Photos, setBase64Photos] = useState<Record<string, string>>({})
   const rosterRef = useRef<HTMLDivElement>(null)
+
+  // Pre-load images as Base64 to avoid CORS issues during PNG generation
+  useEffect(() => {
+    const loadImages = async () => {
+      const photos: Record<string, string> = {}
+      for (const p of portfolio) {
+        const url = p.athlete?.photo_url
+        if (url && !photos[url]) {
+          try {
+            const res = await fetch(url)
+            const blob = await res.blob()
+            const reader = new FileReader()
+            reader.onloadend = () => {
+              photos[url] = reader.result as string
+              setBase64Photos(prev => ({ ...prev, [url]: reader.result as string }))
+            }
+            reader.readAsDataURL(blob)
+          } catch (e) {
+            console.error('Failed to pre-load image:', url, e)
+          }
+        }
+      }
+    }
+    if (portfolio.length > 0) loadImages()
+  }, [portfolio])
 
   const handleShare = async () => {
     if (!rosterRef.current) return
     setLoading(true)
 
     try {
-      // 1. Give time for rendering and potential image loads
-      await new Promise(resolve => setTimeout(resolve, 600))
+      // Small delay to ensure state-driven images are rendered in the hidden div
+      await new Promise(resolve => setTimeout(resolve, 800))
 
-      // 2. Generate PNG with robust settings
       const dataUrl = await toPng(rosterRef.current, {
         cacheBust: true,
         backgroundColor: '#050414',
-        pixelRatio: 2,
-        // If an image fails to load (CORS), it won't crash the whole process
+        pixelRatio: 1.5, // Balanced quality for mobile memory limits
         skipFonts: false,
       })
 
-      // 3. Trigger Download
+      // Download
       const link = document.createElement('a')
-      link.download = `trixer-roster-${userName.toLowerCase()}.png`
+      link.download = `trixer-elenco-${userName.toLowerCase().replace(/\s+/g, '-')}.png`
       link.href = dataUrl
       document.body.appendChild(link)
       link.click()
@@ -44,7 +68,7 @@ export default function ShareRoster({
       
     } catch (err) {
       console.error('Share generation error:', err)
-      alert('Houve um problema ao gerar a imagem. Tente recarregar a página ou usar outro navegador.')
+      alert('Não foi possível gerar a imagem. Tente recarregar a página.')
     } finally {
       setLoading(false)
     }
@@ -62,18 +86,18 @@ export default function ShareRoster({
       </button>
 
       {/* ── Story Card (1080x1920) ── */}
-      {/* Positioned far away but still rendered with opacity 0 to ensure browser processes it */}
-      <div style={{ position: 'absolute', top: '-10000px', left: '0', pointerEvents: 'none', zIndex: -100 }}>
+      {/* Use fixed + pointer-events-none + extreme left to keep it in DOM but totally hidden */}
+      <div style={{ position: 'fixed', left: '-10000px', top: '0', pointerEvents: 'none', zIndex: -100 }}>
         <div 
           ref={rosterRef}
-          className="w-[1080px] h-[1920px] bg-[#050414] flex flex-col justify-center px-20 py-[350px] font-sans text-white relative overflow-hidden"
+          className="w-[1080px] h-[1920px] bg-[#050414] flex flex-col justify-center px-20 py-[400px] font-sans text-white relative overflow-hidden"
           style={{ 
             backgroundImage: 'radial-gradient(circle at 20% 10%, rgba(255, 92, 0, 0.15), transparent), radial-gradient(circle at 80% 90%, rgba(107, 33, 168, 0.15), transparent)'
           }}
         >
           {/* Logo Branding */}
           <div className="absolute top-[12%] left-1/2 -translate-x-1/2 opacity-[0.04] pointer-events-none w-full text-center">
-            <span className="text-[280px] font-black tracking-tighter">TRIXER</span>
+            <span className="text-[280px] font-black tracking-tighter leading-none">TRIXER</span>
           </div>
 
           {/* ── Header ── */}
@@ -83,8 +107,8 @@ export default function ShareRoster({
                 <div className="flex items-center gap-6 mb-5">
                   <span className="text-[var(--color-orange)] font-black text-[100px] tracking-tighter leading-none">TRIXER</span>
                   <div className="flex flex-col mt-4">
-                    <span className="text-white/40 text-2xl font-bold uppercase tracking-[0.4em] leading-none">The Triathlon</span>
-                    <span className="text-white/40 text-2xl font-bold uppercase tracking-[0.4em] leading-none mt-2">Game</span>
+                    <span className="text-white/40 text-2xl font-bold uppercase tracking-[0.3em] leading-none">The Triathlon</span>
+                    <span className="text-white/40 text-2xl font-bold uppercase tracking-[0.3em] leading-none mt-2">Game</span>
                   </div>
                 </div>
                 <p className="text-5xl text-white/60">Trixer: <span className="text-white font-black">{userName}</span></p>
@@ -96,7 +120,7 @@ export default function ShareRoster({
             </div>
           </div>
 
-          {/* ── Content (Concentrado) ── */}
+          {/* ── Content ── */}
           <div className="space-y-12 flex-1 relative z-10">
             <div className="text-center mb-16">
                <h2 className="text-4xl font-black uppercase tracking-[0.6em] text-white/10 italic">Meu Elenco Oficial</h2>
@@ -104,16 +128,17 @@ export default function ShareRoster({
 
             {portfolio.map((p, i) => {
               const ath = p.athlete as any
+              const photoSrc = base64Photos[ath?.photo_url] || ath?.photo_url
+
               return (
                 <div key={i} className="bg-white/[0.04] border-4 border-white/5 rounded-[70px] p-16 flex items-center gap-16 shadow-2xl">
                   <div className="w-52 h-52 rounded-full overflow-hidden shrink-0 border-[8px] border-[var(--color-orange)]/40 p-2 bg-[#050414]">
                     <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-[var(--color-orange)]/20 to-[var(--color-purple)]/20">
-                      {ath?.photo_url ? (
+                      {photoSrc ? (
                         <img 
-                          src={ath.photo_url} 
+                          src={photoSrc} 
                           alt={ath.name} 
                           className="w-full h-full object-cover"
-                          crossOrigin="anonymous"
                         />
                       ) : (
                         <div className="text-7xl font-black text-white/80">
