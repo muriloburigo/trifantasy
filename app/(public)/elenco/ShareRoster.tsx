@@ -34,7 +34,7 @@ export default function ShareRoster({
         resolve(canvas.toDataURL('image/png'))
       }
       img.onerror = () => reject(new Error('Could not load image'))
-      img.src = url + (url.includes('?') ? '&' : '?') + 'v=6'
+      img.src = url + (url.includes('?') ? '&' : '?') + 'v=7'
     })
   }
 
@@ -60,7 +60,6 @@ export default function ShareRoster({
     setLoading(mode === 'whatsapp' ? 'whatsapp' : 'share')
     
     try {
-      // Short delay to ensure DOM is ready
       await new Promise(resolve => setTimeout(resolve, 400))
       
       const blob = await toBlob(rosterRef.current, {
@@ -71,14 +70,13 @@ export default function ShareRoster({
 
       if (!blob) throw new Error('Failed to generate image')
 
-      const fileName = `trixer-elenco-${userName.toLowerCase().replace(/\s+/g, '-')}.png`
-      const shareText = `Confira meu elenco no Trixer - The Triathlon Game! 🏊‍♂️🚴‍♂️🏃‍♂️\n\nMonte o seu em: https://www.trixer.app`
+      const fileName = `trixer-${userName.toLowerCase().replace(/\s+/g, '-')}.png`
+      const shareText = `Confira meu elenco no Trixer - The Triathlon Game! 🏊‍♂️🚴‍♂️🏃‍♂️\n\nhttps://www.trixer.app`
 
-      // 1. WhatsApp Logic
       if (mode === 'whatsapp') {
         const file = new File([blob], fileName, { type: 'image/png' })
         
-        // Try Mobile Native Share (Supports image + text)
+        // 1. Mobile: Native Share
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
@@ -87,33 +85,31 @@ export default function ShareRoster({
             })
             setLoading(null)
             return
-          } catch (e) {
-            console.log('Native share cancelled or failed', e)
-          }
+          } catch (e) { console.log('Native share failed', e) }
         }
 
-        // Fallback: Open WhatsApp (Text) and Download (Image)
+        // 2. Desktop: Copy to clipboard and open WhatsApp
+        try {
+          const item = new ClipboardItem({ 'image/png': blob })
+          await navigator.clipboard.write([item])
+          alert('Imagem copiada! Cole (Ctrl+V) na conversa do WhatsApp.')
+        } catch (e) {
+          console.warn('Clipboard copy failed, falling back to text only', e)
+        }
+
         const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`
         window.open(waUrl, '_blank')
-        
-        const dataUrl = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = dataUrl
-        link.download = fileName
-        link.click()
       } else {
-        // 2. Pure Download Logic
+        // Pure Download
         const dataUrl = URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = dataUrl
         link.download = fileName
-        document.body.appendChild(link)
         link.click()
-        document.body.removeChild(link)
       }
     } catch (err) {
       console.error('Export error:', err)
-      alert('Erro ao gerar imagem. Tente novamente.')
+      alert('Houve um erro. Tente recarregar a página.')
     } finally {
       setLoading(null)
     }
@@ -155,7 +151,7 @@ export default function ShareRoster({
         </button>
       </div>
 
-      {/* ── Export Card ── */}
+      {/* ── Export Card (Oculto) ── */}
       <div style={{ position: 'fixed', left: '-9999px', top: '0', pointerEvents: 'none', visibility: 'visible' }}>
         <div ref={rosterRef} className="w-[450px] bg-[#050414] flex flex-col px-10 py-32 font-sans text-white relative overflow-hidden"
           style={{ backgroundImage: 'radial-gradient(circle at 20% 10%, rgba(255, 92, 0, 0.15), transparent), radial-gradient(circle at 80% 90%, rgba(107, 33, 168, 0.12), transparent)', minHeight: '800px' }}>
