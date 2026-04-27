@@ -18,7 +18,7 @@ export default function ShareRoster({
   const rosterRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    console.log('Trixer ShareRoster v2.1 Loaded')
+    console.log('Trixer ShareRoster v3.0 Loaded')
   }, [])
 
   const handleShare = async () => {
@@ -26,13 +26,13 @@ export default function ShareRoster({
     setLoading(true)
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise(resolve => setTimeout(resolve, 800))
 
       const dataUrl = await toPng(rosterRef.current, {
         cacheBust: true,
         backgroundColor: '#050414',
         pixelRatio: 2,
-        // Forcing ignore images if they cause hang, but let's try standard first
+        includeQueryParams: true,
       })
 
       const link = document.createElement('a')
@@ -55,10 +55,10 @@ export default function ShareRoster({
       <button
         onClick={handleShare}
         disabled={loading || portfolio.length === 0}
-        className="flex items-center gap-2 bg-transparent border-2 border-[var(--color-orange)] text-[var(--color-orange)] hover:bg-[var(--color-orange)] hover:text-white text-[10px] sm:text-xs font-black px-3 sm:px-4 py-2 rounded-lg transition-all active:scale-95 disabled:opacity-30 shadow-lg"
+        className="flex items-center gap-2 bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-[10px] sm:text-xs font-black px-4 py-2 rounded-lg transition-all active:scale-95 disabled:opacity-30 shadow-lg shadow-[var(--color-orange)]/20"
       >
         {loading ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} />}
-        {t('shareRoster') || 'Compartilhar'} v2
+        {t('shareRoster') || 'Compartilhar'}
       </button>
 
       {/* ── Story Card (1080x1920) ── */}
@@ -74,7 +74,6 @@ export default function ShareRoster({
             <span className="text-[250px] font-black tracking-tighter">TRIXER</span>
           </div>
 
-          {/* ── Header ── */}
           <div className="mb-24 relative z-10">
             <div className="flex justify-between items-end border-b-8 border-[var(--color-orange)] pb-12">
               <div>
@@ -94,7 +93,6 @@ export default function ShareRoster({
             </div>
           </div>
 
-          {/* ── Content ── */}
           <div className="space-y-12 flex-1 relative z-10">
             <div className="text-center mb-16">
                <h2 className="text-4xl font-black uppercase tracking-[0.6em] text-white/10 italic">Meu Elenco Oficial</h2>
@@ -128,15 +126,14 @@ export default function ShareRoster({
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-7xl font-black text-white tracking-tight">T${Number(ath.current_price).toFixed(0)}</p>
-                    <p className="text-2xl font-bold text-white/20 uppercase tracking-widest mt-3">Preço</p>
+                    <p className="text-[80px] font-black text-white tracking-tight">T${Number(ath.current_price).toFixed(0)}</p>
+                    <p className="text-2xl font-bold text-white/20 uppercase tracking-widest mt-3">Preço Atual</p>
                   </div>
                 </div>
               )
             })}
           </div>
 
-          {/* ── Footer ── */}
           <div className="mt-24 pt-16 border-t-4 border-white/10 flex justify-between items-center relative z-10">
             <div>
               <p className="text-4xl font-medium text-white/40 mb-4">Crie seu elenco em</p>
