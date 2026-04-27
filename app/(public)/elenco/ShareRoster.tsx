@@ -1,6 +1,6 @@
 'use client'
 import { useRef, useState, useEffect } from 'react'
-import { toPng, toBlob } from 'html-to-image'
+import { toBlob } from 'html-to-image'
 import { Share2, Loader2, MessageCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
@@ -34,7 +34,7 @@ export default function ShareRoster({
         resolve(canvas.toDataURL('image/png'))
       }
       img.onerror = () => reject(new Error('Could not load image'))
-      img.src = url + (url.includes('?') ? '&' : '?') + 'v=5'
+      img.src = url + (url.includes('?') ? '&' : '?') + 'v=6'
     })
   }
 
@@ -60,43 +60,60 @@ export default function ShareRoster({
     setLoading(mode === 'whatsapp' ? 'whatsapp' : 'share')
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 600))
+      // Short delay to ensure DOM is ready
+      await new Promise(resolve => setTimeout(resolve, 400))
       
       const blob = await toBlob(rosterRef.current, {
         cacheBust: true,
         backgroundColor: '#050414',
-        pixelRatio: 2.5,
+        pixelRatio: 2,
       })
 
       if (!blob) throw new Error('Failed to generate image')
 
-      const fileName = `elenco-trixer-${userName.toLowerCase().replace(/\s+/g, '-')}.png`
-      const file = new File([blob], fileName, { type: 'image/png' })
+      const fileName = `trixer-elenco-${userName.toLowerCase().replace(/\s+/g, '-')}.png`
       const shareText = `Confira meu elenco no Trixer - The Triathlon Game! 🏊‍♂️🚴‍♂️🏃‍♂️\n\nMonte o seu em: https://www.trixer.app`
 
-      // Try native share (mobile)
-      if (mode === 'whatsapp' && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          text: shareText,
-        })
-      } else {
-        // Fallback: Download and Open WhatsApp link (for text)
+      // 1. WhatsApp Logic
+      if (mode === 'whatsapp') {
+        const file = new File([blob], fileName, { type: 'image/png' })
+        
+        // Try Mobile Native Share (Supports image + text)
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              text: shareText,
+            })
+            setLoading(null)
+            return
+          } catch (e) {
+            console.log('Native share cancelled or failed', e)
+          }
+        }
+
+        // Fallback: Open WhatsApp (Text) and Download (Image)
+        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`
+        window.open(waUrl, '_blank')
+        
         const dataUrl = URL.createObjectURL(blob)
         const link = document.createElement('a')
-        link.download = fileName
         link.href = dataUrl
+        link.download = fileName
+        link.click()
+      } else {
+        // 2. Pure Download Logic
+        const dataUrl = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = dataUrl
+        link.download = fileName
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-        
-        if (mode === 'whatsapp') {
-          const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`
-          window.open(waUrl, '_blank')
-        }
       }
     } catch (err) {
       console.error('Export error:', err)
+      alert('Erro ao gerar imagem. Tente novamente.')
     } finally {
       setLoading(null)
     }
@@ -107,7 +124,6 @@ export default function ShareRoster({
   return (
     <>
       <div className="flex items-center gap-1.5 sm:gap-2">
-        {/* WhatsApp Button */}
         <button
           onClick={() => handleShare('whatsapp')}
           disabled={!!loading || portfolio.length === 0 || !imagesReady}
@@ -123,7 +139,6 @@ export default function ShareRoster({
           {!isCompact && 'WhatsApp'}
         </button>
 
-        {/* Default Share/Download Button */}
         <button
           onClick={() => handleShare('download')}
           disabled={!!loading || portfolio.length === 0 || !imagesReady}
@@ -181,7 +196,7 @@ export default function ShareRoster({
                     <p className="text-lg font-black truncate leading-none mb-2 tracking-tight">{ath.name.toUpperCase()}</p>
                     <div className="flex gap-2">
                       <div className="bg-white/5 px-2 py-0.5 rounded text-[10px] font-bold text-white/40 border border-white/5 uppercase">PTO #{ath.pto_rank || '—'}</div>
-                      <div className="bg-white/5 px-2 py-0.5 rounded text-[10px] font-bold text-white/50 border border-white/5 uppercase">WTCS #{ath.wtcs_rank || '—'}</div>
+                      <div className="bg-white/5 px-2 py-0.5 rounded text-[10px] font-bold text-white/40 border border-white/5 uppercase">WTCS #{ath.wtcs_rank || '—'}</div>
                     </div>
                   </div>
                   <div className="text-right"><p className="text-xl font-black text-white tracking-tight">T${Number(ath.current_price).toFixed(0)}</p><p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Valor</p></div>
