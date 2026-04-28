@@ -125,7 +125,7 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
       {/* Race header */}
       <div className="mb-8">
         <span className="text-xs font-semibold text-[var(--color-orange)] uppercase tracking-wider">
-          {race.distance === 'full' ? t('full') : t('middle')}
+          {race.distance === 'full' ? t('full') : race.distance === 'T100' ? t('t100') : t('middle')}
         </span>
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mt-1 mb-3">{race.name}</h1>
         <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-muted)]">
