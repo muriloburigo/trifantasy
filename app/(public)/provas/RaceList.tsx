@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { Search, X, MapPin, Calendar, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { formatDate, daysUntil } from '~/lib/utils'
-import type { Race } from '~/lib/types'
+import type { Race, RaceDistance } from '~/lib/types'
 
 type StatusFilter = 'all' | 'open' | 'upcoming' | 'finished'
-type DistanceFilter = 'all' | 'full' | '70.3' | 'T100'
+type DistanceFilter = 'all' | RaceDistance
 
 function RaceCard({ race, t }: { race: Race; t: ReturnType<typeof useTranslations<'races'>> }) {
   const days = daysUntil(race.date)
@@ -21,6 +21,9 @@ function RaceCard({ race, t }: { race: Race; t: ReturnType<typeof useTranslation
   }
   const st = statusMap[race.status] ?? statusMap.upcoming
 
+  // Resolve distance label
+  const distLabel = race.distance === 'full' ? t('full') : race.distance === 'T100' ? t('t100') : t('middle')
+
   return (
     <Link
       href={`/provas/${race.slug}`}
@@ -29,7 +32,7 @@ function RaceCard({ race, t }: { race: Race; t: ReturnType<typeof useTranslation
       <div className="flex items-start justify-between gap-2">
         <div>
           <span className="text-xs font-semibold text-[var(--color-orange)] uppercase tracking-wider">
-            {race.distance === 'full' ? t('full') : race.distance === 'T100' ? 'T100' : t('middle')}
+            {distLabel}
           </span>
           <h3 className="font-bold text-base mt-0.5 leading-tight group-hover:text-[var(--color-orange)] transition-colors">
             {race.name}
