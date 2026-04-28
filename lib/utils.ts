@@ -9,7 +9,11 @@ export function formatTime(seconds: number | null | undefined): string {
 
 /** Format date as "12 Apr 2025" */
 export function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('pt-BR', {
+  // Use "YYYY-MM-DD T00:00:00" to force local time interpretation
+  const [year, month, day] = dateStr.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  
+  return date.toLocaleDateString('pt-BR', {
     day: 'numeric', month: 'short', year: 'numeric',
   })
 }
@@ -18,7 +22,10 @@ export function formatDate(dateStr: string): string {
 export function daysUntil(dateStr: string): number {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const target = new Date(dateStr)
+  
+  const [year, month, day] = dateStr.split('-').map(Number)
+  const target = new Date(year, month - 1, day)
+  
   return Math.ceil((target.getTime() - today.getTime()) / 86_400_000)
 }
 
