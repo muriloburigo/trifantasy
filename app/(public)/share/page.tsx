@@ -129,25 +129,38 @@ export default async function SharePage() {
       .order('race_id')
       .order('pro_pos', { ascending: true })
 
+    const secsToHms = (secs: number) => {
+      const h = Math.floor(secs / 3600)
+      const m = Math.floor((secs % 3600) / 60)
+      const s = secs % 60
+      return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+    }
+
     for (const r of (allResults ?? [])) {
       if (!podiumsByRace[r.race_id]) podiumsByRace[r.race_id] = []
       const pos = podiumsByRace[r.race_id].length + 1
-      const winner = podiumsByRace[r.race_id][0]
+      const winnerSecs: number | null = (podiumsByRace[r.race_id][0] as any)?._rawSecs ?? null
       let gap = '—'
-      if (pos > 1 && winner?.time && r.finish_time) {
-        const toSec = (t: string) => t.split(':').reduce((acc, v, i, a) => acc + Number(v) * Math.pow(60, a.length - 1 - i), 0)
-        const diff = toSec(r.finish_time) - toSec(winner.time)
+      if (pos > 1 && winnerSecs != null && r.finish_time != null) {
+        const diff = (r.finish_time as number) - winnerSecs
         const m = Math.floor(diff / 60)
         const s = diff % 60
         gap = `+${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
       }
       const mappedAthlete = mapAthlete((r as any).athlete)
       if (!mappedAthlete) continue
-      podiumsByRace[r.race_id].push({
+      const entry: PodiumEntry & { _rawSecs?: number } = {
         athlete: mappedAthlete,
-        time: r.finish_time ?? '—',
+        time: r.finish_time != null ? secsToHms(r.finish_time as number) : '—',
         gap,
-      })
+        _rawSecs: r.finish_time != null ? (r.finish_time as number) : undefined,
+      }
+      podiumsByRace[r.race_id].push(entry)
+    }
+
+    // strip the helper field before passing to client
+    for (const raceId of Object.keys(podiumsByRace)) {
+      podiumsByRace[raceId] = podiumsByRace[raceId].map(({ _rawSecs: _, ...rest }: any) => rest)
     }
   }
 
