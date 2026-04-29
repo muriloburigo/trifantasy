@@ -1,8 +1,8 @@
 'use client'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toPng } from 'html-to-image'
-import { Download, Sparkles } from 'lucide-react'
+import { Download, Loader2, Sparkles } from 'lucide-react'
 
 import type { CardFormat, TemplateId, Athlete, Race, PodiumEntry, Roster, LeagueStanding } from '~/lib/trixerTypes'
 import { FORMAT_DIMENSIONS } from '~/lib/trixerTypes'
@@ -45,6 +45,8 @@ export default function SharePageClient({
   const [template, setTemplate] = useState<TemplateId>(initialTemplate)
   const [format,   setFormat]   = useState<CardFormat>(initialFormat)
   const [exporting, setExporting] = useState(false)
+  const [imagesReady, setImagesReady] = useState(false)
+  const [b64Photos, setB64Photos] = useState<Record<string, string>>({})
 
   // Editable fields
   const [prTitle,    setPrTitle]    = useState('Rising on the market')
@@ -52,6 +54,53 @@ export default function SharePageClient({
   const [prVariant,  setPrVariant]  = useState<'rising' | 'falling'>('rising')
 
   const previewRef = useRef<HTMLDivElement>(null)
+
+  // ── Pre-convert all athlete photos to base64 to avoid CORS issues ────────
+  const allPhotoUrls = useMemo(() => {
+    const urls = new Set<string>()
+    const addAthletes = (list: Athlete[]) => list.forEach(a => { if (a.photoUrl) urls.add(a.photoUrl) })
+    addAthletes(rising)
+    addAthletes(falling)
+    if (nextRace) addAthletes(nextRace.favorites)
+    if (lastRace) lastRace.podium.forEach(p => { if (p.athlete.photoUrl) urls.add(p.athlete.photoUrl) })
+    if (roster)   addAthletes(roster.athletes)
+    return [...urls]
+  }, [rising, falling, nextRace, lastRace, roster])
+
+  useEffect(() => {
+    if (allPhotoUrls.length === 0) { setImagesReady(true); return }
+    setImagesReady(false)
+    let cancelled = false
+    ;(async () => {
+      const photos: Record<string, string> = {}
+      for (const url of allPhotoUrls) {
+        try {
+          const img = new Image()
+          img.crossOrigin = 'anonymous'
+          await new Promise<void>((resolve) => {
+            img.onload = () => {
+              const canvas = document.createElement('canvas')
+              canvas.width  = img.naturalWidth  || img.width
+              canvas.height = img.naturalHeight || img.height
+              const ctx = canvas.getContext('2d')
+              ctx?.drawImage(img, 0, 0)
+              try { photos[url] = canvas.toDataURL('image/png') } catch { /* tainted */ }
+              resolve()
+            }
+            img.onerror = () => resolve()
+            img.src = url + (url.includes('?') ? '&' : '?') + '_b64=1'
+          })
+        } catch { /* skip */ }
+      }
+      if (!cancelled) { setB64Photos(photos); setImagesReady(true) }
+    })()
+    return () => { cancelled = true }
+  }, [allPhotoUrls])
+
+  // Replace photoUrl with base64 version for export-safe rendering
+  const resolvePhoto = (url?: string) => (url && b64Photos[url]) ? b64Photos[url] : url
+  const withB64 = (athletes: Athlete[]): Athlete[] =>
+    athletes.map(a => ({ ...a, photoUrl: resolvePhoto(a.photoUrl) }))
 
   const previewMaxW = 480
   const previewMaxH = format === 'story' ? 700 : 480
@@ -65,7 +114,7 @@ export default function SharePageClient({
             title={prTitle}
             subtitle={prSubtitle}
             variant={prVariant}
-            athletes={prVariant === 'falling' ? falling : rising}
+            athletes={withB64(prVariant === 'falling' ? falling : rising)}
           />
         )
       case 'race-preview':
@@ -74,16 +123,22 @@ export default function SharePageClient({
           <RacePreviewCard
             format={format}
             race={nextRace.race}
-            favorites={nextRace.favorites}
+            favorites={withB64(nextRace.favorites)}
             daysUntil={nextRace.daysUntil}
           />
         )
       case 'race-recap':
         if (!lastRace) return <EmptyState message="No race recap data available yet." />
-        return <RaceRecapCard format={format} race={lastRace.race} podium={lastRace.podium} />
+        return (
+          <RaceRecapCard
+            format={format}
+            race={lastRace.race}
+            podium={lastRace.podium.map(p => ({ ...p, athlete: { ...p.athlete, photoUrl: resolvePhoto(p.athlete.photoUrl) } }))}
+          />
+        )
       case 'my-roster':
         if (!roster) return <EmptyState message="Build your roster first to generate this card." />
-        return <MyRosterCard format={format} roster={roster} />
+        return <MyRosterCard format={format} roster={{ ...roster, athletes: withB64(roster.athletes) }} />
       case 'league-standings':
         if (!leagueStandings) return <EmptyState message="Join a league to generate standings cards." />
         return (
@@ -94,7 +149,8 @@ export default function SharePageClient({
           />
         )
     }
-  }, [template, format, prTitle, prSubtitle, prVariant, rising, falling, nextRace, lastRace, roster, leagueStandings])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [template, format, prTitle, prSubtitle, prVariant, rising, falling, nextRace, lastRace, roster, leagueStandings, b64Photos])
 
   const handleExport = async () => {
     if (!previewRef.current) return
@@ -105,13 +161,14 @@ export default function SharePageClient({
         width: w,
         height: h,
         pixelRatio: 2,
-        cacheBust: true,
         style: { transform: 'scale(1)', transformOrigin: 'top left' },
       })
       const link = document.createElement('a')
       link.download = `trixer-${template}-${format}-${Date.now()}.png`
       link.href = dataUrl
+      document.body.appendChild(link)
       link.click()
+      document.body.removeChild(link)
     } catch (err) {
       console.error('[SharePage] Export error:', err)
     } finally {
@@ -217,12 +274,17 @@ export default function SharePageClient({
             {/* Export button */}
             <button
               onClick={handleExport}
-              disabled={exporting}
+              disabled={exporting || !imagesReady}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--color-orange)] hover:opacity-90 active:scale-95 disabled:opacity-50 text-white font-bold transition-all"
             >
-              <Download className="h-5 w-5" />
+              {exporting || !imagesReady
+                ? <Loader2 className="h-5 w-5 animate-spin" />
+                : <Download className="h-5 w-5" />
+              }
               {exporting
                 ? 'Rendering…'
+                : !imagesReady
+                ? 'Carregando fotos…'
                 : `Download PNG (${FORMAT_DIMENSIONS[format].w}×${FORMAT_DIMENSIONS[format].h})`}
             </button>
           </div>
