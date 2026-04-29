@@ -5,11 +5,13 @@ import type { Race } from '~/lib/types'
 import {
   TrendingUp, TrendingDown, Trophy, MapPin, Calendar,
   Users, ChevronRight, Zap, ArrowRight, Star, Lock, ShoppingBag, Plus, Globe,
+  Unlock,
 } from 'lucide-react'
 import PublicShell from './(public)/PublicShell'
 import GlobalRankWidget from './components/GlobalRankWidget'
 import ShareRoster from './(public)/elenco/ShareRoster'
 import { getTranslations } from 'next-intl/server'
+import { getMarketStatus } from '~/lib/market'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -219,6 +221,9 @@ export default async function HomePage() {
   const nextRace = withStartlist[0] ?? allActive[0] ?? null
   const nextRaceDays = nextRace ? daysUntil(nextRace.date) : null
 
+  const market = await getMarketStatus(pub)
+  const openRaces = allActive.filter(r => r.status === 'open')
+
   return (
     <PublicShell>
       <div className="border-b border-[var(--color-navy-border)] bg-gradient-to-b from-[var(--color-navy-card)] to-[var(--color-navy)]">
@@ -264,6 +269,47 @@ export default async function HomePage() {
             )}
           </div>
         </div>
+
+        {/* Market Status Banner */}
+        {openRaces.length > 0 && (
+          <div className="max-w-7xl mx-auto px-4 pb-10">
+            <Link 
+              href={openRaces.length === 1 ? `/provas/${openRaces[0].slug}` : "/atletas"}
+              className={`group flex items-center justify-between p-4 rounded-2xl border transition-all ${
+                market.locked 
+                  ? 'bg-yellow-500/5 border-yellow-500/20 hover:border-yellow-500/40' 
+                  : 'bg-[var(--color-success)]/5 border-[var(--color-success)]/20 hover:border-[var(--color-success)]/40'
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <div className={`p-2.5 rounded-xl shrink-0 ${
+                  market.locked ? 'bg-yellow-500/10 text-yellow-500' : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                }`}>
+                  {market.locked ? <Lock size={20} /> : <Unlock size={20} />}
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm sm:text-base flex items-center gap-2">
+                    {market.locked ? (await getTranslations('marketBanner'))('locked') : (await getTranslations('marketBanner'))('open')}
+                    <span className="w-1 h-1 rounded-full bg-white/20 hidden sm:block" />
+                    <span className="text-[var(--color-muted)] font-medium text-xs sm:text-sm">
+                      {openRaces.length === 1 ? t('openRaceSingular', { n: 1 }) : t('openRacePlural', { n: openRaces.length })}
+                    </span>
+                  </h3>
+                  <p className="text-[var(--color-muted)] text-[10px] sm:text-xs mt-0.5 line-clamp-1">
+                    {market.locked 
+                      ? (await getTranslations('marketBanner'))('ongoingRace', { race: market.lockRace?.name ?? '' })
+                      : t('availableSubtitle') + ': ' + openRaces.map(r => r.name).join(', ')
+                    }
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-[var(--color-orange)] font-bold text-xs sm:text-sm pl-4 shrink-0">
+                <span className="hidden sm:inline">{t('ctaLogged')}</span>
+                <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-10">
