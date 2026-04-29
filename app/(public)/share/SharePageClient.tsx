@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toPng } from 'html-to-image'
-import { Download, Loader2, Sparkles } from 'lucide-react'
+import { Check, ChevronDown, Download, Loader2, Sparkles } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import type { CardFormat, TemplateId, Athlete, Race, PodiumEntry, Roster, LeagueStanding } from '~/lib/trixerTypes'
@@ -298,11 +298,15 @@ export default function SharePageClient({
             {/* Race selector — upcoming */}
             {template === 'race-preview' && upcomingRaces.length > 0 && (
               <Panel label={t('selectorUpcomingLabel')}>
-                <RaceSelector
-                  options={upcomingRaces.map(r => ({ id: r.race.id, name: r.race.name, date: r.race.date }))}
+                <Combobox
+                  options={upcomingRaces.map(r => ({
+                    id: r.race.id,
+                    label: r.race.name,
+                    sublabel: fmtDate(r.race.date),
+                  }))}
                   value={selectedUpcomingId}
                   onChange={setSelectedUpcomingId}
-                  placeholder={t('selectorUpcomingPlaceholder')}
+                  searchPlaceholder={t('selectorUpcomingPlaceholder')}
                 />
               </Panel>
             )}
@@ -310,11 +314,15 @@ export default function SharePageClient({
             {/* Race selector — finished */}
             {template === 'race-recap' && finishedRaces.length > 0 && (
               <Panel label={t('selectorFinishedLabel')}>
-                <RaceSelector
-                  options={finishedRaces.map(r => ({ id: r.race.id, name: r.race.name, date: r.race.date }))}
+                <Combobox
+                  options={finishedRaces.map(r => ({
+                    id: r.race.id,
+                    label: r.race.name,
+                    sublabel: fmtDate(r.race.date),
+                  }))}
                   value={selectedFinishedId}
                   onChange={setSelectedFinishedId}
-                  placeholder={t('selectorFinishedPlaceholder')}
+                  searchPlaceholder={t('selectorFinishedPlaceholder')}
                 />
               </Panel>
             )}
@@ -322,24 +330,16 @@ export default function SharePageClient({
             {/* League selector */}
             {template === 'league-standings' && allLeagueStandings.length > 1 && (
               <Panel label={t('selectorLeagueLabel')}>
-                <div className="grid gap-1.5">
-                  {allLeagueStandings.map(l => (
-                    <button
-                      key={l.leagueId}
-                      onClick={() => setSelectedLeagueId(l.leagueId)}
-                      className={`text-left rounded-xl px-3 py-2.5 transition-all border ${
-                        selectedLeagueId === l.leagueId
-                          ? 'bg-[var(--color-orange-dim)] border-[var(--color-orange)]/40'
-                          : 'bg-white/[0.03] border-[var(--color-navy-border)] hover:border-white/20'
-                      }`}
-                    >
-                      <div className="font-semibold text-sm truncate">{l.leagueName}</div>
-                      <div className="text-xs text-[var(--color-muted)] mt-0.5">
-                        {l.standings.length} {t('selectorLeagueMembersLabel')}
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                <Combobox
+                  options={allLeagueStandings.map(l => ({
+                    id: l.leagueId,
+                    label: l.leagueName,
+                    sublabel: `${l.standings.length} ${t('selectorLeagueMembersLabel')}`,
+                  }))}
+                  value={selectedLeagueId}
+                  onChange={setSelectedLeagueId}
+                  searchPlaceholder={t('selectorLeagueLabel')}
+                />
               </Panel>
             )}
 
@@ -381,38 +381,113 @@ export default function SharePageClient({
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function RaceSelector({
+const fmtDate = (date: string) => {
+  const [y, m, d] = date.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function Combobox({
   options,
   value,
   onChange,
-  placeholder,
+  searchPlaceholder,
 }: {
-  options: { id: string; name: string; date: string }[]
+  options: { id: string; label: string; sublabel?: string }[]
   value: string
   onChange: (id: string) => void
-  placeholder: string
+  searchPlaceholder: string
 }) {
-  const fmt = (date: string) => {
-    const [y, m, d] = date.split('-').map(Number)
-    return new Date(y, m - 1, d).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
-  }
+  const [open, setOpen]   = useState(false)
+  const [query, setQuery] = useState('')
+  const containerRef = useRef<HTMLDivElement>(null)
+  const inputRef     = useRef<HTMLInputElement>(null)
+
+  const selected = options.find(o => o.id === value)
+  const filtered  = query.trim()
+    ? options.filter(o => o.label.toLowerCase().includes(query.toLowerCase()))
+    : options
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+        setQuery('')
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  useEffect(() => {
+    if (open) setTimeout(() => inputRef.current?.focus(), 40)
+  }, [open])
 
   return (
-    <div className="grid gap-1.5">
-      {options.map(o => (
-        <button
-          key={o.id}
-          onClick={() => onChange(o.id)}
-          className={`text-left rounded-xl px-3 py-2.5 transition-all border ${
-            value === o.id
-              ? 'bg-[var(--color-orange-dim)] border-[var(--color-orange)]/40'
-              : 'bg-white/[0.03] border-[var(--color-navy-border)] hover:border-white/20'
-          }`}
-        >
-          <div className="font-semibold text-sm truncate">{o.name}</div>
-          <div className="text-xs text-[var(--color-muted)] mt-0.5">{fmt(o.date)}</div>
-        </button>
-      ))}
+    <div ref={containerRef} className="relative">
+      {/* Trigger */}
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] hover:border-white/20 transition-all text-left"
+      >
+        <div className="min-w-0 flex-1">
+          {selected ? (
+            <>
+              <div className="text-sm font-semibold text-white truncate">{selected.label}</div>
+              {selected.sublabel && (
+                <div className="text-xs text-[var(--color-muted)] mt-0.5">{selected.sublabel}</div>
+              )}
+            </>
+          ) : (
+            <div className="text-sm text-[var(--color-muted)]">{searchPlaceholder}</div>
+          )}
+        </div>
+        <ChevronDown
+          className={`h-4 w-4 text-[var(--color-muted)] shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-xl shadow-2xl overflow-hidden">
+          {options.length > 4 && (
+            <div className="p-2 border-b border-[var(--color-navy-border)]">
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder={searchPlaceholder}
+                className="w-full bg-[var(--color-navy-elevated)] rounded-lg px-3 py-1.5 text-sm text-white placeholder:text-[var(--color-muted)] outline-none border border-transparent focus:border-[var(--color-orange)]/40 transition-colors"
+              />
+            </div>
+          )}
+          <div className="max-h-60 overflow-y-auto">
+            {filtered.length === 0 ? (
+              <div className="px-3 py-4 text-sm text-[var(--color-muted)] text-center">—</div>
+            ) : filtered.map(o => (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => { onChange(o.id); setOpen(false); setQuery('') }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.04] transition-colors"
+              >
+                <Check
+                  className={`h-4 w-4 shrink-0 transition-opacity ${o.id === value ? 'text-[var(--color-orange)] opacity-100' : 'opacity-0'}`}
+                />
+                <div className="min-w-0">
+                  <div className={`text-sm font-semibold truncate ${o.id === value ? 'text-[var(--color-orange)]' : 'text-white'}`}>
+                    {o.label}
+                  </div>
+                  {o.sublabel && (
+                    <div className="text-xs text-[var(--color-muted)]">{o.sublabel}</div>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
