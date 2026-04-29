@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toPng } from 'html-to-image'
 import { Download, Loader2, Sparkles } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import type { CardFormat, TemplateId, Athlete, Race, PodiumEntry, Roster, LeagueStanding } from '~/lib/trixerTypes'
 import { FORMAT_DIMENSIONS } from '~/lib/trixerTypes'
@@ -22,12 +23,12 @@ type Props = {
   leagueStandings: { leagueName: string; standings: LeagueStanding[] } | null
 }
 
-const TEMPLATES: { id: TemplateId; label: string; description: string }[] = [
-  { id: 'power-ranking',    label: 'Power Ranking',    description: 'Top athletes rising or falling on the market' },
-  { id: 'race-preview',     label: 'Race Preview',     description: 'Cover for the next race with top picks' },
-  { id: 'race-recap',       label: 'Race Recap',       description: 'Final podium with times and market impact' },
-  { id: 'my-roster',        label: 'My Roster',        description: "Your 5-athlete team — viral share card" },
-  { id: 'league-standings', label: 'League Standings', description: 'Top 10 of a Trix League' },
+const TEMPLATE_IDS: TemplateId[] = [
+  'power-ranking',
+  'race-preview',
+  'race-recap',
+  'my-roster',
+  'league-standings',
 ]
 
 export default function SharePageClient({
@@ -38,6 +39,7 @@ export default function SharePageClient({
   roster,
   leagueStandings,
 }: Props) {
+  const t = useTranslations('share')
   const params = useSearchParams()
   const initialTemplate = (params.get('template') as TemplateId) ?? 'power-ranking'
   const initialFormat   = (params.get('format')   as CardFormat)  ?? 'feed'
@@ -48,9 +50,9 @@ export default function SharePageClient({
   const [imagesReady, setImagesReady] = useState(false)
   const [b64Photos, setB64Photos] = useState<Record<string, string>>({})
 
-  // Editable fields
-  const [prTitle,    setPrTitle]    = useState('Rising on the market')
-  const [prSubtitle, setPrSubtitle] = useState('This week · ' + new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }))
+  // Editable fields — initialised from translations
+  const [prTitle,    setPrTitle]    = useState(() => t('defaultPrTitle'))
+  const [prSubtitle, setPrSubtitle] = useState(() => t('defaultPrSubtitle') + ' · ' + new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' }))
   const [prVariant,  setPrVariant]  = useState<'rising' | 'falling'>('rising')
 
   const previewRef = useRef<HTMLDivElement>(null)
@@ -118,7 +120,7 @@ export default function SharePageClient({
           />
         )
       case 'race-preview':
-        if (!nextRace) return <EmptyState message="No upcoming race with startlist found." />
+        if (!nextRace) return <EmptyState message={t('emptyNoRace')} />
         return (
           <RacePreviewCard
             format={format}
@@ -128,7 +130,7 @@ export default function SharePageClient({
           />
         )
       case 'race-recap':
-        if (!lastRace) return <EmptyState message="No race recap data available yet." />
+        if (!lastRace) return <EmptyState message={t('emptyNoRecap')} />
         return (
           <RaceRecapCard
             format={format}
@@ -137,10 +139,10 @@ export default function SharePageClient({
           />
         )
       case 'my-roster':
-        if (!roster) return <EmptyState message="Build your roster first to generate this card." />
+        if (!roster) return <EmptyState message={t('emptyNoRoster')} />
         return <MyRosterCard format={format} roster={{ ...roster, athletes: withB64(roster.athletes) }} />
       case 'league-standings':
-        if (!leagueStandings) return <EmptyState message="Join a league to generate standings cards." />
+        if (!leagueStandings) return <EmptyState message={t('emptyNoLeague')} />
         return (
           <LeagueStandingsCard
             format={format}
@@ -184,10 +186,10 @@ export default function SharePageClient({
           <Sparkles className="h-6 w-6 text-[var(--color-orange)] mt-1 shrink-0" />
           <div>
             <h1 className="text-3xl lg:text-4xl font-black tracking-tight">
-              Card Generator
+              {t('pageTitle')}
             </h1>
             <p className="text-[var(--color-muted)] mt-1 max-w-xl text-sm">
-              Pick a template, tweak the content, export a 1080px PNG ready for Instagram.
+              {t('pageSubtitle')}
             </p>
           </div>
         </div>
@@ -196,27 +198,31 @@ export default function SharePageClient({
           {/* ── Editor panel ── */}
           <div className="space-y-5">
             {/* Template */}
-            <Panel label="Template">
+            <Panel label={t('panelTemplate')}>
               <div className="grid gap-2">
-                {TEMPLATES.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setTemplate(t.id)}
-                    className={`text-left rounded-xl p-3 transition-all border ${
-                      template === t.id
-                        ? 'bg-[var(--color-orange-dim)] border-[var(--color-orange)]/40'
-                        : 'bg-white/[0.03] border-[var(--color-navy-border)] hover:border-white/20'
-                    }`}
-                  >
-                    <div className="font-bold text-sm">{t.label}</div>
-                    <div className="text-xs text-[var(--color-muted)] mt-0.5">{t.description}</div>
-                  </button>
-                ))}
+                {TEMPLATE_IDS.map((id) => {
+                  const labelKey = `tpl${id.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join('')}Label` as any
+                  const descKey  = `tpl${id.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join('')}Desc`  as any
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => setTemplate(id)}
+                      className={`text-left rounded-xl p-3 transition-all border ${
+                        template === id
+                          ? 'bg-[var(--color-orange-dim)] border-[var(--color-orange)]/40'
+                          : 'bg-white/[0.03] border-[var(--color-navy-border)] hover:border-white/20'
+                      }`}
+                    >
+                      <div className="font-bold text-sm">{t(labelKey)}</div>
+                      <div className="text-xs text-[var(--color-muted)] mt-0.5">{t(descKey)}</div>
+                    </button>
+                  )
+                })}
               </div>
             </Panel>
 
             {/* Format */}
-            <Panel label="Format">
+            <Panel label={t('panelFormat')}>
               <div className="grid grid-cols-2 gap-2">
                 {(['feed', 'story'] as CardFormat[]).map((f) => (
                   <button
@@ -228,7 +234,7 @@ export default function SharePageClient({
                         : 'bg-white/[0.03] border-[var(--color-navy-border)] text-[var(--color-muted)] hover:text-white'
                     }`}
                   >
-                    {f === 'feed' ? 'Feed 4:5' : 'Story 9:16'}
+                    {f === 'feed' ? t('formatFeed') : t('formatStory')}
                   </button>
                 ))}
               </div>
@@ -236,34 +242,34 @@ export default function SharePageClient({
 
             {/* Content controls — only shown for power-ranking */}
             {template === 'power-ranking' && (
-              <Panel label="Content">
-                <Field label="Title">
+              <Panel label={t('panelContent')}>
+                <Field label={t('fieldTitle')}>
                   <input
                     value={prTitle}
                     onChange={(e) => setPrTitle(e.target.value)}
                     className="w-full bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[var(--color-orange)]/60"
                   />
                 </Field>
-                <Field label="Subtitle">
+                <Field label={t('fieldSubtitle')}>
                   <input
                     value={prSubtitle}
                     onChange={(e) => setPrSubtitle(e.target.value)}
                     className="w-full bg-[var(--color-navy-elevated)] border border-[var(--color-navy-border)] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[var(--color-orange)]/60"
                   />
                 </Field>
-                <Field label="Variant">
+                <Field label={t('fieldVariant')}>
                   <div className="grid grid-cols-2 gap-2">
                     {(['rising', 'falling'] as const).map((v) => (
                       <button
                         key={v}
                         onClick={() => setPrVariant(v)}
-                        className={`py-2 rounded-lg text-sm font-bold border transition-all capitalize ${
+                        className={`py-2 rounded-lg text-sm font-bold border transition-all ${
                           prVariant === v
                             ? 'bg-[var(--color-orange-dim)] border-[var(--color-orange)]/40 text-[var(--color-orange)]'
                             : 'bg-white/[0.03] border-[var(--color-navy-border)] text-[var(--color-muted)] hover:text-white'
                         }`}
                       >
-                        {v}
+                        {v === 'rising' ? t('variantRising') : t('variantFalling')}
                       </button>
                     ))}
                   </div>
@@ -282,23 +288,23 @@ export default function SharePageClient({
                 : <Download className="h-5 w-5" />
               }
               {exporting
-                ? 'Rendering…'
+                ? t('btnRendering')
                 : !imagesReady
-                ? 'Carregando fotos…'
-                : `Download PNG (${FORMAT_DIMENSIONS[format].w}×${FORMAT_DIMENSIONS[format].h})`}
+                ? t('btnLoadingPhotos')
+                : t('btnDownload', { w: FORMAT_DIMENSIONS[format].w, h: FORMAT_DIMENSIONS[format].h })}
             </button>
           </div>
 
           {/* ── Preview ── */}
           <div className="flex flex-col items-center gap-4">
             <p className="text-xs text-[var(--color-muted)] uppercase tracking-widest">
-              Live preview · scaled to fit
+              {t('previewLabel')}
             </p>
             <CardPreview ref={previewRef} format={format} maxWidth={previewMaxW} maxHeight={previewMaxH}>
               {card}
             </CardPreview>
             <p className="text-xs text-[var(--color-muted)] text-center">
-              Exports at full {FORMAT_DIMENSIONS[format].w}×{FORMAT_DIMENSIONS[format].h} resolution.
+              {t('previewResolution', { w: FORMAT_DIMENSIONS[format].w, h: FORMAT_DIMENSIONS[format].h })}
             </p>
           </div>
         </div>
