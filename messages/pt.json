@@ -284,7 +284,8 @@
     "memberPlural": "membros",
     "netWorthLabel": "Patrimônio em T$",
     "walletUnit": "carteira",
-    "portfolioUnit": "atletas"
+    "portfolioUnit": "atletas",
+    "paginationOf": "de"
   },
   "profile": {
     "title": "Meu Perfil",

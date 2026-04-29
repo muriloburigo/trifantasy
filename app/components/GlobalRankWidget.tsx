@@ -19,6 +19,7 @@ export default function GlobalRankWidget({
   currentUserId?: string | null
 }) {
   const t = useTranslations('home')
+  const tL = useTranslations('leagues')
   const [page, setPage] = useState(0)
 
   const totalPages = Math.ceil(entries.length / PAGE_SIZE)
@@ -64,11 +65,11 @@ export default function GlobalRankWidget({
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">
                 {e.name}
-                {isMe && <span className="text-[var(--color-orange)] ml-1 text-[10px]">você</span>}
+                {isMe && <span className="text-[var(--color-orange)] ml-1 text-[10px]">{tL('youLabel')}</span>}
               </p>
               {(e.wallet !== undefined && e.portfolioValue !== undefined) && (
                 <p className="text-[10px] text-[var(--color-muted)]">
-                  T${e.wallet.toFixed(0)} carteira · T${e.portfolioValue.toFixed(0)} atletas
+                  T${e.wallet.toFixed(0)} {tL('walletUnit')} · T${e.portfolioValue.toFixed(0)} {tL('portfolioUnit')}
                 </p>
               )}
             </div>
@@ -92,7 +93,7 @@ export default function GlobalRankWidget({
             <ChevronLeft size={16} />
           </button>
           <span className="text-xs text-[var(--color-muted)]">
-            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, entries.length)} de {entries.length}
+            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, entries.length)} {tL('paginationOf')} {entries.length}
           </span>
           <button
             onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}

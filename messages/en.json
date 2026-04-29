@@ -284,7 +284,8 @@
     "memberPlural": "members",
     "netWorthLabel": "Net Worth (T$)",
     "walletUnit": "wallet",
-    "portfolioUnit": "athletes"
+    "portfolioUnit": "athletes",
+    "paginationOf": "of"
   },
   "profile": {
     "title": "My Profile",
