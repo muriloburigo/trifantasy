@@ -183,7 +183,7 @@ export default async function HomePage() {
       auth.from('profiles').select('wallet').eq('id', loggedUser.id).single(),
       admin.from('league_members').select('league:leagues(id, name, is_public, is_global)').eq('user_id', loggedUser.id),
     ])
-    const leagueMemberships = leagueMembershipsRes?.data ?? []
+    const leagueMemberships = leagueMembershipsRes ?? []
     myPortfolio = (portfolioRes ?? []).map(p => ({ ...p, athlete: p.athlete as any }))
     const wallet = Number((profileRes as any)?.wallet ?? 0)
     myNetWorth = wallet + myPortfolio.reduce((s, p) => s + Number(p.athlete?.current_price ?? 0), 0)
