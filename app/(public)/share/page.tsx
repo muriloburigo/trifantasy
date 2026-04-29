@@ -9,16 +9,19 @@ import SharePageClient from './SharePageClient'
 const countryFlag = (iso: string) =>
   (iso ?? '').toUpperCase().replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)))
 
-const mapAthlete = (a: any): Athlete => ({
-  id: a.id,
-  name: a.name,
-  country: a.country ?? '',
-  countryFlag: countryFlag(a.country ?? ''),
-  photoUrl: a.photo_url ?? undefined,
-  currentT: Number(a.current_price ?? 0),
-  deltaT: Number(a.price_change ?? 0),
-  rank: a.pto_rank ?? undefined,
-})
+const mapAthlete = (a: any): Athlete | null => {
+  if (!a) return null
+  return {
+    id: a.id,
+    name: a.name,
+    country: a.country ?? '',
+    countryFlag: countryFlag(a.country ?? ''),
+    photoUrl: a.photo_url ?? undefined,
+    currentT: Number(a.current_price ?? 0),
+    deltaT: Number(a.price_change ?? 0),
+    rank: a.pto_rank ?? undefined,
+  }
+}
 
 // ── page ─────────────────────────────────────────────────────────────────────
 
@@ -89,8 +92,8 @@ export default async function SharePage() {
   ])
 
   // ── Rising / Falling ──────────────────────────────────────────────────────
-  const rising  = (risingRaw  ?? []).map(mapAthlete)
-  const falling = (fallingRaw ?? []).map(mapAthlete)
+  const rising  = (risingRaw  ?? []).map(mapAthlete).filter(Boolean) as Athlete[]
+  const falling = (fallingRaw ?? []).map(mapAthlete).filter(Boolean) as Athlete[]
 
   // ── Upcoming races (for race-preview) ─────────────────────────────────────
   const upcomingRaces = (upcomingRacesRaw ?? [])
@@ -101,7 +104,7 @@ export default async function SharePage() {
       const daysUntil = Math.round((raceDate - todayMs) / 86400000)
       const favorites = (r.race_athletes as any[])
         .map((ra: any) => mapAthlete(ra.athlete))
-        .filter((a: Athlete) => a.id)
+        .filter((a): a is Athlete => !!a?.id)
         .sort((a: Athlete, b: Athlete) => b.currentT - a.currentT)
         .slice(0, 5)
       return {
@@ -138,8 +141,10 @@ export default async function SharePage() {
         const s = diff % 60
         gap = `+${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
       }
+      const mappedAthlete = mapAthlete((r as any).athlete)
+      if (!mappedAthlete) continue
       podiumsByRace[r.race_id].push({
-        athlete: mapAthlete((r as any).athlete),
+        athlete: mappedAthlete,
         time: r.finish_time ?? '—',
         gap,
       })
@@ -154,7 +159,7 @@ export default async function SharePage() {
   // ── My Roster ─────────────────────────────────────────────────────────────
   let roster: Roster | null = null
   if (portfolioRaw && portfolioRaw.length > 0) {
-    const athletes  = portfolioRaw.map((p: any) => mapAthlete(p.athlete)).filter((a) => a.id)
+    const athletes  = portfolioRaw.map((p: any) => mapAthlete(p.athlete)).filter((a): a is Athlete => !!a?.id)
     const athletesT = athletes.reduce((sum, a) => sum + a.currentT, 0)
     const walletT   = Number(profileRaw?.wallet ?? 0)
     roster = {
