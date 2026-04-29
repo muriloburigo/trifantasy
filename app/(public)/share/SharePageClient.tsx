@@ -360,8 +360,10 @@ function RaceSelector({
   onChange: (id: string) => void
   placeholder: string
 }) {
-  const fmt = (date: string) =>
-    new Date(date).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+  const fmt = (date: string) => {
+    const [y, m, d] = date.split('-').map(Number)
+    return new Date(y, m - 1, d).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+  }
 
   return (
     <div className="grid gap-1.5">
