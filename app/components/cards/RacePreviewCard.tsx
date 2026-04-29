@@ -9,10 +9,12 @@ type Props = {
   daysUntil?: number
 }
 
-const formatDate = (iso: string) =>
-  new Date(iso)
+const formatDate = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, m - 1, d)
     .toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })
     .toUpperCase()
+}
 
 export const RacePreviewCard = ({ format, race, favorites, daysUntil }: Props) => {
   const isStory = format === 'story'
