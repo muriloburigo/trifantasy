@@ -23,6 +23,7 @@
 
   --font-sans: var(--font-inter);
   --font-heading: var(--font-sora);
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
