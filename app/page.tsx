@@ -4,7 +4,7 @@ import { formatDate, daysUntil } from '~/lib/utils'
 import type { Race } from '~/lib/types'
 import {
   TrendingUp, TrendingDown, Trophy, MapPin, Calendar,
-  Users, ChevronRight, Zap, ArrowRight, Star, Lock, ShoppingBag,
+  Users, ChevronRight, Zap, ArrowRight, Star, Lock, ShoppingBag, Plus, Globe,
 } from 'lucide-react'
 import PublicShell from './(public)/PublicShell'
 import GlobalRankWidget from './components/GlobalRankWidget'
@@ -170,17 +170,43 @@ export default async function HomePage() {
     }
   }
 
-  // Portfolio details
+  // Portfolio details + my leagues
   let myPortfolio: any[] = []
   let myNetWorth = 0
+  let myLeagues: { id: string; name: string; is_public: boolean; memberCount: number }[] = []
   if (loggedUser) {
-    const [{ data: portfolioRes }, { data: profileRes }] = await Promise.all([
+    const [{ data: portfolioRes }, { data: profileRes }, { data: leagueMemberships }] = await Promise.all([
       auth.from('portfolio').select('bought_price, athlete:athletes(id, name, current_price, photo_url)').eq('user_id', loggedUser.id),
-      auth.from('profiles').select('wallet').eq('id', loggedUser.id).single()
+      auth.from('profiles').select('wallet').eq('id', loggedUser.id).single(),
+      admin.from('league_members').select('league:leagues(id, name, is_public, is_global)').eq('user_id', loggedUser.id),
     ])
     myPortfolio = (portfolioRes ?? []).map(p => ({ ...p, athlete: p.athlete as any }))
     const wallet = Number((profileRes as any)?.wallet ?? 0)
     myNetWorth = wallet + myPortfolio.reduce((s, p) => s + Number(p.athlete?.current_price ?? 0), 0)
+
+    // Filter out global league, keep up to 3 non-global leagues
+    const nonGlobal = (leagueMemberships ?? [])
+      .map((m: any) => m.league)
+      .filter((l: any) => l && !l.is_global)
+      .slice(0, 3)
+
+    if (nonGlobal.length > 0) {
+      const leagueIds = nonGlobal.map((l: any) => l.id)
+      const { data: memberCounts } = await admin
+        .from('league_members')
+        .select('league_id')
+        .in('league_id', leagueIds)
+      const countByLeague: Record<string, number> = {}
+      for (const row of memberCounts ?? []) {
+        countByLeague[row.league_id] = (countByLeague[row.league_id] ?? 0) + 1
+      }
+      myLeagues = nonGlobal.map((l: any) => ({
+        id: l.id,
+        name: l.name,
+        is_public: l.is_public,
+        memberCount: countByLeague[l.id] ?? 0,
+      }))
+    }
   }
 
   const today = new Date()
@@ -350,17 +376,66 @@ export default async function HomePage() {
               </div>
             )}
 
-            <div className="bg-gradient-to-br from-[var(--color-orange)]/10 to-[var(--color-purple)]/10 border border-[var(--color-orange)]/20 rounded-2xl p-5 text-center">
-              <Trophy size={24} className="mx-auto mb-2 text-yellow-400 opacity-80" />
-              <h3 className="font-bold text-sm mb-1">{t('leagueCta')}</h3>
-              <p className="text-[11px] text-[var(--color-muted)] mb-4 leading-relaxed">{t('leagueCtaDesc')}</p>
-              {loggedUser ? (
-                <><Link href="/ligas" className="block w-full text-center bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-xs font-bold py-2.5 rounded-lg transition-colors mb-2">{t('leagueCtaView')}</Link>
-                <Link href="/ligas/criar" className="block w-full text-center text-xs text-[var(--color-muted)] hover:text-white border border-[var(--color-navy-border)] py-2.5 rounded-lg transition-colors">{t('leagueCtaCreate')}</Link></>
+            <div className="bg-gradient-to-br from-[var(--color-orange)]/10 to-[var(--color-purple)]/10 border border-[var(--color-orange)]/20 rounded-2xl overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-orange)]/10">
+                <Trophy size={14} className="text-yellow-400" />
+                <span className="font-bold text-sm flex-1">{t('leagueCta')}</span>
+              </div>
+
+              {/* League preview for logged-in users with leagues */}
+              {loggedUser && myLeagues.length > 0 ? (
+                <div className="divide-y divide-[var(--color-navy-border)]/60">
+                  {myLeagues.map(l => (
+                    <Link
+                      key={l.id}
+                      href={`/ligas/${l.id}`}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--color-navy-card)]/40 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold truncate leading-tight">{l.name}</p>
+                        <p className="text-[10px] text-[var(--color-muted)] flex items-center gap-1 mt-0.5">
+                          {l.is_public
+                            ? <><Globe size={9} /> Pública</>
+                            : <><Lock size={9} /> Privada</>}
+                          <span className="mx-1 opacity-40">·</span>
+                          <Users size={9} /> {l.memberCount} {l.memberCount === 1 ? 'membro' : 'membros'}
+                        </p>
+                      </div>
+                      <ChevronRight size={12} className="text-[var(--color-muted)] shrink-0" />
+                    </Link>
+                  ))}
+                </div>
+              ) : loggedUser ? (
+                /* Logged in but no leagues yet */
+                <div className="px-4 py-4 text-center">
+                  <p className="text-[11px] text-[var(--color-muted)] leading-relaxed">{t('leagueCtaDesc')}</p>
+                </div>
               ) : (
-                <><Link href="/register" className="block w-full text-center bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-xs font-bold py-2.5 rounded-lg transition-colors mb-2">{t('leagueCtaButton')}</Link>
-                <Link href="/login" className="block w-full text-center text-xs text-[var(--color-muted)] hover:text-white border border-[var(--color-navy-border)] py-2.5 rounded-lg transition-colors">{t('leagueCtaLogin')}</Link></>
+                /* Not logged in */
+                <div className="px-4 py-4 text-center">
+                  <p className="text-[11px] text-[var(--color-muted)] leading-relaxed">{t('leagueCtaDesc')}</p>
+                </div>
               )}
+
+              {/* Action buttons */}
+              <div className="px-4 py-3 border-t border-[var(--color-orange)]/10 space-y-2">
+                {loggedUser ? (
+                  <>
+                    <Link href="/ligas" className="flex items-center justify-center gap-1.5 w-full text-center bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-xs font-bold py-2.5 rounded-lg transition-colors">
+                      <Trophy size={12} />{t('leagueCtaView')}
+                    </Link>
+                    <Link href="/ligas/criar" className="flex items-center justify-center gap-1.5 w-full text-center text-xs text-[var(--color-muted)] hover:text-white border border-[var(--color-navy-border)] py-2.5 rounded-lg transition-colors">
+                      <Plus size={12} />{t('leagueCtaCreate')}
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/register" className="block w-full text-center bg-[var(--color-orange)] hover:bg-[var(--color-orange-light)] text-white text-xs font-bold py-2.5 rounded-lg transition-colors">{t('leagueCtaButton')}</Link>
+                    <Link href="/login" className="block w-full text-center text-xs text-[var(--color-muted)] hover:text-white border border-[var(--color-navy-border)] py-2.5 rounded-lg transition-colors">{t('leagueCtaLogin')}</Link>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
