@@ -183,49 +183,50 @@ export default async function SharePage() {
     }
   }
 
-  // ── League Standings ──────────────────────────────────────────────────────
-  let leagueStandings: { leagueName: string; standings: LeagueStanding[] } | null = null
-  const firstLeague = (memberLeagues ?? [])
+  // ── League Standings (all non-global leagues) ─────────────────────────────
+  const allLeagues = (memberLeagues ?? [])
     .map((m: any) => m.league)
-    .find((l: any) => l && !l.is_global)
+    .filter((l: any) => l && !l.is_global)
 
-  if (firstLeague) {
+  const allLeagueStandings: { leagueId: string; leagueName: string; standings: LeagueStanding[] }[] = []
+
+  for (const league of allLeagues) {
     const { data: leagueMembers } = await admin
       .from('league_members')
       .select('user_id')
-      .eq('league_id', firstLeague.id)
+      .eq('league_id', league.id)
 
     const memberIds = (leagueMembers ?? []).map((m: any) => m.user_id)
+    if (memberIds.length === 0) continue
 
-    if (memberIds.length > 0) {
-      const [{ data: memberProfiles }, { data: memberPortfolios }] = await Promise.all([
-        admin.from('profiles').select('id, name, wallet').in('id', memberIds),
-        admin.from('portfolio').select('user_id, athlete:athletes(current_price)').in('user_id', memberIds),
-      ])
+    const [{ data: memberProfiles }, { data: memberPortfolios }] = await Promise.all([
+      admin.from('profiles').select('id, name, wallet, photo_url').in('id', memberIds),
+      admin.from('portfolio').select('user_id, athlete:athletes(current_price)').in('user_id', memberIds),
+    ])
 
-      const athletesByUser: Record<string, number> = {}
-      for (const p of memberPortfolios ?? []) {
-        athletesByUser[p.user_id] = (athletesByUser[p.user_id] ?? 0) + Number((p.athlete as any)?.current_price ?? 0)
-      }
-
-      const standings: LeagueStanding[] = (memberProfiles ?? [])
-        .map((p: any) => {
-          const walletT   = Number(p.wallet ?? 0)
-          const athletesT = athletesByUser[p.id] ?? 0
-          return {
-            position:  0,
-            name:      p.name ?? 'Trixer',
-            walletT:   Math.round(walletT),
-            athletesT: Math.round(athletesT),
-            totalT:    Math.round(walletT + athletesT),
-            initials:  (p.name ?? 'T').split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase(),
-          }
-        })
-        .sort((a: LeagueStanding, b: LeagueStanding) => b.totalT - a.totalT)
-        .map((s: LeagueStanding, i: number) => ({ ...s, position: i + 1 }))
-
-      leagueStandings = { leagueName: firstLeague.name, standings }
+    const athletesByUser: Record<string, number> = {}
+    for (const p of memberPortfolios ?? []) {
+      athletesByUser[p.user_id] = (athletesByUser[p.user_id] ?? 0) + Number((p.athlete as any)?.current_price ?? 0)
     }
+
+    const standings: LeagueStanding[] = (memberProfiles ?? [])
+      .map((p: any) => {
+        const walletT   = Number(p.wallet ?? 0)
+        const athletesT = athletesByUser[p.id] ?? 0
+        return {
+          position:  0,
+          name:      p.name ?? 'Trixer',
+          walletT:   Math.round(walletT),
+          athletesT: Math.round(athletesT),
+          totalT:    Math.round(walletT + athletesT),
+          initials:  (p.name ?? 'T').split(' ').slice(0, 2).map((w: string) => w[0] ?? '').join('').toUpperCase(),
+          avatarUrl: (p as any).photo_url ?? undefined,
+        }
+      })
+      .sort((a: LeagueStanding, b: LeagueStanding) => b.totalT - a.totalT)
+      .map((s: LeagueStanding, i: number) => ({ ...s, position: i + 1 }))
+
+    allLeagueStandings.push({ leagueId: league.id, leagueName: league.name, standings })
   }
 
   return (
@@ -236,7 +237,7 @@ export default async function SharePage() {
         upcomingRaces={upcomingRaces}
         finishedRaces={finishedRaces}
         roster={roster}
-        leagueStandings={leagueStandings}
+        allLeagueStandings={allLeagueStandings}
       />
     </Suspense>
   )

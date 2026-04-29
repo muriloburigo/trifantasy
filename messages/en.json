@@ -598,6 +598,8 @@
     "selectorUpcomingLabel": "Race",
     "selectorFinishedLabel": "Race",
     "selectorUpcomingPlaceholder": "Select a race",
-    "selectorFinishedPlaceholder": "Select a race"
+    "selectorFinishedPlaceholder": "Select a race",
+    "selectorLeagueLabel": "League",
+    "selectorLeagueMembersLabel": "members"
   }
 }

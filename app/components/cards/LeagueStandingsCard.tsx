@@ -84,14 +84,26 @@ export const LeagueStandingsCard = ({ format, leagueName, standings }: Props) =>
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    overflow: 'hidden',
+                    flexShrink: 0,
                   }}
                 >
-                  <span
-                    className="font-display font-black"
-                    style={{ color: 'white', fontSize: isStory ? 22 : 18, letterSpacing: '-0.04em' }}
-                  >
-                    {s.initials}
-                  </span>
+                  {s.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={s.avatarUrl}
+                      alt={s.name}
+                      crossOrigin="anonymous"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <span
+                      className="font-display font-black"
+                      style={{ color: 'white', fontSize: isStory ? 22 : 18, letterSpacing: '-0.04em' }}
+                    >
+                      {s.initials}
+                    </span>
+                  )}
                 </div>
                 <span
                   className="font-display font-bold"

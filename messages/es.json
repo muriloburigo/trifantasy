@@ -595,6 +595,8 @@
     "selectorUpcomingLabel": "Carrera",
     "selectorFinishedLabel": "Carrera",
     "selectorUpcomingPlaceholder": "Selecciona una carrera",
-    "selectorFinishedPlaceholder": "Selecciona una carrera"
+    "selectorFinishedPlaceholder": "Selecciona una carrera",
+    "selectorLeagueLabel": "Liga",
+    "selectorLeagueMembersLabel": "miembros"
   }
 }

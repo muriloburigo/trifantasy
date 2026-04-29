@@ -17,13 +17,15 @@ import { LeagueStandingsCard } from '~/app/components/cards/LeagueStandingsCard'
 type UpcomingRaceOption = { race: Race; favorites: Athlete[]; daysUntil: number }
 type FinishedRaceOption = { race: Race; podium: PodiumEntry[] }
 
+type LeagueStandingsOption = { leagueId: string; leagueName: string; standings: LeagueStanding[] }
+
 type Props = {
   rising: Athlete[]
   falling: Athlete[]
   upcomingRaces: UpcomingRaceOption[]
   finishedRaces: FinishedRaceOption[]
   roster: Roster | null
-  leagueStandings: { leagueName: string; standings: LeagueStanding[] } | null
+  allLeagueStandings: LeagueStandingsOption[]
 }
 
 const TEMPLATE_IDS: TemplateId[] = [
@@ -40,7 +42,7 @@ export default function SharePageClient({
   upcomingRaces,
   finishedRaces,
   roster,
-  leagueStandings,
+  allLeagueStandings,
 }: Props) {
   const t = useTranslations('share')
   const params = useSearchParams()
@@ -53,9 +55,10 @@ export default function SharePageClient({
   const [imagesReady, setImagesReady] = useState(false)
   const [b64Photos, setB64Photos] = useState<Record<string, string>>({})
 
-  // Race selectors
+  // Race / league selectors
   const [selectedUpcomingId, setSelectedUpcomingId] = useState<string>(upcomingRaces[0]?.race.id ?? '')
   const [selectedFinishedId, setSelectedFinishedId] = useState<string>(finishedRaces[0]?.race.id ?? '')
+  const [selectedLeagueId,   setSelectedLeagueId]   = useState<string>(allLeagueStandings[0]?.leagueId ?? '')
 
   // Editable fields
   const [prTitle,    setPrTitle]    = useState(() => t('defaultPrTitle'))
@@ -66,6 +69,7 @@ export default function SharePageClient({
 
   const selectedUpcoming = upcomingRaces.find(r => r.race.id === selectedUpcomingId) ?? upcomingRaces[0] ?? null
   const selectedFinished = finishedRaces.find(r => r.race.id === selectedFinishedId) ?? finishedRaces[0] ?? null
+  const selectedLeague   = allLeagueStandings.find(l => l.leagueId === selectedLeagueId) ?? allLeagueStandings[0] ?? null
 
   // ── Pre-convert all athlete photos to base64 to avoid CORS issues ────────
   const allPhotoUrls = useMemo(() => {
@@ -76,8 +80,9 @@ export default function SharePageClient({
     upcomingRaces.forEach(r => addAthletes(r.favorites))
     finishedRaces.forEach(r => r.podium.forEach(p => { if (p.athlete.photoUrl) urls.add(p.athlete.photoUrl) }))
     if (roster) addAthletes(roster.athletes)
+    allLeagueStandings.forEach(ls => ls.standings.forEach(s => { if (s.avatarUrl) urls.add(s.avatarUrl) }))
     return [...urls]
-  }, [rising, falling, upcomingRaces, finishedRaces, roster])
+  }, [rising, falling, upcomingRaces, finishedRaces, roster, allLeagueStandings])
 
   useEffect(() => {
     if (allPhotoUrls.length === 0) { setImagesReady(true); return }
@@ -151,17 +156,20 @@ export default function SharePageClient({
         if (!roster) return <EmptyState message={t('emptyNoRoster')} />
         return <MyRosterCard format={format} roster={{ ...roster, athletes: withB64(roster.athletes) }} />
       case 'league-standings':
-        if (!leagueStandings) return <EmptyState message={t('emptyNoLeague')} />
+        if (!selectedLeague) return <EmptyState message={t('emptyNoLeague')} />
         return (
           <LeagueStandingsCard
             format={format}
-            leagueName={leagueStandings.leagueName}
-            standings={leagueStandings.standings}
+            leagueName={selectedLeague.leagueName}
+            standings={selectedLeague.standings.map(s => ({
+              ...s,
+              avatarUrl: s.avatarUrl ? (b64Photos[s.avatarUrl] ?? s.avatarUrl) : undefined,
+            }))}
           />
         )
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [template, format, prTitle, prSubtitle, prVariant, rising, falling, selectedUpcoming, selectedFinished, roster, leagueStandings, b64Photos])
+  }, [template, format, prTitle, prSubtitle, prVariant, rising, falling, selectedUpcoming, selectedFinished, roster, selectedLeague, b64Photos])
 
   const handleExport = async () => {
     if (!previewRef.current) return
@@ -308,6 +316,30 @@ export default function SharePageClient({
                   onChange={setSelectedFinishedId}
                   placeholder={t('selectorFinishedPlaceholder')}
                 />
+              </Panel>
+            )}
+
+            {/* League selector */}
+            {template === 'league-standings' && allLeagueStandings.length > 1 && (
+              <Panel label={t('selectorLeagueLabel')}>
+                <div className="grid gap-1.5">
+                  {allLeagueStandings.map(l => (
+                    <button
+                      key={l.leagueId}
+                      onClick={() => setSelectedLeagueId(l.leagueId)}
+                      className={`text-left rounded-xl px-3 py-2.5 transition-all border ${
+                        selectedLeagueId === l.leagueId
+                          ? 'bg-[var(--color-orange-dim)] border-[var(--color-orange)]/40'
+                          : 'bg-white/[0.03] border-[var(--color-navy-border)] hover:border-white/20'
+                      }`}
+                    >
+                      <div className="font-semibold text-sm truncate">{l.leagueName}</div>
+                      <div className="text-xs text-[var(--color-muted)] mt-0.5">
+                        {l.standings.length} {t('selectorLeagueMembersLabel')}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </Panel>
             )}
 

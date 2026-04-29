@@ -598,6 +598,8 @@
     "selectorUpcomingLabel": "Prova",
     "selectorFinishedLabel": "Prova",
     "selectorUpcomingPlaceholder": "Selecione uma prova",
-    "selectorFinishedPlaceholder": "Selecione uma prova"
+    "selectorFinishedPlaceholder": "Selecione uma prova",
+    "selectorLeagueLabel": "Liga",
+    "selectorLeagueMembersLabel": "membros"
   }
 }
