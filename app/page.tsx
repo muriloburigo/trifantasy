@@ -222,7 +222,8 @@ export default async function HomePage() {
   const nextRaceDays = nextRace ? daysUntil(nextRace.date) : null
 
   const market = await getMarketStatus(pub)
-  const openRaces = allActive.filter(r => r.status === 'open')
+  // Only show open races that have a registered startlist
+  const openRaces = withStartlist.filter(r => r.status === 'open')
 
   return (
     <PublicShell>
@@ -273,15 +274,14 @@ export default async function HomePage() {
         {/* Market Status Banner */}
         {openRaces.length > 0 && (
           <div className="max-w-7xl mx-auto px-4 pb-10">
-            <Link 
-              href={openRaces.length === 1 ? `/provas/${openRaces[0].slug}` : "/atletas"}
-              className={`group flex items-center justify-between p-4 rounded-2xl border transition-all ${
+            <div 
+              className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-2xl border gap-4 transition-all ${
                 market.locked 
-                  ? 'bg-yellow-500/5 border-yellow-500/20 hover:border-yellow-500/40' 
-                  : 'bg-[var(--color-success)]/5 border-[var(--color-success)]/20 hover:border-[var(--color-success)]/40'
+                  ? 'bg-yellow-500/5 border-yellow-500/20' 
+                  : 'bg-[var(--color-success)]/5 border-[var(--color-success)]/20'
               }`}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 flex-1">
                 <div className={`p-2.5 rounded-xl shrink-0 ${
                   market.locked ? 'bg-yellow-500/10 text-yellow-500' : 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
                 }`}>
@@ -295,19 +295,40 @@ export default async function HomePage() {
                       {openRaces.length === 1 ? t('openRaceSingular', { n: 1 }) : t('openRacePlural', { n: openRaces.length })}
                     </span>
                   </h3>
-                  <p className="text-[var(--color-muted)] text-[10px] sm:text-xs mt-0.5 line-clamp-1">
-                    {market.locked 
-                      ? (await getTranslations('marketBanner'))('ongoingRace', { race: market.lockRace?.name ?? '' })
-                      : t('availableSubtitle') + ': ' + openRaces.map(r => r.name).join(', ')
-                    }
-                  </p>
+                  <div className="flex flex-wrap gap-2 mt-1.5">
+                    {market.locked && market.lockRace && (
+                      <Link 
+                        href={`/provas/${(market.lockRace as any).slug}`}
+                        className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 hover:bg-yellow-500/20 transition-colors flex items-center gap-1.5"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
+                        {market.lockRace.name}
+                      </Link>
+                    )}
+                    {openRaces.filter(r => r.id !== market.lockRace?.id).map(r => (
+                      <Link 
+                        key={r.id}
+                        href={`/provas/${r.slug}`}
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors ${
+                          market.locked
+                            ? 'bg-white/5 text-[var(--color-muted)] border-white/10 hover:bg-white/10 hover:text-white'
+                            : 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20 hover:bg-[var(--color-success)]/20'
+                        }`}
+                      >
+                        {r.name}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-[var(--color-orange)] font-bold text-xs sm:text-sm pl-4 shrink-0">
-                <span className="hidden sm:inline">{t('ctaLogged')}</span>
-                <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
-              </div>
-            </Link>
+              <Link 
+                href="/atletas"
+                className="flex items-center gap-2 text-[var(--color-orange)] font-bold text-xs sm:text-sm px-4 py-2 hover:bg-[var(--color-orange)]/5 rounded-xl transition-all self-end sm:self-center"
+              >
+                <span>{t('ctaLogged')}</span>
+                <ChevronRight size={16} />
+              </Link>
+            </div>
           </div>
         )}
       </div>

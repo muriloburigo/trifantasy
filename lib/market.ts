@@ -16,14 +16,14 @@ export async function getMarketStatus(supabase: SupabaseClient): Promise<MarketS
   // Find the earliest open/upcoming race
   const { data: races } = await supabase
     .from('races')
-    .select('id, name, date, status')
+    .select('id, name, slug, date, status')
     .in('status', ['open', 'upcoming', 'locked'])
     .order('date', { ascending: true })
     .limit(1)
 
   if (!races?.length) return { locked: false }
 
-  const race = races[0]
+  const race = races[0] as any
 
   // Race start is assumed at 23:00 UTC (= 20:00 BRT / 08:00 AEST) on race day.
   // Market locks 24h before that, i.e. 23:00 UTC the day before.
