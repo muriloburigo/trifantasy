@@ -1,6 +1,6 @@
 'use server'
 import { redirect } from 'next/navigation'
-import { createClient } from '~/lib/supabase/server'
+import { createClient, createAdminClient } from '~/lib/supabase/server'
 import { generateInviteCode } from '~/lib/utils'
 
 export async function createLeague(formData: FormData) {
@@ -13,8 +13,9 @@ export async function createLeague(formData: FormData) {
   if (!name) return { error: 'Dê um nome à liga.' }
 
   const inviteCode = generateInviteCode()
+  const admin = createAdminClient()
 
-  const { data: league, error } = await supabase
+  const { data: league, error } = await admin
     .from('leagues')
     .insert({ name, invite_code: inviteCode, owner_id: user.id, is_public: isPublic })
     .select('id')
@@ -23,7 +24,7 @@ export async function createLeague(formData: FormData) {
   if (error || !league) return { error: 'Erro ao criar liga.' }
 
   // Creator auto-joins
-  await supabase.from('league_members').insert({ league_id: league.id, user_id: user.id })
+  await admin.from('league_members').insert({ league_id: league.id, user_id: user.id })
 
   redirect(`/ligas/${league.id}`)
 }
@@ -33,7 +34,9 @@ export async function joinLeague(inviteCode: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Faça login para entrar em uma liga.' }
 
-  const { data: league } = await supabase
+  // Use admin to look up the league — the SELECT RLS policy blocks non-members
+  const admin = createAdminClient()
+  const { data: league } = await admin
     .from('leagues')
     .select('id, name')
     .eq('invite_code', inviteCode.toUpperCase())
@@ -41,7 +44,7 @@ export async function joinLeague(inviteCode: string) {
 
   if (!league) return { error: 'Código inválido. Verifique e tente novamente.' }
 
-  const { error } = await supabase
+  const { error } = await admin
     .from('league_members')
     .insert({ league_id: league.id, user_id: user.id })
 
@@ -56,7 +59,9 @@ export async function joinPublicLeague(leagueId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Faça login para entrar.' }
 
-  const { data: league } = await supabase
+  // Use admin to look up the league — the SELECT RLS policy blocks non-members
+  const admin = createAdminClient()
+  const { data: league } = await admin
     .from('leagues')
     .select('id, is_public')
     .eq('id', leagueId)
@@ -64,7 +69,7 @@ export async function joinPublicLeague(leagueId: string) {
 
   if (!league?.is_public) return { error: 'Esta liga não é pública.' }
 
-  const { error } = await supabase
+  const { error } = await admin
     .from('league_members')
     .insert({ league_id: leagueId, user_id: user.id })
 
@@ -79,8 +84,10 @@ export async function addMemberByUsername(leagueId: string, username: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Não autorizado.' }
 
+  const admin = createAdminClient()
+
   // Only owner can add members
-  const { data: league } = await supabase
+  const { data: league } = await admin
     .from('leagues')
     .select('owner_id')
     .eq('id', leagueId)
@@ -89,7 +96,7 @@ export async function addMemberByUsername(leagueId: string, username: string) {
   if (league?.owner_id !== user.id) return { error: 'Apenas o criador pode adicionar membros.' }
 
   // Find user by name (case-insensitive)
-  const { data: profile } = await supabase
+  const { data: profile } = await admin
     .from('profiles')
     .select('id, name')
     .ilike('name', username.trim())
@@ -98,7 +105,7 @@ export async function addMemberByUsername(leagueId: string, username: string) {
   if (!profile) return { error: 'Usuário não encontrado.' }
   if (profile.id === user.id) return { error: 'Você já está na liga.' }
 
-  const { error } = await supabase
+  const { error } = await admin
     .from('league_members')
     .insert({ league_id: leagueId, user_id: profile.id })
 
