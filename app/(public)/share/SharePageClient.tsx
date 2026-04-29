@@ -14,11 +14,14 @@ import { RaceRecapCard } from '~/app/components/cards/RaceRecapCard'
 import { MyRosterCard } from '~/app/components/cards/MyRosterCard'
 import { LeagueStandingsCard } from '~/app/components/cards/LeagueStandingsCard'
 
+type UpcomingRaceOption = { race: Race; favorites: Athlete[]; daysUntil: number }
+type FinishedRaceOption = { race: Race; podium: PodiumEntry[] }
+
 type Props = {
   rising: Athlete[]
   falling: Athlete[]
-  nextRace: { race: Race; favorites: Athlete[]; daysUntil: number } | null
-  lastRace: { race: Race; podium: PodiumEntry[] } | null
+  upcomingRaces: UpcomingRaceOption[]
+  finishedRaces: FinishedRaceOption[]
   roster: Roster | null
   leagueStandings: { leagueName: string; standings: LeagueStanding[] } | null
 }
@@ -34,8 +37,8 @@ const TEMPLATE_IDS: TemplateId[] = [
 export default function SharePageClient({
   rising,
   falling,
-  nextRace,
-  lastRace,
+  upcomingRaces,
+  finishedRaces,
   roster,
   leagueStandings,
 }: Props) {
@@ -50,12 +53,19 @@ export default function SharePageClient({
   const [imagesReady, setImagesReady] = useState(false)
   const [b64Photos, setB64Photos] = useState<Record<string, string>>({})
 
-  // Editable fields — initialised from translations
+  // Race selectors
+  const [selectedUpcomingId, setSelectedUpcomingId] = useState<string>(upcomingRaces[0]?.race.id ?? '')
+  const [selectedFinishedId, setSelectedFinishedId] = useState<string>(finishedRaces[0]?.race.id ?? '')
+
+  // Editable fields
   const [prTitle,    setPrTitle]    = useState(() => t('defaultPrTitle'))
   const [prSubtitle, setPrSubtitle] = useState(() => t('defaultPrSubtitle') + ' · ' + new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' }))
   const [prVariant,  setPrVariant]  = useState<'rising' | 'falling'>('rising')
 
   const previewRef = useRef<HTMLDivElement>(null)
+
+  const selectedUpcoming = upcomingRaces.find(r => r.race.id === selectedUpcomingId) ?? upcomingRaces[0] ?? null
+  const selectedFinished = finishedRaces.find(r => r.race.id === selectedFinishedId) ?? finishedRaces[0] ?? null
 
   // ── Pre-convert all athlete photos to base64 to avoid CORS issues ────────
   const allPhotoUrls = useMemo(() => {
@@ -63,11 +73,11 @@ export default function SharePageClient({
     const addAthletes = (list: Athlete[]) => list.forEach(a => { if (a.photoUrl) urls.add(a.photoUrl) })
     addAthletes(rising)
     addAthletes(falling)
-    if (nextRace) addAthletes(nextRace.favorites)
-    if (lastRace) lastRace.podium.forEach(p => { if (p.athlete.photoUrl) urls.add(p.athlete.photoUrl) })
-    if (roster)   addAthletes(roster.athletes)
+    upcomingRaces.forEach(r => addAthletes(r.favorites))
+    finishedRaces.forEach(r => r.podium.forEach(p => { if (p.athlete.photoUrl) urls.add(p.athlete.photoUrl) }))
+    if (roster) addAthletes(roster.athletes)
     return [...urls]
-  }, [rising, falling, nextRace, lastRace, roster])
+  }, [rising, falling, upcomingRaces, finishedRaces, roster])
 
   useEffect(() => {
     if (allPhotoUrls.length === 0) { setImagesReady(true); return }
@@ -99,7 +109,6 @@ export default function SharePageClient({
     return () => { cancelled = true }
   }, [allPhotoUrls])
 
-  // Replace photoUrl with base64 version for export-safe rendering
   const resolvePhoto = (url?: string) => (url && b64Photos[url]) ? b64Photos[url] : url
   const withB64 = (athletes: Athlete[]): Athlete[] =>
     athletes.map(a => ({ ...a, photoUrl: resolvePhoto(a.photoUrl) }))
@@ -120,22 +129,22 @@ export default function SharePageClient({
           />
         )
       case 'race-preview':
-        if (!nextRace) return <EmptyState message={t('emptyNoRace')} />
+        if (!selectedUpcoming) return <EmptyState message={t('emptyNoRace')} />
         return (
           <RacePreviewCard
             format={format}
-            race={nextRace.race}
-            favorites={withB64(nextRace.favorites)}
-            daysUntil={nextRace.daysUntil}
+            race={selectedUpcoming.race}
+            favorites={withB64(selectedUpcoming.favorites)}
+            daysUntil={selectedUpcoming.daysUntil}
           />
         )
       case 'race-recap':
-        if (!lastRace) return <EmptyState message={t('emptyNoRecap')} />
+        if (!selectedFinished) return <EmptyState message={t('emptyNoRecap')} />
         return (
           <RaceRecapCard
             format={format}
-            race={lastRace.race}
-            podium={lastRace.podium.map(p => ({ ...p, athlete: { ...p.athlete, photoUrl: resolvePhoto(p.athlete.photoUrl) } }))}
+            race={selectedFinished.race}
+            podium={selectedFinished.podium.map(p => ({ ...p, athlete: { ...p.athlete, photoUrl: resolvePhoto(p.athlete.photoUrl) } }))}
           />
         )
       case 'my-roster':
@@ -152,7 +161,7 @@ export default function SharePageClient({
         )
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [template, format, prTitle, prSubtitle, prVariant, rising, falling, nextRace, lastRace, roster, leagueStandings, b64Photos])
+  }, [template, format, prTitle, prSubtitle, prVariant, rising, falling, selectedUpcoming, selectedFinished, roster, leagueStandings, b64Photos])
 
   const handleExport = async () => {
     if (!previewRef.current) return
@@ -197,6 +206,7 @@ export default function SharePageClient({
         <div className="grid lg:grid-cols-[400px_1fr] gap-8">
           {/* ── Editor panel ── */}
           <div className="space-y-5">
+
             {/* Template */}
             <Panel label={t('panelTemplate')}>
               <div className="grid gap-2">
@@ -240,7 +250,7 @@ export default function SharePageClient({
               </div>
             </Panel>
 
-            {/* Content controls — only shown for power-ranking */}
+            {/* Content controls */}
             {template === 'power-ranking' && (
               <Panel label={t('panelContent')}>
                 <Field label={t('fieldTitle')}>
@@ -277,6 +287,30 @@ export default function SharePageClient({
               </Panel>
             )}
 
+            {/* Race selector — upcoming */}
+            {template === 'race-preview' && upcomingRaces.length > 0 && (
+              <Panel label={t('selectorUpcomingLabel')}>
+                <RaceSelector
+                  options={upcomingRaces.map(r => ({ id: r.race.id, name: r.race.name, date: r.race.date }))}
+                  value={selectedUpcomingId}
+                  onChange={setSelectedUpcomingId}
+                  placeholder={t('selectorUpcomingPlaceholder')}
+                />
+              </Panel>
+            )}
+
+            {/* Race selector — finished */}
+            {template === 'race-recap' && finishedRaces.length > 0 && (
+              <Panel label={t('selectorFinishedLabel')}>
+                <RaceSelector
+                  options={finishedRaces.map(r => ({ id: r.race.id, name: r.race.name, date: r.race.date }))}
+                  value={selectedFinishedId}
+                  onChange={setSelectedFinishedId}
+                  placeholder={t('selectorFinishedPlaceholder')}
+                />
+              </Panel>
+            )}
+
             {/* Export button */}
             <button
               onClick={handleExport}
@@ -310,6 +344,42 @@ export default function SharePageClient({
         </div>
       </div>
     </main>
+  )
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function RaceSelector({
+  options,
+  value,
+  onChange,
+  placeholder,
+}: {
+  options: { id: string; name: string; date: string }[]
+  value: string
+  onChange: (id: string) => void
+  placeholder: string
+}) {
+  const fmt = (date: string) =>
+    new Date(date).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+
+  return (
+    <div className="grid gap-1.5">
+      {options.map(o => (
+        <button
+          key={o.id}
+          onClick={() => onChange(o.id)}
+          className={`text-left rounded-xl px-3 py-2.5 transition-all border ${
+            value === o.id
+              ? 'bg-[var(--color-orange-dim)] border-[var(--color-orange)]/40'
+              : 'bg-white/[0.03] border-[var(--color-navy-border)] hover:border-white/20'
+          }`}
+        >
+          <div className="font-semibold text-sm truncate">{o.name}</div>
+          <div className="text-xs text-[var(--color-muted)] mt-0.5">{fmt(o.date)}</div>
+        </button>
+      ))}
+    </div>
   )
 }
 

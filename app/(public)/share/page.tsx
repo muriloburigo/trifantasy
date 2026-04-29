@@ -29,17 +29,17 @@ export default async function SharePage() {
 
   const admin = createAdminClient()
 
-  // ── Parallel fetches ──────────────────────────────────────────────────────
+  const today = new Date().toISOString().slice(0, 10)
 
   const [
     { data: risingRaw },
     { data: fallingRaw },
-    { data: nextRaceRaw },
+    { data: upcomingRacesRaw },
+    { data: finishedRacesRaw },
     { data: profileRaw },
     { data: portfolioRaw },
     { data: memberLeagues },
   ] = await Promise.all([
-    // Rising athletes (sorted by price_change desc)
     admin
       .from('athletes')
       .select('id, name, country, current_price, price_change, photo_url, pto_rank')
@@ -47,7 +47,6 @@ export default async function SharePage() {
       .order('price_change', { ascending: false })
       .limit(7),
 
-    // Falling athletes
     admin
       .from('athletes')
       .select('id, name, country, current_price, price_change, photo_url, pto_rank')
@@ -55,30 +54,34 @@ export default async function SharePage() {
       .order('price_change', { ascending: true })
       .limit(7),
 
-    // Next upcoming race with startlist
+    // All upcoming/open races with startlists
     admin
       .from('races')
       .select('id, name, date, location, distance, race_athletes(athlete_id, athlete:athletes(id, name, country, current_price, price_change, photo_url, pto_rank))')
       .in('status', ['upcoming', 'open'])
-      .gte('date', new Date().toISOString().slice(0, 10))
+      .gte('date', today)
       .order('date', { ascending: true })
-      .limit(1)
-      .maybeSingle(),
+      .limit(20),
 
-    // Current user profile
+    // All finished races (most recent first)
+    admin
+      .from('races')
+      .select('id, name, date, location, distance')
+      .eq('status', 'finished')
+      .order('date', { ascending: false })
+      .limit(20),
+
     admin
       .from('profiles')
       .select('name, wallet')
       .eq('id', user.id)
       .single(),
 
-    // User portfolio
     admin
       .from('portfolio')
       .select('athlete_id, athlete:athletes(id, name, country, current_price, price_change, photo_url, pto_rank)')
       .eq('user_id', user.id),
 
-    // User league memberships (non-global)
     admin
       .from('league_members')
       .select('league:leagues(id, name, is_global)')
@@ -89,36 +92,69 @@ export default async function SharePage() {
   const rising  = (risingRaw  ?? []).map(mapAthlete)
   const falling = (fallingRaw ?? []).map(mapAthlete)
 
-  // ── Next race ─────────────────────────────────────────────────────────────
-  let nextRace: { race: Race; favorites: Athlete[]; daysUntil: number } | null = null
-  if (nextRaceRaw) {
-    const raceDate  = new Date(nextRaceRaw.date).getTime()
-    const today     = new Date(new Date().toISOString().slice(0, 10)).getTime()
-    const daysUntil = Math.round((raceDate - today) / 86400000)
+  // ── Upcoming races (for race-preview) ─────────────────────────────────────
+  const upcomingRaces = (upcomingRacesRaw ?? [])
+    .filter((r: any) => (r.race_athletes?.length ?? 0) > 0)
+    .map((r: any) => {
+      const raceDate  = new Date(r.date).getTime()
+      const todayMs   = new Date(today).getTime()
+      const daysUntil = Math.round((raceDate - todayMs) / 86400000)
+      const favorites = (r.race_athletes as any[])
+        .map((ra: any) => mapAthlete(ra.athlete))
+        .filter((a: Athlete) => a.id)
+        .sort((a: Athlete, b: Athlete) => b.currentT - a.currentT)
+        .slice(0, 5)
+      return {
+        race: { id: r.id, name: r.name, date: r.date, location: r.location ?? '', distance: r.distance ?? '' } as Race,
+        favorites,
+        daysUntil,
+      }
+    })
 
-    const favorites = ((nextRaceRaw as any).race_athletes ?? [])
-      .map((ra: any) => mapAthlete(ra.athlete))
-      .filter((a: Athlete) => a.id)
-      .sort((a: Athlete, b: Athlete) => b.currentT - a.currentT)
-      .slice(0, 5)
+  // ── Finished races with results (for race-recap) ───────────────────────────
+  // Fetch podiums for all finished races in one query, then group
+  const finishedIds = (finishedRacesRaw ?? []).map((r: any) => r.id)
 
-    nextRace = {
-      race: {
-        id:       nextRaceRaw.id,
-        name:     nextRaceRaw.name,
-        date:     nextRaceRaw.date,
-        location: nextRaceRaw.location ?? '',
-        distance: nextRaceRaw.distance ?? '',
-      },
-      favorites,
-      daysUntil,
+  let podiumsByRace: Record<string, PodiumEntry[]> = {}
+  if (finishedIds.length > 0) {
+    const { data: allResults } = await admin
+      .from('results')
+      .select('race_id, pro_pos, finish_time, athlete:athletes(id, name, country, current_price, price_change, photo_url, pto_rank)')
+      .in('race_id', finishedIds)
+      .not('pro_pos', 'is', null)
+      .lte('pro_pos', 3)
+      .order('race_id')
+      .order('pro_pos', { ascending: true })
+
+    for (const r of (allResults ?? [])) {
+      if (!podiumsByRace[r.race_id]) podiumsByRace[r.race_id] = []
+      const pos = podiumsByRace[r.race_id].length + 1
+      const winner = podiumsByRace[r.race_id][0]
+      let gap = '—'
+      if (pos > 1 && winner?.time && r.finish_time) {
+        const toSec = (t: string) => t.split(':').reduce((acc, v, i, a) => acc + Number(v) * Math.pow(60, a.length - 1 - i), 0)
+        const diff = toSec(r.finish_time) - toSec(winner.time)
+        const m = Math.floor(diff / 60)
+        const s = diff % 60
+        gap = `+${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+      }
+      podiumsByRace[r.race_id].push({
+        athlete: mapAthlete((r as any).athlete),
+        time: r.finish_time ?? '—',
+        gap,
+      })
     }
   }
+
+  const finishedRaces = (finishedRacesRaw ?? []).map((r: any) => ({
+    race: { id: r.id, name: r.name, date: r.date, location: r.location ?? '', distance: r.distance ?? '' } as Race,
+    podium: podiumsByRace[r.id] ?? [],
+  }))
 
   // ── My Roster ─────────────────────────────────────────────────────────────
   let roster: Roster | null = null
   if (portfolioRaw && portfolioRaw.length > 0) {
-    const athletes = portfolioRaw.map((p: any) => mapAthlete(p.athlete)).filter((a) => a.id)
+    const athletes  = portfolioRaw.map((p: any) => mapAthlete(p.athlete)).filter((a) => a.id)
     const athletesT = athletes.reduce((sum, a) => sum + a.currentT, 0)
     const walletT   = Number(profileRaw?.wallet ?? 0)
     roster = {
@@ -145,14 +181,8 @@ export default async function SharePage() {
 
     if (memberIds.length > 0) {
       const [{ data: memberProfiles }, { data: memberPortfolios }] = await Promise.all([
-        admin
-          .from('profiles')
-          .select('id, name, wallet')
-          .in('id', memberIds),
-        admin
-          .from('portfolio')
-          .select('user_id, athlete:athletes(current_price)')
-          .in('user_id', memberIds),
+        admin.from('profiles').select('id, name, wallet').in('id', memberIds),
+        admin.from('portfolio').select('user_id, athlete:athletes(current_price)').in('user_id', memberIds),
       ])
 
       const athletesByUser: Record<string, number> = {}
@@ -165,7 +195,7 @@ export default async function SharePage() {
           const walletT   = Number(p.wallet ?? 0)
           const athletesT = athletesByUser[p.id] ?? 0
           return {
-            position:  0, // assigned after sort
+            position:  0,
             name:      p.name ?? 'Trixer',
             walletT:   Math.round(walletT),
             athletesT: Math.round(athletesT),
@@ -185,8 +215,8 @@ export default async function SharePage() {
       <SharePageClient
         rising={rising}
         falling={falling}
-        nextRace={nextRace}
-        lastRace={null}
+        upcomingRaces={upcomingRaces}
+        finishedRaces={finishedRaces}
         roster={roster}
         leagueStandings={leagueStandings}
       />

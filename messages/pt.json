@@ -594,6 +594,10 @@
     "emptyNoRoster": "Monte seu elenco para gerar este card.",
     "emptyNoLeague": "Entre em uma liga para gerar cards de classificação.",
     "defaultPrTitle": "Em alta no mercado",
-    "defaultPrSubtitle": "Esta semana"
+    "defaultPrSubtitle": "Esta semana",
+    "selectorUpcomingLabel": "Prova",
+    "selectorFinishedLabel": "Prova",
+    "selectorUpcomingPlaceholder": "Selecione uma prova",
+    "selectorFinishedPlaceholder": "Selecione uma prova"
   }
 }

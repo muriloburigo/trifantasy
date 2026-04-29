@@ -591,6 +591,10 @@
     "emptyNoRoster": "Arma tu plantilla para generar este card.",
     "emptyNoLeague": "Únete a una liga para generar cards de clasificación.",
     "defaultPrTitle": "En alza en el mercado",
-    "defaultPrSubtitle": "Esta semana"
+    "defaultPrSubtitle": "Esta semana",
+    "selectorUpcomingLabel": "Carrera",
+    "selectorFinishedLabel": "Carrera",
+    "selectorUpcomingPlaceholder": "Selecciona una carrera",
+    "selectorFinishedPlaceholder": "Selecciona una carrera"
   }
 }

@@ -594,6 +594,10 @@
     "emptyNoRoster": "Build your roster first to generate this card.",
     "emptyNoLeague": "Join a league to generate standings cards.",
     "defaultPrTitle": "Rising on the market",
-    "defaultPrSubtitle": "This week"
+    "defaultPrSubtitle": "This week",
+    "selectorUpcomingLabel": "Race",
+    "selectorFinishedLabel": "Race",
+    "selectorUpcomingPlaceholder": "Select a race",
+    "selectorFinishedPlaceholder": "Select a race"
   }
 }
