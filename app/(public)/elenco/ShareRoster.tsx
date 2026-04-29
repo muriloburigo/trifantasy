@@ -98,7 +98,7 @@ export default function ShareRoster({
         ) : (
           <Share2 size={14} className="text-[var(--color-orange)]" />
         )}
-        {!isCompact && (imagesReady ? t('shareRoster') || 'Compartilhar' : '...')}
+        {!isCompact && (imagesReady ? t('shareRoster') : '...')}
       </button>
 
       {/* ── Export Card ── */}
@@ -121,12 +121,12 @@ export default function ShareRoster({
                 <p className="text-[11px] text-white/60 uppercase font-bold tracking-wider">Trixer: <span className="text-white">{userName}</span></p>
               </div>
               <div className="text-right">
-                <p className="text-[9px] font-bold uppercase text-white/40 mb-1 tracking-widest leading-none">Patrimônio</p>
+                <p className="text-[9px] font-bold uppercase text-white/40 mb-1 tracking-widest leading-none">{t('myRosterNetWorth')}</p>
                 <p className="text-3xl font-black text-[var(--color-orange)] tracking-tight">T${netWorth.toFixed(0)}</p>
               </div>
             </div>
           </div>
-          <div className="text-center mb-8"><h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 italic">Meu Elenco Oficial</h2></div>
+          <div className="text-center mb-8"><h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 italic">{t('exportRosterTitle')}</h2></div>
           <div className="space-y-4 flex-1 relative z-10">
             {portfolio.map((p, i) => {
               const ath = p.athlete as any
@@ -145,13 +145,13 @@ export default function ShareRoster({
                       <div className="bg-white/5 px-2 py-0.5 rounded text-[10px] font-bold text-white/40 border border-white/5 uppercase">WTCS #{ath.wtcs_rank || '—'}</div>
                     </div>
                   </div>
-                  <div className="text-right"><p className="text-xl font-black text-white tracking-tight">T${Number(ath.current_price).toFixed(0)}</p><p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Valor</p></div>
+                  <div className="text-right"><p className="text-xl font-black text-white tracking-tight">T${Number(ath.current_price).toFixed(0)}</p><p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{t('exportAthleteValue')}</p></div>
                 </div>
               )
             })}
           </div>
           <div className="mt-10 pt-8 border-t border-white/10 flex justify-between items-center relative z-10">
-            <div><p className="text-[10px] font-medium text-white/40 mb-1">Crie seu elenco em</p><p className="text-xl font-black tracking-tighter text-white">www.trixer.app</p></div>
+            <div><p className="text-[10px] font-medium text-white/40 mb-1">{t('exportCta')}</p><p className="text-xl font-black tracking-tighter text-white">www.trixer.app</p></div>
             <div className="w-14 h-14 bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)] rounded-2xl flex items-center justify-center shadow-xl rotate-6"><span className="text-white font-black text-lg -rotate-6">TRX</span></div>
           </div>
         </div>
