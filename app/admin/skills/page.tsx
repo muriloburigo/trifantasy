@@ -1,5 +1,5 @@
 import { requireAdmin } from '~/lib/auth/require-admin'
-import { Terminal, Users, FileText, Flag, UserPlus, ChevronRight } from 'lucide-react'
+import { Terminal, Users, FileText, Flag, UserPlus, ChevronRight, Camera } from 'lucide-react'
 
 export default async function AdminSkillsPage() {
   await requireAdmin()
@@ -89,6 +89,28 @@ export default async function AdminSkillsPage() {
       script: 'node scripts/import-results.mjs <url> <race_id>',
       color: 'purple',
     },
+    {
+      command: '/atualizar-fotos',
+      icon: Camera,
+      title: 'Atualizar Fotos de Atletas',
+      description: 'Faz harvest em bulk das páginas de ranking (PTO, World Triathlon, ProTriNews) e atualiza photo_url dos atletas sem foto. Fallback por página individual quando necessário.',
+      steps: [
+        'Abra o Claude Code neste projeto',
+        'Digite /atualizar-fotos no chat',
+        'Informe os filtros desejados: gênero, tipo, --force para reatualizar',
+        'O Claude executa em duas fases: harvest bulk → fallback por atleta',
+        'Ao final, informa quantas fotos foram atualizadas e quais PROs ficaram sem foto',
+      ],
+      args: [
+        { name: '--gender=M|F|all', desc: 'Filtra por gênero (padrão: all)' },
+        { name: '--type=pro|age_grouper|all', desc: 'Filtra por tipo (padrão: pro)' },
+        { name: '--force', desc: 'Reprocessa atletas que já têm foto' },
+        { name: '--dry-run', desc: 'Mostra o que faria sem salvar no banco' },
+        { name: '--limit=N', desc: 'Limita a N atletas (útil para testar)' },
+      ],
+      script: 'node scripts/update-athlete-photos.mjs',
+      color: 'teal',
+    },
   ]
 
   return (
@@ -127,14 +149,16 @@ export default async function AdminSkillsPage() {
               <div className="flex items-start gap-4 p-6 border-b border-[var(--color-navy-border)]">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                   skill.color === 'orange' ? 'bg-[var(--color-orange)]/15 border border-[var(--color-orange)]/30'
-                  : skill.color === 'green' ? 'bg-green-500/15 border border-green-500/30'
-                  : skill.color === 'blue' ? 'bg-blue-500/15 border border-blue-500/30'
+                  : skill.color === 'green'  ? 'bg-green-500/15 border border-green-500/30'
+                  : skill.color === 'blue'   ? 'bg-blue-500/15 border border-blue-500/30'
+                  : skill.color === 'teal'   ? 'bg-teal-500/15 border border-teal-500/30'
                   : 'bg-purple-500/15 border border-purple-500/30'
                 }`}>
                   <Icon size={18} className={
                     skill.color === 'orange' ? 'text-[var(--color-orange)]'
-                    : skill.color === 'green' ? 'text-green-400'
-                    : skill.color === 'blue' ? 'text-blue-400'
+                    : skill.color === 'green'  ? 'text-green-400'
+                    : skill.color === 'blue'   ? 'text-blue-400'
+                    : skill.color === 'teal'   ? 'text-teal-400'
                     : 'text-purple-400'
                   } />
                 </div>
@@ -142,8 +166,9 @@ export default async function AdminSkillsPage() {
                   <div className="flex items-center gap-3 mb-1">
                     <code className={`text-base font-bold font-mono ${
                       skill.color === 'orange' ? 'text-[var(--color-orange)]'
-                      : skill.color === 'green' ? 'text-green-400'
-                      : skill.color === 'blue' ? 'text-blue-400'
+                      : skill.color === 'green'  ? 'text-green-400'
+                      : skill.color === 'blue'   ? 'text-blue-400'
+                      : skill.color === 'teal'   ? 'text-teal-400'
                       : 'text-purple-400'
                     }`}>{skill.command}</code>
                   </div>
@@ -161,8 +186,9 @@ export default async function AdminSkillsPage() {
                       <li key={i} className="flex items-start gap-2.5 text-sm text-[var(--color-muted)]">
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 ${
                           skill.color === 'orange' ? 'bg-[var(--color-orange)]/20 text-[var(--color-orange)]'
-                          : skill.color === 'green' ? 'bg-green-500/20 text-green-400'
-                          : skill.color === 'blue' ? 'bg-blue-500/20 text-blue-400'
+                          : skill.color === 'green'  ? 'bg-green-500/20 text-green-400'
+                          : skill.color === 'blue'   ? 'bg-blue-500/20 text-blue-400'
+                          : skill.color === 'teal'   ? 'bg-teal-500/20 text-teal-400'
                           : 'bg-purple-500/20 text-purple-400'
                         }`}>{i + 1}</span>
                         {step}
