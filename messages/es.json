@@ -278,7 +278,12 @@
     "filterEmpty": "Sin ligas encontradas.",
     "filterClear": "Limpiar",
     "publicCount": "{n} ligas públicas",
-    "globalLeagueName": "Liga Global Trixer"
+    "globalLeagueName": "Liga Global Trixer",
+    "member": "miembro",
+    "memberPlural": "miembros",
+    "netWorthLabel": "Patrimonio (T$)",
+    "walletUnit": "billetera",
+    "portfolioUnit": "atletas"
   },
   "profile": {
     "title": "Mi Perfil",

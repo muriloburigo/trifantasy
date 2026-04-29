@@ -152,7 +152,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
         <div className="p-4 border-b border-[var(--color-navy-border)] flex items-center gap-2">
           <Trophy size={16} className="text-[var(--color-orange)]" />
           <h2 className="font-bold">{t('rankingTitle')}</h2>
-          <span className="text-xs text-[var(--color-muted)] ml-auto">Patrimônio em T$</span>
+          <span className="text-xs text-[var(--color-muted)] ml-auto">{t('netWorthLabel')}</span>
         </div>
 
         {ranked.length === 0 ? (
@@ -192,7 +192,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
                       {isMe && <span className="text-[var(--color-orange)] ml-1 text-[10px]">{t('youLabel')}</span>}
                     </p>
                     <p className="text-[10px] text-[var(--color-muted)] mt-0.5">
-                      T${member.wallet.toFixed(0)} carteira · T${member.portfolioValue.toFixed(0)} atletas
+                      T${member.wallet.toFixed(0)} {t('walletUnit')} · T${member.portfolioValue.toFixed(0)} {t('portfolioUnit')}
                     </p>
                   </div>
 

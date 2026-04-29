@@ -109,6 +109,7 @@ function RaceCard({ race, athleteCount, t }: { race: Race; athleteCount?: number
 
 export default async function HomePage() {
   const t = await getTranslations('home')
+  const tLeagues = await getTranslations('leagues')
   const pub   = createPublicClient()
   const admin = createAdminClient()
   const auth = await createClient()
@@ -396,10 +397,10 @@ export default async function HomePage() {
                         <p className="text-xs font-semibold truncate leading-tight">{l.name}</p>
                         <p className="text-[10px] text-[var(--color-muted)] flex items-center gap-1 mt-0.5">
                           {l.is_public
-                            ? <><Globe size={9} /> Pública</>
-                            : <><Lock size={9} /> Privada</>}
+                            ? <><Globe size={9} /> {tLeagues('public')}</>
+                            : <><Lock size={9} /> {tLeagues('private')}</>}
                           <span className="mx-1 opacity-40">·</span>
-                          <Users size={9} /> {l.memberCount} {l.memberCount === 1 ? 'membro' : 'membros'}
+                          <Users size={9} /> {l.memberCount} {l.memberCount === 1 ? tLeagues('member') : tLeagues('memberPlural')}
                         </p>
                       </div>
                       <ChevronRight size={12} className="text-[var(--color-muted)] shrink-0" />
