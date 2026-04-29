@@ -178,11 +178,12 @@ export default async function HomePage() {
   let myNetWorth = 0
   let myLeagues: { id: string; name: string; is_public: boolean; memberCount: number }[] = []
   if (loggedUser) {
-    const [{ data: portfolioRes }, { data: profileRes }, { data: leagueMemberships }] = await Promise.all([
+    const [{ data: portfolioRes }, { data: profileRes }, { data: leagueMembershipsRes }] = await Promise.all([
       auth.from('portfolio').select('bought_price, athlete:athletes(id, name, current_price, photo_url)').eq('user_id', loggedUser.id),
       auth.from('profiles').select('wallet').eq('id', loggedUser.id).single(),
       admin.from('league_members').select('league:leagues(id, name, is_public, is_global)').eq('user_id', loggedUser.id),
     ])
+    const leagueMemberships = leagueMembershipsRes.data ?? []
     myPortfolio = (portfolioRes ?? []).map(p => ({ ...p, athlete: p.athlete as any }))
     const wallet = Number((profileRes as any)?.wallet ?? 0)
     myNetWorth = wallet + myPortfolio.reduce((s, p) => s + Number(p.athlete?.current_price ?? 0), 0)
