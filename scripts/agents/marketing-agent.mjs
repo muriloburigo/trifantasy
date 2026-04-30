@@ -351,6 +351,17 @@ Broad (1–2): #triathlon #ironman #swimbikerun
 Mid-tier (4–5): #triathlete #t100triathlon #ptotriathlon #ironmantri #triathlonlife #endurancesports #70point3 #konadream
 Niche (3–4): #triathlonfantasy #trixer #fantasygame #collinscup #ptorankings + athlete name tags when relevant
 
+CRITICAL — IN-GAME MARKET RULE:
+T$ is Trixer's fictional in-game currency. Athlete values and price movements exist ONLY inside the game — they have no relation to the athlete's real-world earnings, sponsorships, or financial value.
+ALWAYS make the game context explicit when mentioning T$ or price changes:
+✅ "Djenyfer is up T$7 on the Trixer market"
+✅ "her Trixer value jumped after the race"
+✅ "worth T$25 in the game right now"
+❌ "Djenyfer gained $7" (sounds like real money)
+❌ "her stock is rising" (without Trixer context)
+❌ "valued at T$25" (without clarifying it's in-game)
+Never write in a way that could be misread as financial advice or real athlete valuation.
+
 LANGUAGE: English only.
 
 Return ONLY the caption. No explanations, no preamble.`
