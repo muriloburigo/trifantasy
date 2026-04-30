@@ -1,28 +1,33 @@
 import type { CardFormat, LeagueStanding } from '~/lib/trixerTypes'
 import { CardFrame } from './shared/CardFrame'
 
+type Labels = { eyebrow: string; leagueLabel: string }
+const DEFAULT_LABELS: Labels = { eyebrow: 'STANDINGS', leagueLabel: 'Trix League' }
+
 type Props = {
   format: CardFormat
   leagueName: string
   standings: LeagueStanding[]
+  labels?: Partial<Labels>
 }
 
 const medalFor = (pos: number) =>
   pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : null
 
-export const LeagueStandingsCard = ({ format, leagueName, standings }: Props) => {
+export const LeagueStandingsCard = ({ format, leagueName, standings, labels: labelsProp }: Props) => {
+  const labels = { ...DEFAULT_LABELS, ...labelsProp }
   const isStory = format === 'story'
   const items = standings.slice(0, isStory ? 10 : 8)
 
   return (
-    <CardFrame format={format} eyebrow="STANDINGS">
+    <CardFrame format={format} eyebrow={labels.eyebrow}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: isStory ? 56 : 32 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <span
             className="font-display font-bold uppercase"
             style={{ fontSize: isStory ? 22 : 18, color: 'hsl(268 83% 75%)', letterSpacing: '0.22em' }}
           >
-            Trix League
+            {labels.leagueLabel}
           </span>
           <h1
             className="font-display font-black"

@@ -2,11 +2,31 @@ import type { Athlete, CardFormat, Race } from '~/lib/trixerTypes'
 import { CardFrame } from './shared/CardFrame'
 import { AthleteAvatar } from './shared/AthleteAvatar'
 
+type Labels = {
+  eyebrow: string
+  labelDate: string
+  labelLocation: string
+  labelDistance: string
+  labelStartsIn: string
+  labelDays: string
+  topPicks: string
+}
+const DEFAULT_LABELS: Labels = {
+  eyebrow: 'NEXT RACE',
+  labelDate: 'DATE',
+  labelLocation: 'LOCATION',
+  labelDistance: 'DISTANCE',
+  labelStartsIn: 'STARTS IN',
+  labelDays: 'DAYS',
+  topPicks: 'Top picks',
+}
+
 type Props = {
   format: CardFormat
   race: Race
   favorites: Athlete[]
   daysUntil?: number
+  labels?: Partial<Labels>
 }
 
 const formatDate = (iso: string) => {
@@ -16,12 +36,13 @@ const formatDate = (iso: string) => {
     .toUpperCase()
 }
 
-export const RacePreviewCard = ({ format, race, favorites, daysUntil }: Props) => {
+export const RacePreviewCard = ({ format, race, favorites, daysUntil, labels: labelsProp }: Props) => {
+  const labels = { ...DEFAULT_LABELS, ...labelsProp }
   const isStory = format === 'story'
   const picks = favorites.slice(0, isStory ? 5 : 4)
 
   return (
-    <CardFrame format={format} eyebrow="NEXT RACE">
+    <CardFrame format={format} eyebrow={labels.eyebrow}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: isStory ? 64 : 40 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {race.series && (
@@ -48,11 +69,11 @@ export const RacePreviewCard = ({ format, race, favorites, daysUntil }: Props) =
             {race.name}
           </h1>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: isStory ? 32 : 24, marginTop: 12 }}>
-            <Meta label="DATE" value={formatDate(race.date)} isStory={isStory} />
-            <Meta label="LOCATION" value={race.location} isStory={isStory} />
-            <Meta label="DISTANCE" value={race.distance.toUpperCase()} isStory={isStory} />
+            <Meta label={labels.labelDate} value={formatDate(race.date)} isStory={isStory} />
+            <Meta label={labels.labelLocation} value={race.location} isStory={isStory} />
+            <Meta label={labels.labelDistance} value={race.distance.toUpperCase()} isStory={isStory} />
             {typeof daysUntil === 'number' && (
-              <Meta label="STARTS IN" value={`${daysUntil} DAYS`} isStory={isStory} highlight />
+              <Meta label={labels.labelStartsIn} value={`${daysUntil} ${labels.labelDays}`} isStory={isStory} highlight />
             )}
           </div>
         </div>
@@ -62,7 +83,7 @@ export const RacePreviewCard = ({ format, race, favorites, daysUntil }: Props) =
             className="font-display font-bold uppercase"
             style={{ fontSize: isStory ? 24 : 20, color: 'hsl(220 15% 70%)', letterSpacing: '0.2em' }}
           >
-            Top picks
+            {labels.topPicks}
           </span>
           <div
             style={{

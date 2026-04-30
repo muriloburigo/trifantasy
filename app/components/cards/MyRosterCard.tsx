@@ -2,16 +2,21 @@ import type { CardFormat, Roster } from '~/lib/trixerTypes'
 import { CardFrame } from './shared/CardFrame'
 import { AthleteAvatar } from './shared/AthleteAvatar'
 
+type Labels = { eyebrow: string; total: string; cta: string }
+const DEFAULT_LABELS: Labels = { eyebrow: 'MY ROSTER', total: 'Total', cta: 'Beat my roster →' }
+
 type Props = {
   format: CardFormat
   roster: Roster
+  labels?: Partial<Labels>
 }
 
-export const MyRosterCard = ({ format, roster }: Props) => {
+export const MyRosterCard = ({ format, roster, labels: labelsProp }: Props) => {
+  const labels = { ...DEFAULT_LABELS, ...labelsProp }
   const isStory = format === 'story'
 
   return (
-    <CardFrame format={format} eyebrow="MY ROSTER">
+    <CardFrame format={format} eyebrow={labels.eyebrow}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: isStory ? 64 : 40 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <span
@@ -33,7 +38,7 @@ export const MyRosterCard = ({ format, roster }: Props) => {
             {roster.trixerName}
           </h1>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginTop: 6 }}>
-            <span style={{ fontSize: isStory ? 26 : 22, color: 'hsl(220 15% 65%)' }}>Total</span>
+            <span style={{ fontSize: isStory ? 26 : 22, color: 'hsl(220 15% 65%)' }}>{labels.total}</span>
             <span
               className="font-display font-black"
               style={{
@@ -98,7 +103,7 @@ export const MyRosterCard = ({ format, roster }: Props) => {
           }}
         >
           <span className="font-display font-bold" style={{ fontSize: isStory ? 30 : 24, color: 'white' }}>
-            Beat my roster →
+            {labels.cta}
           </span>
           <span style={{ fontSize: isStory ? 22 : 18, color: 'hsl(220 15% 75%)' }}>
             trixer.app

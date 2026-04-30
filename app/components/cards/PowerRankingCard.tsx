@@ -3,12 +3,16 @@ import { CardFrame } from './shared/CardFrame'
 import { AthleteAvatar } from './shared/AthleteAvatar'
 import { DeltaTag } from './shared/DeltaTag'
 
+type Labels = { eyebrowUp: string; eyebrowDown: string }
+const DEFAULT_LABELS: Labels = { eyebrowUp: 'MARKET UP', eyebrowDown: 'MARKET DOWN' }
+
 type Props = {
   format: CardFormat
   title?: string
   subtitle?: string
   athletes: Athlete[]
   variant?: 'rising' | 'falling' | 'mixed'
+  labels?: Partial<Labels>
 }
 
 export const PowerRankingCard = ({
@@ -17,12 +21,14 @@ export const PowerRankingCard = ({
   subtitle,
   athletes,
   variant = 'rising',
+  labels: labelsProp,
 }: Props) => {
+  const labels = { ...DEFAULT_LABELS, ...labelsProp }
   const isStory = format === 'story'
   const items = athletes.slice(0, isStory ? 7 : 5)
 
   return (
-    <CardFrame format={format} eyebrow={variant === 'falling' ? 'MARKET DOWN' : 'MARKET UP'}>
+    <CardFrame format={format} eyebrow={variant === 'falling' ? labels.eyebrowDown : labels.eyebrowUp}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: isStory ? 56 : 28 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <h1

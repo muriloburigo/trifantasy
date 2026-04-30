@@ -3,27 +3,32 @@ import { CardFrame } from './shared/CardFrame'
 import { AthleteAvatar } from './shared/AthleteAvatar'
 import { DeltaTag } from './shared/DeltaTag'
 
+type Labels = { eyebrow: string; finalResults: string }
+const DEFAULT_LABELS: Labels = { eyebrow: 'RACE RECAP', finalResults: 'Final results' }
+
 type Props = {
   format: CardFormat
   race: Race
   podium: PodiumEntry[]
+  labels?: Partial<Labels>
 }
 
 const medals = ['🥇', '🥈', '🥉']
 
-export const RaceRecapCard = ({ format, race, podium }: Props) => {
+export const RaceRecapCard = ({ format, race, podium, labels: labelsProp }: Props) => {
+  const labels = { ...DEFAULT_LABELS, ...labelsProp }
   const isStory = format === 'story'
   const top3 = podium.slice(0, 3)
 
   return (
-    <CardFrame format={format} eyebrow="RACE RECAP">
+    <CardFrame format={format} eyebrow={labels.eyebrow}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: isStory ? 60 : 36 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <span
             className="font-display font-bold uppercase"
             style={{ fontSize: isStory ? 20 : 16, color: 'hsl(268 83% 75%)', letterSpacing: '0.22em' }}
           >
-            Final results
+            {labels.finalResults}
           </span>
           <h1
             className="font-display font-black"

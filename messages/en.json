@@ -600,6 +600,22 @@
     "selectorUpcomingPlaceholder": "Select a race",
     "selectorFinishedPlaceholder": "Select a race",
     "selectorLeagueLabel": "League",
-    "selectorLeagueMembersLabel": "members"
+    "selectorLeagueMembersLabel": "members",
+    "cardMarketUpEyebrow": "MARKET UP",
+    "cardMarketDownEyebrow": "MARKET DOWN",
+    "cardRacePreviewEyebrow": "NEXT RACE",
+    "cardRacePreviewDate": "DATE",
+    "cardRacePreviewLocation": "LOCATION",
+    "cardRacePreviewDistance": "DISTANCE",
+    "cardRacePreviewStartsIn": "STARTS IN",
+    "cardRacePreviewDays": "DAYS",
+    "cardRacePreviewTopPicks": "Top picks",
+    "cardRaceRecapEyebrow": "RACE RECAP",
+    "cardRaceRecapFinalResults": "Final results",
+    "cardMyRosterEyebrow": "MY ROSTER",
+    "cardMyRosterTotal": "Total",
+    "cardMyRosterCta": "Beat my roster →",
+    "cardLeagueEyebrow": "STANDINGS",
+    "cardLeagueLabel": "Trix League"
   }
 }

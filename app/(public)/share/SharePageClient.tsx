@@ -131,6 +131,7 @@ export default function SharePageClient({
             subtitle={prSubtitle}
             variant={prVariant}
             athletes={withB64(prVariant === 'falling' ? falling : rising)}
+            labels={{ eyebrowUp: t('cardMarketUpEyebrow'), eyebrowDown: t('cardMarketDownEyebrow') }}
           />
         )
       case 'race-preview':
@@ -141,6 +142,15 @@ export default function SharePageClient({
             race={selectedUpcoming.race}
             favorites={withB64(selectedUpcoming.favorites)}
             daysUntil={selectedUpcoming.daysUntil}
+            labels={{
+              eyebrow: t('cardRacePreviewEyebrow'),
+              labelDate: t('cardRacePreviewDate'),
+              labelLocation: t('cardRacePreviewLocation'),
+              labelDistance: t('cardRacePreviewDistance'),
+              labelStartsIn: t('cardRacePreviewStartsIn'),
+              labelDays: t('cardRacePreviewDays'),
+              topPicks: t('cardRacePreviewTopPicks'),
+            }}
           />
         )
       case 'race-recap':
@@ -150,11 +160,18 @@ export default function SharePageClient({
             format={format}
             race={selectedFinished.race}
             podium={selectedFinished.podium.map(p => ({ ...p, athlete: { ...p.athlete, photoUrl: resolvePhoto(p.athlete.photoUrl) } }))}
+            labels={{ eyebrow: t('cardRaceRecapEyebrow'), finalResults: t('cardRaceRecapFinalResults') }}
           />
         )
       case 'my-roster':
         if (!roster) return <EmptyState message={t('emptyNoRoster')} />
-        return <MyRosterCard format={format} roster={{ ...roster, athletes: withB64(roster.athletes) }} />
+        return (
+          <MyRosterCard
+            format={format}
+            roster={{ ...roster, athletes: withB64(roster.athletes) }}
+            labels={{ eyebrow: t('cardMyRosterEyebrow'), total: t('cardMyRosterTotal'), cta: t('cardMyRosterCta') }}
+          />
+        )
       case 'league-standings':
         if (!selectedLeague) return <EmptyState message={t('emptyNoLeague')} />
         return (
@@ -165,6 +182,7 @@ export default function SharePageClient({
               ...s,
               avatarUrl: s.avatarUrl ? (b64Photos[s.avatarUrl] ?? s.avatarUrl) : undefined,
             }))}
+            labels={{ eyebrow: t('cardLeagueEyebrow'), leagueLabel: t('cardLeagueLabel') }}
           />
         )
     }

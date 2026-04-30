@@ -597,6 +597,22 @@
     "selectorUpcomingPlaceholder": "Selecciona una carrera",
     "selectorFinishedPlaceholder": "Selecciona una carrera",
     "selectorLeagueLabel": "Liga",
-    "selectorLeagueMembersLabel": "miembros"
+    "selectorLeagueMembersLabel": "miembros",
+    "cardMarketUpEyebrow": "MERCADO AL ALZA",
+    "cardMarketDownEyebrow": "MERCADO A LA BAJA",
+    "cardRacePreviewEyebrow": "PRÓXIMA CARRERA",
+    "cardRacePreviewDate": "FECHA",
+    "cardRacePreviewLocation": "LUGAR",
+    "cardRacePreviewDistance": "DISTANCIA",
+    "cardRacePreviewStartsIn": "EMPIEZA EN",
+    "cardRacePreviewDays": "DÍAS",
+    "cardRacePreviewTopPicks": "Favoritos",
+    "cardRaceRecapEyebrow": "RESULTADO",
+    "cardRaceRecapFinalResults": "Resultado final",
+    "cardMyRosterEyebrow": "MI EQUIPO",
+    "cardMyRosterTotal": "Total",
+    "cardMyRosterCta": "Desafía mi equipo →",
+    "cardLeagueEyebrow": "CLASIFICACIÓN",
+    "cardLeagueLabel": "Trix League"
   }
 }
