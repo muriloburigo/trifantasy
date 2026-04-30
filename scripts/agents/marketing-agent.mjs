@@ -18,11 +18,10 @@
  * Required env vars:
  *   NEXT_PUBLIC_SUPABASE_URL
  *   SUPABASE_SERVICE_ROLE_KEY
- *   INSTAGRAM_BUSINESS_ACCOUNT_ID
- *   INSTAGRAM_ACCESS_TOKEN
+ *   MAKE_WEBHOOK_URL              (Make.com webhook URL that posts to Instagram)
  *   ANTHROPIC_API_KEY
- *   GA4_PROPERTY_ID               (ex: 123456789)
- *   GA4_SERVICE_ACCOUNT_KEY_JSON  (JSON string of service account credentials)
+ *   GA4_PROPERTY_ID               (ex: 123456789 — optional)
+ *   GA4_SERVICE_ACCOUNT_KEY_JSON  (JSON string of service account credentials — optional)
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -38,8 +37,7 @@ const ROOT = path.resolve(__dirname, '../..')
 
 const SUPABASE_URL      = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_KEY      = process.env.SUPABASE_SERVICE_ROLE_KEY
-const IG_ACCOUNT_ID     = process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID
-const IG_TOKEN          = process.env.INSTAGRAM_ACCESS_TOKEN
+const MAKE_WEBHOOK_URL  = process.env.MAKE_WEBHOOK_URL
 const ANTHROPIC_KEY     = process.env.ANTHROPIC_API_KEY
 const GA4_PROPERTY_ID   = process.env.GA4_PROPERTY_ID
 const GA4_KEY_JSON      = process.env.GA4_SERVICE_ACCOUNT_KEY_JSON
@@ -274,68 +272,35 @@ async function fetchAppStats() {
   return { totalUsers, activePortfolios, totalLeagues, totalTrades }
 }
 
-// ── Instagram Graph API ───────────────────────────────────────────────────────
+// ── Make.com Webhook ─────────────────────────────────────────────────────────
+// Make.com recebe {caption, imageUrl} e publica no Instagram.
+// Cenário no Make: Webhook → Instagram for Business (Create a Photo Post)
 
 async function igPost({ imageUrl, caption }) {
-  if (!IG_ACCOUNT_ID || !IG_TOKEN) throw new Error('Missing Instagram env vars')
+  if (!MAKE_WEBHOOK_URL) throw new Error('Missing MAKE_WEBHOOK_URL env var')
 
-  log('Creating IG media container...')
-  const createRes = await fetch(
-    `https://graph.facebook.com/v20.0/${IG_ACCOUNT_ID}/media`,
-    {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        image_url: imageUrl,
-        caption,
-        access_token: IG_TOKEN,
-      }),
-    }
-  )
-  if (!createRes.ok) throw new Error(`IG create container error: ${await createRes.text()}`)
-  const { id: containerId } = await createRes.json()
-  log(`Container created: ${containerId}`)
+  log('Sending to Make.com webhook...')
+  const res = await fetch(MAKE_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ caption, imageUrl }),
+  })
 
-  // Wait for container to be ready
-  let status = 'IN_PROGRESS'
-  let attempts = 0
-  while (status === 'IN_PROGRESS' && attempts < 15) {
-    await sleep(3000)
-    const statusRes = await fetch(
-      `https://graph.facebook.com/v20.0/${containerId}?fields=status_code&access_token=${IG_TOKEN}`
-    )
-    const s = await statusRes.json()
-    status = s.status_code ?? 'ERROR'
-    attempts++
-    log(`Container status: ${status} (attempt ${attempts})`)
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Make.com webhook error ${res.status}: ${body}`)
   }
 
-  if (status !== 'FINISHED') throw new Error(`IG container not ready: ${status}`)
-
-  log('Publishing post...')
-  const publishRes = await fetch(
-    `https://graph.facebook.com/v20.0/${IG_ACCOUNT_ID}/media_publish`,
-    {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ creation_id: containerId, access_token: IG_TOKEN }),
-    }
-  )
-  if (!publishRes.ok) throw new Error(`IG publish error: ${await publishRes.text()}`)
-  const { id: postId } = await publishRes.json()
-  log(`✓ Posted to Instagram: https://www.instagram.com/p/${postId}`)
-  return postId
+  const data = await res.json().catch(() => ({}))
+  log(`✓ Sent to Make.com — Instagram will publish shortly`)
+  return data
 }
 
-// The Instagram Graph API requires a publicly accessible image URL.
-// We generate a card image via the /api/og or by hosting on Supabase Storage.
-// For now we accept an explicit --image-url flag or a hosted card URL.
 async function resolveImageUrl(action, data) {
   const imageUrl = getArg('image-url')
   if (imageUrl) return imageUrl
 
-  // Fallback: use the app's OG image as a shareable image
-  // In production, you'd call the /share page, screenshot it, upload to Supabase Storage
+  // Fallback: OG image do app
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.trixer.app'
   return `${siteUrl}/opengraph-image`
 }

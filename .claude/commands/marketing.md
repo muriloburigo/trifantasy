@@ -45,38 +45,47 @@ node scripts/agents/marketing-agent.mjs --action=analyze --report [--dry-run]
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | Chave admin do Supabase |
-| `INSTAGRAM_BUSINESS_ACCOUNT_ID` | ID da conta business @trixer.app |
-| `INSTAGRAM_ACCESS_TOKEN` | Token de longa duração da Graph API |
+| `MAKE_WEBHOOK_URL` | URL do webhook do Make.com (ver configuração abaixo) |
 | `ANTHROPIC_API_KEY` | Chave da Claude API para geração de copy |
-| `GA4_PROPERTY_ID` | ID da propriedade GA4 (ex: `123456789`) |
-| `GA4_SERVICE_ACCOUNT_KEY_JSON` | JSON da service account com acesso ao GA4 |
+| `GA4_PROPERTY_ID` | ID da propriedade GA4 (opcional) |
+| `GA4_SERVICE_ACCOUNT_KEY_JSON` | JSON da service account GA4 (opcional) |
 
-## Como obter o Instagram Access Token
+## Como configurar o Make.com (10 minutos)
 
-1. Acesse [developers.facebook.com](https://developers.facebook.com)
-2. Crie um app → Produto: Instagram Graph API
-3. Adicione a conta @trixer.app como conta de teste
-4. Gere um token de longa duração (60 dias → pode ser renovado programaticamente)
-5. Salve `INSTAGRAM_BUSINESS_ACCOUNT_ID` e `INSTAGRAM_ACCESS_TOKEN` no `.env.local` e no Vercel
+1. Crie conta gratuita em [make.com](https://make.com) (1.000 operações/mês grátis)
 
-## Como configurar o Google Analytics
+2. Clique em **Create a new scenario**
+
+3. Adicione o módulo **Webhooks → Custom webhook**
+   - Clique em "Add" → copie a URL gerada (ex: `https://hook.eu1.make.com/abc123...`)
+   - Essa URL vai para `MAKE_WEBHOOK_URL` no Vercel
+
+4. Adicione o módulo **Instagram for Business → Create a Photo Post**
+   - Conecte sua conta @trixer.app via OAuth (simples, sem Graph API)
+   - Campo **Caption**: `{{1.caption}}`
+   - Campo **Image URL**: `{{1.imageUrl}}`
+
+5. Salve e ative o cenário (botão no canto inferior esquerdo)
+
+6. Salve `MAKE_WEBHOOK_URL` no Vercel Dashboard → Environment Variables
+
+## Como configurar o Google Analytics (opcional)
 
 1. No Google Cloud Console, crie uma Service Account
 2. Baixe o JSON das credenciais
-3. No GA4, vá em Administração → Gestão de acesso → adicione o e-mail da service account com papel "Leitor"
+3. No GA4 → Administração → Gestão de acesso → adicione o e-mail da service account como "Leitor"
 4. Stringify o JSON e salve como `GA4_SERVICE_ACCOUNT_KEY_JSON`
 5. O `GA4_PROPERTY_ID` está em GA4 → Administração → Detalhes da propriedade
 
 ## Uso com --dry-run
 
-Sempre rode com `--dry-run` primeiro para ver a legenda gerada e a imagem antes de publicar:
+Sempre rode com `--dry-run` primeiro para ver a legenda gerada antes de publicar:
 ```bash
 node scripts/agents/marketing-agent.mjs --action=post-upcoming-race --dry-run
 ```
 
 ## Sobre as imagens
 
-O Instagram Graph API exige uma URL pública para a imagem (não upload direto).
-Passe `--image-url=https://...` com a URL da imagem, ou use o card gerado pelo `/share` e hospedado no Supabase Storage.
-
-Roadmap: integrar com o `/share` para gerar + hospedar o card automaticamente antes de postar.
+Por padrão usa a OG image do app. Para usar os cards do `/share`:
+1. Exporte o card pelo `/share` e hospede em qualquer URL pública (ex: Supabase Storage)
+2. Passe `--image-url=https://...` na chamada do agente
