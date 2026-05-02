@@ -694,8 +694,9 @@ CTA: lock your squad at trixer.app`
 }
 
 async function actionPostLeagueStandings() {
-  if (!LEAGUE_ID) { console.error('--league-id required'); process.exit(1) }
-  const { league, standings } = await fetchLeagueStandings(LEAGUE_ID)
+  const effectiveLeagueId = LEAGUE_ID || process.env._AUTO_LEAGUE_ID
+  if (!effectiveLeagueId) { console.error('--league-id required'); process.exit(1) }
+  const { league, standings } = await fetchLeagueStandings(effectiveLeagueId)
   const top3  = standings.slice(0, 3).map(s => `${s.position}. ${s.name} — T$${s.total}`)
   const angle = process.env._AUTO_ANGLE ?? ''
 
@@ -708,7 +709,7 @@ ${angle ? `Editorial angle: ${angle}` : ''}
 CTA: challenge friends at trixer.app`
 
   const plan = await planPost(context)
-  await publishPost(plan, { action: 'post-league-standings', league_id: LEAGUE_ID })
+  await publishPost(plan, { action: 'post-league-standings', league_id: effectiveLeagueId })
 
   log('\n── CAPTION ──────────────────────────────────────')
   console.log(plan.caption)
