@@ -22,7 +22,8 @@ function RaceCard({ race, t }: { race: Race; t: ReturnType<typeof useTranslation
   const st = statusMap[race.status] ?? statusMap.upcoming
 
   // Resolve distance label
-  const distLabel = race.distance === 'full' ? t('full') : race.distance === 'T100' ? t('t100') : t('middle')
+  // '70.3' is a proper noun — hardcode to prevent locale formatting (pt-BR would render it as 70,3)
+  const distLabel = race.distance === 'full' ? t('full') : race.distance === 'T100' ? 'T100' : '70.3'
 
   return (
     <Link
