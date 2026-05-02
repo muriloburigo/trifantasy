@@ -5,7 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "trixer": "node --env-file=.env.local scripts/agents/trixer-agent.mjs",
+    "marketing": "node --env-file=.env.local scripts/agents/marketing-agent.mjs",
+    "social": "node --env-file=.env.local scripts/agents/social-media-agent.mjs",
+    "designer": "node --env-file=.env.local scripts/agents/designer-agent.mjs",
+    "growth": "node --env-file=.env.local scripts/agents/growth-agent.mjs"
   },
   "dependencies": {
     "@next/font": "^14.2.15",
@@ -18,6 +23,7 @@
     "next-intl": "^4.9.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "sharp": "^0.34.5",
     "web-push": "^3.6.7"
   },
   "devDependencies": {

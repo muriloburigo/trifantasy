@@ -194,7 +194,17 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
                               }
                             </div>
                             {/* Photo */}
-                            {ath?.photo_url ? (
+                            {ath?.id ? (
+                              <Link href={`/atletas/${ath.id}`} className="shrink-0">
+                                {ath?.photo_url ? (
+                                  <img src={ath.photo_url} alt={ath.name} className="w-8 h-8 rounded-full object-cover bg-[var(--color-navy-elevated)] hover:ring-2 hover:ring-[var(--color-blue)] transition-all" />
+                                ) : (
+                                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--color-purple)] to-[#3B1F8C] flex items-center justify-center text-xs font-black text-white hover:ring-2 hover:ring-[var(--color-blue)] transition-all">
+                                    {ath?.name?.split(' ').slice(0,2).map((w: string) => w[0]).join('').toUpperCase()}
+                                  </div>
+                                )}
+                              </Link>
+                            ) : ath?.photo_url ? (
                               <img src={ath.photo_url} alt={ath.name} className="w-8 h-8 rounded-full object-cover shrink-0 bg-[var(--color-navy-elevated)]" />
                             ) : (
                               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--color-purple)] to-[#3B1F8C] flex items-center justify-center text-xs font-black text-white shrink-0">
@@ -203,10 +213,17 @@ export default async function RacePage({ params }: { params: Promise<{ slug: str
                             )}
                             {/* Name + country */}
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold truncate">
-                                {ath?.name}
-                                {ath?.country && <span className="ml-1 text-xs">{flag(ath.country)}</span>}
-                              </p>
+                              {ath?.id ? (
+                                <Link href={`/atletas/${ath.id}`} className="text-sm font-semibold truncate hover:text-[var(--color-blue)] transition-colors block">
+                                  {ath?.name}
+                                  {ath?.country && <span className="ml-1 text-xs">{flag(ath.country)}</span>}
+                                </Link>
+                              ) : (
+                                <p className="text-sm font-semibold truncate">
+                                  {ath?.name}
+                                  {ath?.country && <span className="ml-1 text-xs">{flag(ath.country)}</span>}
+                                </p>
+                              )}
                               {/* Mobile splits */}
                               {!r.dnf && !r.dns && r.swim_time && (
                                 <p className="sm:hidden text-[10px] text-[var(--color-muted)] font-mono mt-0.5 flex gap-2">

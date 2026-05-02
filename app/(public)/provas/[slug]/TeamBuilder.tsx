@@ -218,16 +218,16 @@ export default function TeamBuilder({
             {ownedRoster.map(ra => (
               <div key={ra.athlete_id} className="flex items-center gap-2 bg-[var(--color-navy-elevated)] rounded-lg px-2 py-1.5 border border-[var(--color-navy-border)]">
                 {/* Small Avatar */}
-                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full overflow-hidden flex items-center justify-center text-[7px] sm:text-[8px] font-black text-white shrink-0 ${
+                <Link href={`/atletas/${ra.athlete_id}`} className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full overflow-hidden flex items-center justify-center text-[7px] sm:text-[8px] font-black text-white shrink-0 hover:ring-2 hover:ring-[var(--color-blue)] transition-all ${
                   !ra.athlete?.photo_url ? 'bg-gradient-to-br from-[var(--color-orange)] to-[var(--color-purple)]' : ''
                 }`}>
                   {ra.athlete?.photo_url
                     ? <img src={ra.athlete.photo_url} alt={ra.athlete.name} className="w-full h-full object-cover" />
                     : initials(ra.athlete?.name ?? '?')
                   }
-                </div>
+                </Link>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] sm:text-[11px] font-bold truncate leading-tight">{ra.athlete?.name}</p>
+                  <Link href={`/atletas/${ra.athlete_id}`} className="text-[10px] sm:text-[11px] font-bold truncate leading-tight hover:text-[var(--color-blue)] transition-colors block">{ra.athlete?.name}</Link>
                   <div className="flex items-center gap-1 mt-0.5">
                     <span className="text-[7px] font-bold px-0.5 rounded bg-white/5 text-[var(--color-muted)] uppercase tracking-tighter">
                       P {ra.athlete?.pto_rank ? `#${ra.athlete.pto_rank}` : '—'}
