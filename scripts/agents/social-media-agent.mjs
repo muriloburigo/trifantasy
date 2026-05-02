@@ -246,9 +246,13 @@ ${TRIATHLON_KNOWLEDGE}`
 
 async function planPost(context) {
   const rejectionReason = process.env._REJECTION_REASON ?? ''
+  const hooks = recentHooks(6)
+  const hooksContext = hooks.length > 0
+    ? `\n\nRECENT HOOKS USED (DO NOT REPEAT these opening lines — vary your approach):\n${hooks.map((h, i) => `${i+1}. "${h}"`).join('\n')}`
+    : ''
   const fullContext = rejectionReason
-    ? `${context}\n\n⚠️ PREVIOUS ATTEMPT REJECTED BY EDITOR: "${rejectionReason}"\nYou MUST fix this issue in your new plan. Pay special attention to the visual brief — correct the exact problem described above.`
-    : context
+    ? `${context}${hooksContext}\n\n⚠️ PREVIOUS ATTEMPT REJECTED BY EDITOR: "${rejectionReason}"\nYou MUST fix this issue in your new plan. Pay special attention to the visual brief — correct the exact problem described above.`
+    : `${context}${hooksContext}`
   const raw = await callClaude(POST_PLANNER_SYSTEM, fullContext, 1500)
   try {
     const m = raw.match(/\{[\s\S]*\}/)
@@ -263,6 +267,10 @@ async function planPost(context) {
 
 function recentlyUsedUrls(n = 8) {
   return readPostLog().slice(-n).map(p => p.image_url).filter(Boolean)
+}
+
+function recentHooks(n = 6) {
+  return readPostLog().slice(-n).map(p => p.hook).filter(Boolean)
 }
 
 async function executeVisualBrief(visual) {
@@ -357,11 +365,13 @@ async function igPost({ imageUrl, caption, context }) {
   console.log(`MAKE_STATUS=${accepted ? 'async' : 'sync'} MAKE_BODY=${rawBody.slice(0, 100)}`)
 
   // Log the post for engagement analysis
+  const hook = caption.split('\n').find(l => l.trim().length > 0)?.trim() ?? ''
   writePostLog({
     action: context.action,
     race_id: context.race_id ?? null,
     image_url: imageUrl,
     caption_preview: caption.slice(0, 100),
+    hook,
     day_of_week: new Date().toLocaleDateString('en-US', { weekday: 'long' }),
     hour: new Date().getHours(),
   })

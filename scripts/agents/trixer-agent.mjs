@@ -193,9 +193,11 @@ async function publishToInstagram(caption, imageUrl, action, raceId) {
   const logPath = path.join(REPORTS, 'post-log.json')
   let posts = []
   try { posts = JSON.parse(readFileSync(logPath, 'utf8')) } catch {}
+  const hook = caption.split('\n').find(l => l.trim().length > 0)?.trim() ?? ''
   posts.push({
     action, race_id: raceId || null, image_url: imageUrl,
     caption_preview: caption.slice(0, 100),
+    hook,
     day_of_week: new Date().toLocaleDateString('en-US', { weekday: 'long' }),
     hour: new Date().getHours(),
     timestamp: new Date().toISOString(),

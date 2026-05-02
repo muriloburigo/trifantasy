@@ -53,6 +53,15 @@ function formatDate(iso: string) {
     .toUpperCase()
 }
 
+/** Seconds → h:mm:ss */
+function formatTime(seconds: number | null | undefined): string {
+  if (!seconds) return '—'
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = seconds % 60
+  return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
 // ── Shared layout pieces ──────────────────────────────────────────────────────
 
 function Frame({ children }: { children: React.ReactNode }) {
@@ -311,51 +320,65 @@ function MetaItem({ label, value, highlight }: { label: string, value: string, h
 // ── Card: Race Recap ──────────────────────────────────────────────────────────
 // Layout: cópia do RaceRecapCard — pódio com medalhas, fotos, tempo e delta
 
-function RaceRecapCard({ race, podium }: { race: any, podium: any[] }) {
+function PodiumRow({ r, i, highlight }: { r: any, i: number, highlight: boolean }) {
   const medals = ['🥇', '🥈', '🥉']
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 16,
+      padding: '14px 18px',
+      background: highlight ? `hsl(211 100% 60% / 0.1)` : CARD_BG,
+      border: `1px solid ${highlight ? 'hsl(211 100% 60% / 0.25)' : BORDER}`,
+      borderRadius: 16,
+    }}>
+      <span style={{ fontSize: 26, flexShrink: 0, width: 36 }}>
+        {medals[i] ?? <span style={{ fontSize: 20, fontWeight: 900, color: MUTED }}>{i + 1}</span>}
+      </span>
+      <Avatar photoUrl={r.photo_url} name={r.name ?? ''} size={52} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
+        <span style={{ fontSize: 22, fontWeight: 700, color: WHITE, lineHeight: 1 }}>{r.name}</span>
+        <span style={{ fontSize: 14, color: MUTED }}>
+          {flag(r.country_code)} {r.country?.toUpperCase()}{r.finish_time ? ` · ${r.finish_time}` : ''}
+        </span>
+      </div>
+      {r.price_change !== undefined && r.price_change !== null && (
+        <DeltaTag delta={r.price_change} size="sm" />
+      )}
+    </div>
+  )
+}
+
+function RaceRecapCard({ race, podium }: { race: any, podium: any[] }) {
+  // Split by position to interleave men/women (same pro_pos = different genders)
+  const byPos: Record<number, any[]> = {}
+  podium.forEach(r => {
+    const p = r.pro_pos ?? 99
+    byPos[p] = byPos[p] ?? []
+    byPos[p].push(r)
+  })
+  // Build interleaved list: pos1-man, pos1-woman, pos2-man, pos2-woman...
+  const rows: any[] = []
+  Object.keys(byPos).sort((a,b) => Number(a)-Number(b)).forEach(pos => {
+    byPos[Number(pos)].forEach(r => rows.push(r))
+  })
+
   return (
     <Frame>
       <Header eyebrow="RACE RECAP" />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 32, flex: 1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, flex: 1 }}>
         {/* Race title */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <span style={{ fontSize: 18, fontWeight: 700, color: MUTED, letterSpacing: '0.18em' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span style={{ fontSize: 16, fontWeight: 700, color: PURPLE, letterSpacing: '0.2em' }}>
             {race.distance?.toUpperCase()} · {race.location?.split(',')[0]?.toUpperCase()}
           </span>
-          <div style={{ fontSize: 90, fontWeight: 900, lineHeight: 0.92, letterSpacing: '-0.04em', color: WHITE, display: 'flex', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 80, fontWeight: 900, lineHeight: 0.92, letterSpacing: '-0.04em', color: WHITE, display: 'flex', flexWrap: 'wrap' }}>
             {race.name}
           </div>
         </div>
-        {/* Podium */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <span style={{ fontSize: 20, fontWeight: 700, color: MUTED, letterSpacing: '0.2em' }}>RESULTS</span>
-          {podium.slice(0, 5).map((r: any, i: number) => (
-            <div key={i} style={{
-              display: 'flex', alignItems: 'center', gap: 20,
-              padding: '18px 20px',
-              background: i === 0 ? `hsl(211 100% 60% / 0.1)` : CARD_BG,
-              border: `1px solid ${i === 0 ? 'hsl(211 100% 60% / 0.25)' : BORDER}`,
-              borderRadius: 18,
-            }}>
-              {/* Medal / Position */}
-              <span style={{ fontSize: 30, flexShrink: 0, width: 40 }}>
-                {medals[i] ?? String(i + 1)}
-              </span>
-              {/* Avatar */}
-              <Avatar photoUrl={r.photo_url} name={r.name ?? ''} size={64} />
-              {/* Name + country */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: 26, fontWeight: 700, color: WHITE }}>{r.name}</span>
-                <span style={{ fontSize: 16, color: MUTED }}>
-                  {flag(r.country_code)} {r.country?.toUpperCase()}
-                  {r.finish_time ? ` · ${r.finish_time}` : ''}
-                </span>
-              </div>
-              {/* Delta */}
-              {r.price_change !== undefined && r.price_change !== null && (
-                <DeltaTag delta={r.price_change} size="md" />
-              )}
-            </div>
+        {/* Results */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <span style={{ fontSize: 16, fontWeight: 700, color: MUTED, letterSpacing: '0.2em' }}>RESULTS</span>
+          {rows.slice(0, 6).map((r: any, i: number) => (
+            <PodiumRow key={i} r={r} i={podium.filter(p => p.pro_pos < r.pro_pos).length} highlight={i === 0} />
           ))}
         </div>
       </div>
@@ -363,7 +386,7 @@ function RaceRecapCard({ race, podium }: { race: any, podium: any[] }) {
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: `linear-gradient(90deg, ${GOLD}, hsl(35 90% 55%))`,
-        borderRadius: 16, padding: '22px 0', marginTop: 24, marginBottom: 24,
+        borderRadius: 16, padding: '20px 0', marginTop: 20, marginBottom: 20,
       }}>
         <span style={{ fontSize: 22, fontWeight: 900, color: '#0B0B0F', letterSpacing: '0.07em' }}>
           SEE HOW YOUR SQUAD SCORED · TRIXER.APP
@@ -404,20 +427,35 @@ export async function GET(req: NextRequest) {
       const { data: race } = await admin.from('races')
         .select('id, name, date, location, distance').eq('id', raceId).single()
       const { data: results } = await admin.from('results')
-        .select('pro_pos, finish_time, athlete:athletes(id, name, country, country_code, photo_url, price_change)')
+        .select('pro_pos, finish_time, athlete:athletes(id, name, country, country_code, photo_url)')
         .eq('race_id', raceId).not('pro_pos', 'is', null).lte('pro_pos', 5).order('pro_pos')
       if (!race) return new Response('Race not found', { status: 404 })
 
-      const podium = (results ?? []).map((r: any) => ({
+      // Get race-specific delta from price_history (not current price_change which may be from a later race)
+      const athleteIds = (results ?? []).map((r: any) => r.athlete?.id).filter(Boolean)
+      const { data: priceHistory } = await admin.from('athlete_price_history')
+        .select('athlete_id, change')
+        .eq('race_id', raceId)
+        .eq('reason', 'race_result')
+        .in('athlete_id', athleteIds)
+      const deltaMap: Record<string, number> = {}
+      ;(priceHistory ?? []).forEach((h: any) => {
+        // Sum all entries for same athlete (in case of multiple entries)
+        deltaMap[h.athlete_id] = (deltaMap[h.athlete_id] ?? 0) + h.change
+      })
+
+      // Group by gender to show separate podiums (men + women)
+      const allPodium = (results ?? []).map((r: any) => ({
         name: r.athlete?.name,
         country: r.athlete?.country,
         country_code: r.athlete?.country_code,
         photo_url: r.athlete?.photo_url,
-        price_change: r.athlete?.price_change,
-        finish_time: r.finish_time,
+        price_change: deltaMap[r.athlete?.id] ?? null,
+        finish_time: formatTime(r.finish_time),
+        pro_pos: r.pro_pos,
       }))
 
-      element = <RaceRecapCard race={race} podium={podium} />
+      element = <RaceRecapCard race={race} podium={allPodium} />
 
     } else {
       // market-update: rising athletes sorted by price_change
