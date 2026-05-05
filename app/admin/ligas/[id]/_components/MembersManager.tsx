@@ -1,7 +1,7 @@
 'use client'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { addMember, removeMember } from '../actions'
+import { addMember, removeMember } from '../../actions'
 
 type Profile = { id: string; name: string; photo_url: string | null }
 type Member = { user_id: string; joined_at: string; profile: Profile | null }

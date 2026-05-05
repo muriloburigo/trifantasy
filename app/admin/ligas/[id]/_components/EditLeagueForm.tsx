@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { updateLeague } from '../actions'
+import { updateLeague } from '../../actions'
 
 type League = { id: string; name: string; invite_code: string; is_public: boolean; is_global: boolean }
 
