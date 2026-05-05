@@ -2,12 +2,13 @@ import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient, createAdminClient } from '~/lib/supabase/server'
-import { Trophy, Users, Medal, Globe, Lock } from 'lucide-react'
+import { Trophy, Users, Medal, Globe, Lock, Pencil, Trash2 } from 'lucide-react'
 import CopyButton from './CopyButton'
 import AddMemberForm from './AddMemberForm'
 import BackLink from '~/app/components/BackLink'
 import WhatsAppShare from '~/app/components/WhatsAppShare'
 import { getTranslations } from 'next-intl/server'
+import OwnerDeleteButton from './OwnerDeleteButton'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -211,10 +212,25 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
 
       {/* Owner: add member by name */}
       {isOwner && (
-        <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-5">
-          <h3 className="font-bold text-sm mb-1">{t('addMemberTitle')}</h3>
-          <p className="text-xs text-[var(--color-muted)] mb-3">{t('addMemberDesc')}</p>
-          <AddMemberForm leagueId={id} />
+        <div className="bg-[var(--color-navy-card)] border border-[var(--color-navy-border)] rounded-2xl p-5 space-y-5">
+          {/* Owner management actions */}
+          <div className="flex items-center gap-2 pb-5 border-b border-[var(--color-navy-border)]">
+            <Link
+              href={`/ligas/${id}/editar`}
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-[var(--color-navy-border)] text-[var(--color-muted)] hover:text-white hover:border-white/30 rounded-lg text-xs font-medium transition-colors"
+            >
+              <Pencil size={12} />
+              Editar Liga
+            </Link>
+            <OwnerDeleteButton leagueId={id} leagueName={league.name} />
+          </div>
+
+          {/* Add member */}
+          <div>
+            <h3 className="font-bold text-sm mb-1">{t('addMemberTitle')}</h3>
+            <p className="text-xs text-[var(--color-muted)] mb-3">{t('addMemberDesc')}</p>
+            <AddMemberForm leagueId={id} />
+          </div>
         </div>
       )}
     </div>
