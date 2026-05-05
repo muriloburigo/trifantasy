@@ -38,6 +38,20 @@ export async function upsertRace(formData: FormData) {
     if (prev?.status !== status && (status === 'open' || status === 'locked')) {
       processNotifications().catch(err => console.error('[Notifications] Error on status change:', err))
     }
+    // Snapshot team compositions when race is locked so scoring uses race-day rosters
+    if (prev?.status !== 'locked' && status === 'locked') {
+      const { data: allTeamAthletes } = await supabase
+        .from('team_athletes')
+        .select('team_id, athlete_id')
+      if (allTeamAthletes?.length) {
+        await supabase
+          .from('race_rosters')
+          .upsert(
+            allTeamAthletes.map(ta => ({ race_id: id, team_id: ta.team_id, athlete_id: ta.athlete_id })),
+            { onConflict: 'race_id,team_id,athlete_id' }
+          )
+      }
+    }
   } else {
     await supabase.from('races').insert(payload)
   }

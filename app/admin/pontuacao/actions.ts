@@ -78,22 +78,45 @@ export async function calculateScores(raceId: string): Promise<{
     breakdownByAthlete[input.athlete_id] = scoreAthlete(input)
   }
 
-  // 5. Fetch all teams (global — not race-specific)
-  const { data: teams } = await supabase
-    .from('teams')
-    .select('id, team_athletes(athlete_id)')
+  // 5. Resolve team compositions — prefer race-day roster snapshot over current team_athletes
+  const { data: rosterRows } = await supabase
+    .from('race_rosters')
+    .select('team_id, athlete_id')
+    .eq('race_id', raceId)
 
-  if (!teams?.length) return { error: 'Nenhum time encontrado.' }
+  let teamMap: Record<string, string[]>
+  let allTeamIds: string[]
+
+  if (rosterRows?.length) {
+    teamMap = {}
+    for (const r of rosterRows) {
+      teamMap[r.team_id] = teamMap[r.team_id] ?? []
+      teamMap[r.team_id].push(r.athlete_id)
+    }
+    allTeamIds = [...new Set(rosterRows.map(r => r.team_id))]
+  } else {
+    // Fallback for races without a snapshot (pre-existing races)
+    const { data: teams } = await supabase
+      .from('teams')
+      .select('id, team_athletes(athlete_id)')
+    if (!teams?.length) return { error: 'Nenhum time encontrado.' }
+    teamMap = Object.fromEntries(
+      teams.map(t => [t.id, (t.team_athletes as any[]).map((ta: any) => ta.athlete_id)])
+    )
+    allTeamIds = teams.map(t => t.id)
+  }
+
+  if (!allTeamIds.length) return { error: 'Nenhum time encontrado.' }
 
   // 6. Calculate and upsert scores for each team (only athletes in this race count)
   let teamsScored = 0
-  for (const team of teams) {
-    const athleteIds = (team.team_athletes as any[]).map((ta: any) => ta.athlete_id)
+  for (const teamId of allTeamIds) {
+    const athleteIds = teamMap[teamId] ?? []
     const breakdown = athleteIds.map(id => breakdownByAthlete[id]).filter(Boolean)
     const total = breakdown.reduce((sum, b) => sum + (b?.total ?? 0), 0)
 
     await supabase.from('scores').upsert(
-      { team_id: team.id, race_id: raceId, total_points: total, breakdown, calculated_at: new Date().toISOString() },
+      { team_id: teamId, race_id: raceId, total_points: total, breakdown, calculated_at: new Date().toISOString() },
       { onConflict: 'team_id,race_id' }
     )
     teamsScored++
