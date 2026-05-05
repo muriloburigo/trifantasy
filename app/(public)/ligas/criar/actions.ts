@@ -79,6 +79,39 @@ export async function joinPublicLeague(leagueId: string) {
   redirect(`/ligas/${leagueId}`)
 }
 
+export async function addMemberById(leagueId: string, userId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Não autorizado.' }
+
+  const admin = createAdminClient()
+
+  const { data: league } = await admin
+    .from('leagues')
+    .select('owner_id')
+    .eq('id', leagueId)
+    .single()
+
+  if (league?.owner_id !== user.id) return { error: 'Apenas o criador pode adicionar membros.' }
+
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('name')
+    .eq('id', userId)
+    .single()
+
+  if (!profile) return { error: 'Usuário não encontrado.' }
+
+  const { error } = await admin
+    .from('league_members')
+    .insert({ league_id: leagueId, user_id: userId })
+
+  if (error?.code === '23505') return { error: `${profile.name} já está na liga.` }
+  if (error) return { error: 'Erro ao adicionar membro.' }
+
+  return { success: `${profile.name} adicionado à liga!`, error: undefined }
+}
+
 export async function addMemberByUsername(leagueId: string, username: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
