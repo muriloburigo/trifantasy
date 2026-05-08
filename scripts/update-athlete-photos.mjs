@@ -45,17 +45,38 @@ const DRY_RUN  = flag('dry-run')
 const LIMIT    = parseInt(opt('limit', '9999'), 10)
 const DELAY_MS = 350  // delay entre requests externos
 
-// Known placeholder UUIDs to skip.
-// Add here any UUID that appears as photo_url em múltiplos atletas (placeholder da PTO CDN).
+// Known placeholder UUIDs to skip (site-wide CDN banners/defaults on PTO pages).
+// At startup, detectPlaceholderUuids() adds any new ones found on a known-invalid slug.
 const SKIP_UUIDS = new Set([
-  '1450267a-3a96-42c0-8e44-6f41aabc65ce',
+  // PTO site-wide placeholders (detected by fetching a non-existent athlete slug)
   '027aaf17-2108-4a10-b182-06a7e5b91745',
-  '8e5f3d2a-1234-5678-abcd-placeholder000',
-  // Placeholders detectados em mai/2026 — foto genérica replicada para 265+ atletas
-  '26221c53-4107-4fe0-aa68-88332af6',
-  '769ab444-6988-4ffe-ac18-b2224670',
-  'affcc552-4aae-4a8e-8d07-ec754355',
+  '769ab444-6988-4ffe-ac18-b22246706278',
+  '88be2f0a-2dbe-4139-8d3f-3640e7348529',
+  '267e201f-fc85-410f-82ff-eb755c4cabd9',
+  '26221c53-4107-4fe0-aa68-88332af6b168',
+  'b7e5317c-b1f8-4502-9e63-de49b0196dbf',
 ])
+
+/**
+ * Fetches a known-invalid PTO athlete slug and adds every CDN UUID found there
+ * to SKIP_UUIDS — so future new placeholders are auto-detected at runtime.
+ */
+async function detectPlaceholderUuids() {
+  const res = await safeFetch(
+    'https://stats.protriathletes.org/athlete/definitely-not-an-athlete-xyz99999',
+  )
+  if (!res) return
+  const html = await res.text()
+  const uuids = [...html.matchAll(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi)]
+  let added = 0
+  for (const [uuid] of uuids) {
+    if (!SKIP_UUIDS.has(uuid.toLowerCase())) {
+      SKIP_UUIDS.add(uuid.toLowerCase())
+      added++
+    }
+  }
+  if (added > 0) console.log(`  [placeholder] +${added} novos UUIDs detectados automaticamente`)
+}
 
 // ── Utilities ────────────────────────────────────────────────────────────────
 
@@ -333,25 +354,26 @@ function findAllAthletes(obj, depth = 0) {
 
 async function fetchPtoPhotoByName(name) {
   const slug = nameToSlug(name)
-  const url = `https://stats.protriathletes.org/athlete/${slug}`
-  const res = await safeFetch(url)
+  const res = await safeFetch(`https://stats.protriathletes.org/athlete/${slug}`)
   if (!res) return null
   const html = await res.text()
 
-  // If the page redirects to a generic/404 athlete, the title won't match — bail out
+  // Require that the page title contains BOTH first and last name — generic/redirect pages
+  // use a site-wide title like "PTO Statistics, Results and Rankings" that won't match.
   const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
   const pageTitle = (titleMatch?.[1] ?? '').toLowerCase()
-  const nameParts = name.toLowerCase().split(' ').filter(p => p.length > 2)
-  const titleMatchesAthlete = nameParts.some(p => pageTitle.includes(p))
-  if (!titleMatchesAthlete && pageTitle.length > 0) return null
+  const nameParts = name.toLowerCase().split(' ').filter(p => p.length > 1)
+  const firstPart = nameParts[0] ?? ''
+  const lastPart  = nameParts[nameParts.length - 1] ?? ''
+  if (!firstPart || !lastPart || !pageTitle.includes(firstPart) || !pageTitle.includes(lastPart)) return null
 
-  const CDN = 'https://content.protriathletes.org/content/images'
-  const matches = [...html.matchAll(/content\.protriathletes\.org\/content\/images\/([\d]{4}\/[\d]{2}\/([a-f0-9-]{36}))/g)]
-  for (const m of matches) {
-    const photoUrl = `${CDN}/${m[1]}-w300.webp`
-    if (!isPlaceholder(photoUrl)) return photoUrl
-  }
-  return null
+  // Use og:image exclusively — it's always the athlete's specific profile photo on PTO pages.
+  // Scanning all CDN img tags picks up site-wide banners, sponsor logos and other athletes' photos.
+  const ogMatch = html.match(/property="og:image"\s+content="(https:\/\/content\.protriathletes\.org\/[^"]+)"/)
+              ?? html.match(/content="(https:\/\/content\.protriathletes\.org\/[^"]+)"\s+property="og:image"/)
+  if (!ogMatch) return null
+  const photoUrl = ogMatch[1].replace(/\.png$/, '-w300.webp').replace(/-w\d+\.webp$/, '-w300.webp')
+  return isPlaceholder(photoUrl) ? null : photoUrl
 }
 
 async function fetchWtPhotoByName(name) {
@@ -395,6 +417,10 @@ if (error) { console.error('Erro ao buscar atletas:', error.message); process.ex
 if (!athletes?.length) { console.log('Nenhum atleta encontrado com os filtros informados.'); process.exit(0) }
 
 console.log(`Atletas a processar: ${athletes.length}\n`)
+
+// 1b. Auto-detect any new PTO placeholder UUIDs before fetching anything
+console.log('── Detectando placeholders da PTO ──────────────────────────────────')
+await detectPlaceholderUuids()
 
 // 2. Phase 1 — Bulk harvest from ranking pages
 console.log('── Phase 1: Harvest em bulk das páginas de ranking ─────────────────')
