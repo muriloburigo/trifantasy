@@ -175,7 +175,7 @@ Preço clamped T$1–T$35. Propagado para `race_athletes` de provas futuras.
 | `/admin/atletas` | Gerenciar atletas (CRUD) |
 | `/admin/importar` | Importação de startlists e resultados |
 | `/admin/resultados` | Upload de resultados da prova |
-| `/admin/mercado` | Ajuste manual de preços |
+| `/admin/mercado` | Ajuste manual de preços + sync de rankings (`node scripts/sync-ranks.mjs`) |
 | `/admin/pontuacao` | Calcular pontos + atualizar mercado |
 | `/admin/notificacoes` | Enviar notificações de teste |
 | `/admin/suporte` | Gerenciar tickets de suporte |
@@ -218,7 +218,10 @@ Preço clamped T$1–T$35. Propagado para `race_athletes` de provas futuras.
 ## Scripts Úteis
 
 ```bash
-# Sincronizar rankings mundiais (PTO + WTCS)
+# Sincronizar rankings PTO + WTCS (atualiza só pto_rank/wtcs_rank, não muda T$)
+node scripts/sync-ranks.mjs
+
+# Sincronizar rankings mundiais — versão legada (também zera price_change)
 node scripts/sync-unified-ranks-v3.mjs
 
 # Tornar usuário admin
@@ -227,12 +230,66 @@ node scripts/set-admin.mjs email@exemplo.com
 # Seed de prova específica
 node scripts/seed-brasilia-2026.mjs
 
-# Importar resultados de prova (CSV)
+# Atualizar startlist completo: M+F, novos atletas com T$ inicial, fotos (recomendado)
+node scripts/update-startlist.mjs <URL> <RACE_ID>
+node scripts/update-startlist.mjs <URL> <RACE_ID> --dry-run  # preview
+
+# Importar startlist simples a partir de URL (legado — sem rank lookup nem fotos)
+export $(grep -v '^#' .env.local | xargs) 2>/dev/null
+node scripts/import-startlist.mjs <URL> <RACE_ID>
+
+# Cadastrar atleta individualmente (interativo ou via flags)
+export $(grep -v '^#' .env.local | xargs) 2>/dev/null
+node scripts/create-athlete.mjs --name "Nome" --gender M --country France --country-code FR --pto-rank 38
+
+# Repricing global por pontos PTO (atualiza todos os atletas)
+node scripts/reprice-athletes.mjs
+
+# Importar resultados de prova a partir de URL (M + F automático)
+node scripts/fetch-results.mjs <URL> <RACE_ID>
+node scripts/fetch-results.mjs <URL> <RACE_ID> --dry-run  # preview sem gravar
+
+# Importar resultados de prova (CSV legado)
 node scripts/import-results.mjs
 
 # Gerar chaves VAPID (apenas uma vez)
 node scripts/generate-vapid-keys.mjs
 ```
+
+---
+
+## Importar Startlist — protrinews.com
+
+O site bloqueia bots (403 no WebFetch) mas aceita `curl` com User-Agent de browser. Todos os dados (masculino e feminino) estão embutidos no HTML como JSON dentro de `self.__next_f.push(...)`.
+
+**Fluxo completo:**
+
+1. Baixar o HTML:
+   ```bash
+   curl -s "https://protrinews.com/race/<slug>" \
+     -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" \
+     -H "Accept: text/html" -L > /tmp/page.html
+   ```
+
+2. Extrair o JSON via Python — procurar o `<script>` com `startLists` e `MPRO`. O conteúdo está como string JSON escapada dentro de `self.__next_f.push([1,"..."])`. Fazer `json.loads('"' + inner + '"')` para decodificar, depois localizar `{"startLists":` e extrair o objeto balanceando chaves `{}`.
+
+3. Cada `entry` tem: `athlete_full_name`, `athlete_country_iso2`, `start_list_id` (liga a `startLists[].program_name`: `MPRO` ou `FPRO`).
+
+4. Cross-reference com a tabela `athletes` do Supabase (normalizar nomes: minúsculas, sem acentos, hífen→espaço).
+
+5. Atletas não encontrados: criar via POST em `athletes` com `name`, `gender`, `type='pro'`, `country`, `country_code`.
+
+6. Inserir todos em `race_athletes` com `race_id`, `athlete_id`, `price` (= `current_price` do atleta).
+
+7. Para atletas **novos**: consultar PTO e WTCS e aplicar a tabela de preços (ver `/cadastrar-atleta`). Atualizar `athletes.current_price`, `pto_rank`, `wtcs_rank` e `race_athletes.price`.
+
+**APIs de ranking:**
+- PTO masculino: `https://stats.protriathletes.org/api/rankings?gender=male&limit=500` → JSON com `rankings[].{rank, name, points}`
+- PTO feminino: HTML de `https://stats.protriathletes.org/rankings/women` (API gender=female retorna MPRO por bug — parsear os `<div class="trow">` com `data-division="FPRO"`)
+- WTCS homens: `https://triathlon.org/tri-api/v1/rankings/15` → `data.rankings[].athlete_full_name` (ordem = posição)
+- WTCS mulheres: `https://triathlon.org/tri-api/v1/rankings/16`
+
+**Não alterar T$ de atletas já existentes** — o preço atual reflete histórico de provas anteriores.
 
 ---
 

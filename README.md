@@ -1,37 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Trixer
 
-## Getting Started
+Fantasy game do circuito mundial de Triathlon — usuários montam elencos com até 5 atletas profissionais, pontuam pelo desempenho nas provas reais e competem em ligas.
 
-First, run the development server:
+**URL:** https://www.trixer.app
 
+---
+
+## Stack
+
+| Camada | Tecnologia |
+|--------|-----------|
+| Frontend | Next.js 16.2.4 App Router, React 19 |
+| Styling | Tailwind CSS v4 (config via `globals.css`, sem `tailwind.config.js`) |
+| Database | Supabase (PostgreSQL 15) + RLS |
+| Auth | Supabase Auth + Cloudflare Turnstile |
+| i18n | next-intl 4.x — PT / EN / ES |
+| Push | Web-Push API (VAPID) + Service Workers |
+| Image Export | html-to-image 1.11.13 |
+| Deploy | Vercel (auto-deploy via GitHub push) |
+| Fontes | Inter (body), Sora (headings) via @next/font |
+
+---
+
+## Deploy
+
+Push para `main` dispara deploy automático via Vercel CI/CD.
+
+Deploy manual:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+PATH="/opt/homebrew/Cellar/node/25.9.0_1/bin:$PATH" npx vercel --prod
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> **Atenção:** Não rode `next build` ou `tsc` localmente — Node v25 é incompatível com o projeto.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts Úteis
 
-## Learn More
+```bash
+# Sincronizar rankings mundiais (PTO + WTCS)
+node scripts/sync-unified-ranks-v3.mjs
 
-To learn more about Next.js, take a look at the following resources:
+# Tornar usuário admin
+node scripts/set-admin.mjs email@exemplo.com
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Importar startlist a partir de URL (PTO, Ironman, tabelas HTML)
+export $(grep -v '^#' .env.local | xargs) 2>/dev/null
+node scripts/import-startlist.mjs <URL> <RACE_ID>
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Cadastrar atleta individualmente
+export $(grep -v '^#' .env.local | xargs) 2>/dev/null
+node scripts/create-athlete.mjs --name "Nome" --gender M --country France --country-code FR --pto-rank 38
 
-## Deploy on Vercel
+# Repricing global por pontos PTO (atualiza todos os atletas)
+node scripts/reprice-athletes.mjs
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Importar resultados de prova (CSV)
+node scripts/import-results.mjs
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-\n<!-- Deploy Trigger: Mon Apr 27 10:47:45 -03 2026 -->
+# Gerar chaves VAPID (apenas uma vez)
+node scripts/generate-vapid-keys.mjs
+```
+
+---
+
+## Importar Startlist — protrinews.com
+
+O site bloqueia bots (403) mas aceita `curl` com User-Agent de browser. Todos os dados (masculino e feminino) estão embutidos no HTML como JSON dentro de `self.__next_f.push(...)`.
+
+```bash
+# 1. Baixar o HTML
+curl -s "https://protrinews.com/race/<slug>" \
+  -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" \
+  -H "Accept: text/html" -L > /tmp/page.html
+```
+
+Extrair via Python: localizar o `<script>` com `startLists` e `MPRO`, decodificar com `json.loads('"' + inner + '"')`, extrair o objeto `{"startLists":...}` balanceando `{}`.
+
+Cada `entry` contém: `athlete_full_name`, `athlete_country_iso2`, `start_list_id` (`MPRO` ou `FPRO`).
+
+**APIs de ranking para precificação:**
+- PTO masculino: `https://stats.protriathletes.org/api/rankings?gender=male&limit=500`
+- PTO feminino: HTML de `https://stats.protriathletes.org/rankings/women` (a API `gender=female` retorna MPRO por bug)
+- WTCS homens: `https://triathlon.org/tri-api/v1/rankings/15`
+- WTCS mulheres: `https://triathlon.org/tri-api/v1/rankings/16`
+
+Ver `CLAUDE.md` para o fluxo completo e tabela de preços inicial.
+
+---
+
+## Variáveis de Ambiente
+
+```
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+NEXT_PUBLIC_SITE_URL=https://www.trixer.app
+NEXT_PUBLIC_TURNSTILE_SITE_KEY
+TURNSTILE_SECRET_KEY
+NEXT_PUBLIC_VAPID_PUBLIC_KEY
+VAPID_PRIVATE_KEY
+VAPID_EMAIL=mailto:contato@trixer.app
+CRON_SECRET
+```
+
+---
+
+## Documentação Interna
+
+- `CLAUDE.md` — domínio completo, schema, mecânicas, rotas e scripts
+- `AGENTS.md` — regras e padrões para agentes de IA
+- `GEMINI.md` — contexto resumido para agentes Gemini
+- `.claude/commands/` — comandos slash para operações comuns
+<!-- Deploy Trigger: Mon Apr 27 10:47:45 -03 2026 -->
