@@ -376,6 +376,23 @@ async function fetchPtoPhotoByName(name) {
   return isPlaceholder(photoUrl) ? null : photoUrl
 }
 
+async function fetchPtnPhotoByName(name) {
+  const slug = nameToSlug(name)
+  const res = await safeFetch(`https://protrinews.com/athletes/${slug}`)
+  if (!res) return null
+  const html = await res.text()
+  // Require page title to contain both first and last name
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
+  const pageTitle = (titleMatch?.[1] ?? '').toLowerCase()
+  const nameParts = name.toLowerCase().split(' ').filter(p => p.length > 1)
+  const firstPart = nameParts[0] ?? ''
+  const lastPart  = nameParts[nameParts.length - 1] ?? ''
+  if (!firstPart || !lastPart || !pageTitle.includes(firstPart) || !pageTitle.includes(lastPart)) return null
+  // Extract the trinews storage URL — each athlete has a unique UUID-based photo
+  const m = html.match(/https:\/\/api\.trinews\.app\/storage\/v1\/object\/public\/athlete-photos\/[a-f0-9-]{36}\/photo\.webp[^"'\s\\]*/i)
+  return m ? m[0] : null
+}
+
 async function fetchWtPhotoByName(name) {
   const q = encodeURIComponent(name)
   const res = await safeFetch(
@@ -463,9 +480,15 @@ for (const athlete of athletes) {
 
   const source = photoUrl ? 'bulk' : null
 
-  // Fallback: PTO individual page
+  // Fallback: PTO individual page (og:image only)
   if (!photoUrl && athlete.type === 'pro') {
     photoUrl = await fetchPtoPhotoByName(athlete.name)
+    await sleep(DELAY_MS)
+  }
+
+  // Fallback: ProTriNews individual page (trinews CDN)
+  if (!photoUrl) {
+    photoUrl = await fetchPtnPhotoByName(athlete.name)
     await sleep(DELAY_MS)
   }
 
