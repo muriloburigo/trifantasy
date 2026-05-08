@@ -45,11 +45,16 @@ const DRY_RUN  = flag('dry-run')
 const LIMIT    = parseInt(opt('limit', '9999'), 10)
 const DELAY_MS = 350  // delay entre requests externos
 
-// Known placeholder UUIDs to skip (from fetch-photos-v2.mjs)
+// Known placeholder UUIDs to skip.
+// Add here any UUID that appears as photo_url em múltiplos atletas (placeholder da PTO CDN).
 const SKIP_UUIDS = new Set([
   '1450267a-3a96-42c0-8e44-6f41aabc65ce',
   '027aaf17-2108-4a10-b182-06a7e5b91745',
   '8e5f3d2a-1234-5678-abcd-placeholder000',
+  // Placeholders detectados em mai/2026 — foto genérica replicada para 265+ atletas
+  '26221c53-4107-4fe0-aa68-88332af6',
+  '769ab444-6988-4ffe-ac18-b2224670',
+  'affcc552-4aae-4a8e-8d07-ec754355',
 ])
 
 // ── Utilities ────────────────────────────────────────────────────────────────
@@ -332,6 +337,14 @@ async function fetchPtoPhotoByName(name) {
   const res = await safeFetch(url)
   if (!res) return null
   const html = await res.text()
+
+  // If the page redirects to a generic/404 athlete, the title won't match — bail out
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
+  const pageTitle = (titleMatch?.[1] ?? '').toLowerCase()
+  const nameParts = name.toLowerCase().split(' ').filter(p => p.length > 2)
+  const titleMatchesAthlete = nameParts.some(p => pageTitle.includes(p))
+  if (!titleMatchesAthlete && pageTitle.length > 0) return null
+
   const CDN = 'https://content.protriathletes.org/content/images'
   const matches = [...html.matchAll(/content\.protriathletes\.org\/content\/images\/([\d]{4}\/[\d]{2}\/([a-f0-9-]{36}))/g)]
   for (const m of matches) {
