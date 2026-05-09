@@ -5,7 +5,7 @@ export default async function MarketBanner({
   locked, reasonKey, lockRace,
 }: {
   locked: boolean
-  reasonKey?: 'ongoing' | 'closingSoon'
+  reasonKey?: 'ongoing' | 'closingSoon' | 'admin'
   lockRace?: { name: string; date: string }
 }) {
   const t = await getTranslations('marketBanner')
@@ -21,7 +21,9 @@ export default async function MarketBanner({
 
   const reasonText = reasonKey === 'ongoing'
     ? t('ongoingRace', { race: lockRace?.name ?? '' })
-    : t('closingSoonDesc', { race: lockRace?.name ?? '' })
+    : reasonKey === 'admin'
+      ? t('adminClosed')
+      : t('closingSoonDesc', { race: lockRace?.name ?? '' })
 
   return (
     <div className="flex items-center gap-2 text-xs text-yellow-400 bg-yellow-950/20 border border-yellow-900/40 rounded-lg px-3 py-2 mb-6">
@@ -29,7 +31,7 @@ export default async function MarketBanner({
       <span>
         <strong>{t('locked')}.</strong>{' '}
         {reasonText}
-        {lockRace && (
+        {lockRace && reasonKey !== 'admin' && (
           <span className="text-[var(--color-muted)] ml-1">— {t('reopens')}</span>
         )}
       </span>

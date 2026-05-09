@@ -2,18 +2,32 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 export interface MarketStatus {
   locked: boolean
-  reasonKey?: 'ongoing' | 'closingSoon'
+  reasonKey?: 'ongoing' | 'closingSoon' | 'admin'
   lockRace?: { id: string; name: string; date: string }
+  override?: boolean | null  // null = auto, true = force open, false = force closed
 }
 
 /**
  * Market is locked when the closest upcoming/open race is ≤24h away.
  * It reopens automatically once that race is marked 'finished'.
+ * Admins can override this via the settings table (market_override key).
  */
 export async function getMarketStatus(supabase: SupabaseClient): Promise<MarketStatus> {
+  // Check for admin override first
+  const { data: settingRows } = await supabase
+    .from('settings')
+    .select('value')
+    .eq('key', 'market_override')
+    .limit(1)
+
+  const override = settingRows?.[0]?.value as boolean | null | undefined
+
+  if (override === true)  return { locked: false, override: true }
+  if (override === false) return { locked: true, reasonKey: 'admin', override: false }
+
+  // Auto mode: compute from race schedule
   const now = new Date()
 
-  // Find the earliest open/upcoming race
   const { data: races } = await supabase
     .from('races')
     .select('id, name, slug, date, status')
@@ -21,7 +35,7 @@ export async function getMarketStatus(supabase: SupabaseClient): Promise<MarketS
     .order('date', { ascending: true })
     .limit(1)
 
-  if (!races?.length) return { locked: false }
+  if (!races?.length) return { locked: false, override: null }
 
   const race = races[0] as any
 
@@ -30,16 +44,16 @@ export async function getMarketStatus(supabase: SupabaseClient): Promise<MarketS
   const raceDate = new Date(race.date + 'T23:00:00Z')
   const hoursUntil = (raceDate.getTime() - now.getTime()) / (1000 * 60 * 60)
 
-  // Lock if race status is 'locked' OR within 24h of race start
   if (race.status === 'locked' || hoursUntil <= 24) {
     return {
       locked: true,
       reasonKey: hoursUntil <= 0 ? 'ongoing' : 'closingSoon',
       lockRace: race,
+      override: null,
     }
   }
 
-  return { locked: false }
+  return { locked: false, override: null }
 }
 
 export function formatHoursUntil(dateStr: string): string {

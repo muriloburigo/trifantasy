@@ -366,7 +366,8 @@
     "openFull": "Mercado aberto — você pode comprar e vender atletas livremente.",
     "ongoingRace": "Prova em andamento: {race}",
     "closingSoonDesc": "Mercado fechado — menos de 24h para {race}",
-    "reopens": "reabre após os resultados serem publicados."
+    "reopens": "reabre após os resultados serem publicados.",
+    "adminClosed": "Mercado temporariamente fechado pela organização."
   },
   "locale": {
     "label": "Idioma",

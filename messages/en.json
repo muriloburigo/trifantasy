@@ -366,7 +366,8 @@
     "openFull": "Market open — you can buy and sell athletes freely.",
     "ongoingRace": "Race underway: {race}",
     "closingSoonDesc": "Market closed — less than 24h until {race}",
-    "reopens": "reopens after results are published."
+    "reopens": "reopens after results are published.",
+    "adminClosed": "Market temporarily closed by the organization."
   },
   "locale": {
     "label": "Language",

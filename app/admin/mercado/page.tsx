@@ -1,12 +1,14 @@
 import { createAdminClient } from '~/lib/supabase/server'
 import { requireAdmin } from '~/lib/auth/require-admin'
+import { getMarketStatus } from '~/lib/market'
 import MercadoManager from './MercadoManager'
+import MarketOverridePanel from './MarketOverridePanel'
 
 export default async function MercadoPage() {
   await requireAdmin()
   const supabase = createAdminClient()
 
-  const [athletesRes, portfolioRes] = await Promise.all([
+  const [athletesRes, portfolioRes, marketStatus] = await Promise.all([
     supabase
       .from('athletes')
       .select('id, name, gender, country, pto_rank, current_price, price_change')
@@ -15,6 +17,7 @@ export default async function MercadoPage() {
     supabase
       .from('portfolio')
       .select('athlete_id'),
+    getMarketStatus(supabase),
   ])
 
   // Count owners per athlete
@@ -34,6 +37,13 @@ export default async function MercadoPage() {
       <p className="text-sm text-[var(--color-muted)] mb-6">
         Gerencie preços e variações. Donos = usuários com o atleta no portfolio agora.
       </p>
+
+      <MarketOverridePanel
+        override={marketStatus.override ?? null}
+        locked={marketStatus.locked}
+        reasonKey={marketStatus.reasonKey}
+      />
+
       <MercadoManager athletes={athletes} />
     </div>
   )
