@@ -10,8 +10,10 @@ CREATE TABLE IF NOT EXISTS public.settings (
 
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 
--- Service role has full access; regular users have no access via RLS.
--- (All writes come from server actions using the admin client.)
+-- Anyone can read settings (values are non-sensitive public state).
+-- Writes are restricted to server actions using the service-role admin client.
+CREATE POLICY "settings_public_read" ON public.settings
+  FOR SELECT USING (true);
 
 INSERT INTO public.settings (key, value)
 VALUES ('market_override', 'null')
