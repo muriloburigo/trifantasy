@@ -51,7 +51,7 @@ export async function buyAthlete(athleteId: string) {
 
   if (p1.error || p2.error) return { error: 'Erro ao comprar atleta. Tente novamente.' }
 
-  await supabase.from('market_transactions').insert({
+  const { error: txError } = await supabase.from('market_transactions').insert({
     user_id: user.id,
     athlete_id: athleteId,
     type: 'buy',
@@ -59,6 +59,7 @@ export async function buyAthlete(athleteId: string) {
     wallet_before: wallet,
     wallet_after: walletAfter,
   })
+  if (txError) console.error('[market_transactions] buy insert failed:', txError.message)
 
   revalidatePath('/', 'layout')
   return { success: true, price, name: athleteRes.data.name }
@@ -92,7 +93,7 @@ export async function sellAthlete(athleteId: string) {
 
   if (p1.error || p2.error) return { error: 'Erro ao vender atleta. Tente novamente.' }
 
-  await supabase.from('market_transactions').insert({
+  const { error: txError } = await supabase.from('market_transactions').insert({
     user_id: user.id,
     athlete_id: athleteId,
     type: 'sell',
@@ -100,6 +101,7 @@ export async function sellAthlete(athleteId: string) {
     wallet_before: wallet,
     wallet_after: walletAfter,
   })
+  if (txError) console.error('[market_transactions] sell insert failed:', txError.message)
 
   revalidatePath('/', 'layout')
   return { success: true, price, name: athleteRes.data.name }
