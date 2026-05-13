@@ -28,7 +28,8 @@
     "myLeagues": "Mis Ligas",
     "home": "Home",
     "security": "Seguridad",
-    "tour": "Ver tour guiado"
+    "tour": "Ver tour guiado",
+    "walletHistory": "Historial"
   },
   "home": {
     "tagline": "El Game del Triatlón",
@@ -615,5 +616,24 @@
     "cardMyRosterCta": "Desafía mi equipo →",
     "cardLeagueEyebrow": "CLASIFICACIÓN",
     "cardLeagueLabel": "Trix League"
+  },
+  "wallet": {
+    "title": "Cartera",
+    "subtitle": "Historial de compras y ventas en el mercado",
+    "statWallet": "Saldo actual",
+    "statBuys": "Total comprado",
+    "statSells": "Total vendido",
+    "statNet": "Resultado neto",
+    "colAthlete": "Atleta",
+    "colType": "Tipo",
+    "colPrice": "Precio",
+    "colWallet": "Cartera",
+    "colDate": "Fecha",
+    "typeBuy": "Compra",
+    "typeSell": "Venta",
+    "emptyTitle": "Sin transacciones aún",
+    "emptyDesc": "Tus compras y ventas aparecerán aquí.",
+    "emptyCta": "Ver atletas",
+    "totalTransactions": "{n} transacciones en total"
   }
 }

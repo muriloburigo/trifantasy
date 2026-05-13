@@ -28,7 +28,8 @@
     "myLeagues": "My Leagues",
     "home": "Home",
     "security": "Security",
-    "tour": "View guided tour"
+    "tour": "View guided tour",
+    "walletHistory": "History"
   },
   "home": {
     "tagline": "The Triathlon Game",
@@ -618,5 +619,24 @@
     "cardMyRosterCta": "Beat my roster →",
     "cardLeagueEyebrow": "STANDINGS",
     "cardLeagueLabel": "Trix League"
+  },
+  "wallet": {
+    "title": "Wallet",
+    "subtitle": "Your market transaction history",
+    "statWallet": "Current balance",
+    "statBuys": "Total bought",
+    "statSells": "Total sold",
+    "statNet": "Net result",
+    "colAthlete": "Athlete",
+    "colType": "Type",
+    "colPrice": "Price",
+    "colWallet": "Wallet",
+    "colDate": "Date",
+    "typeBuy": "Buy",
+    "typeSell": "Sell",
+    "emptyTitle": "No transactions yet",
+    "emptyDesc": "Your buys and sells will appear here.",
+    "emptyCta": "View athletes",
+    "totalTransactions": "{n} total transactions"
   }
 }

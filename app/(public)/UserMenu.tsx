@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '~/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
-import { ChevronDown, LogOut, User as UserIcon, Wallet, Users, ShieldCheck, PlayCircle } from 'lucide-react'
+import { ChevronDown, LogOut, User as UserIcon, Wallet, Users, ShieldCheck, PlayCircle, History } from 'lucide-react'
 import LocaleSwitcher from '~/app/components/LocaleSwitcher'
 import { useTranslations } from 'next-intl'
 
@@ -89,6 +89,14 @@ export default function UserMenu({
               <Wallet size={14} className="text-[var(--color-orange)]" />
               <span>{t('team')}</span>
               {wallet != null && <span className="ml-auto text-xs text-[var(--color-orange)] font-bold">T${wallet.toFixed(0)}</span>}
+            </Link>
+            <Link
+              href="/carteira"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-[var(--color-navy-border)]/40 transition-colors"
+            >
+              <History size={14} className="text-[var(--color-muted)]" />
+              {t('walletHistory')}
             </Link>
             <Link
               href="/ligas"
