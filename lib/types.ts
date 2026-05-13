@@ -1,4 +1,4 @@
-export type RaceDistance = 'full' | '70.3' | 'T100' | 'ows' | 'other'
+export type RaceDistance = 'full' | '70.3' | 'T100' | 'olympic' | 'ows' | 'other'
 export type RaceStatus = 'upcoming' | 'open' | 'locked' | 'finished'
 export type AthleteType = 'pro' | 'age_grouper'
 export type Gender = 'M' | 'F'

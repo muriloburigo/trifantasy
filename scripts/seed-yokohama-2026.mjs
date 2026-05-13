@@ -124,7 +124,7 @@ const MEN = [
   { name: 'Koki Iwamoto',     country: 'Japan', country_code: 'JP' },
   { name: 'Satoshi Iwamoto',  country: 'Japan', country_code: 'JP' },
   { name: 'Kenshin Mori',     country: 'Japan', country_code: 'JP' },
-].map(a => ({ ...a, gender: 'male', type: 'pro' }))
+].map(a => ({ ...a, gender: 'M', type: 'pro' }))
 
 const WOMEN = [
   // Great Britain (4)
@@ -179,7 +179,7 @@ const WOMEN = [
   { name: 'Marta Kropko',        country: 'Hungary',  country_code: 'HU' },
   // Brazil (1)
   { name: 'Djenyfer Arnold',     country: 'Brazil',   country_code: 'BR' },
-].map(a => ({ ...a, gender: 'female', type: 'pro' }))
+].map(a => ({ ...a, gender: 'F', type: 'pro' }))
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
