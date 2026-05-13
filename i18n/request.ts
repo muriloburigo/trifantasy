@@ -6,9 +6,9 @@ type Locale = typeof LOCALES[number]
 
 function detectLocale(acceptLanguage: string): Locale {
   const lang = acceptLanguage.toLowerCase()
+  if (lang.includes('pt')) return 'pt'
   if (lang.includes('es')) return 'es'
-  if (lang.includes('en')) return 'en'
-  return 'pt'
+  return 'en'
 }
 
 export default getRequestConfig(async () => {
