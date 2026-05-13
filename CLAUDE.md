@@ -143,6 +143,7 @@ Preço clamped T$1–T$35. Propagado para `race_athletes` de provas futuras.
 | `/atletas` | Diretório de atletas com filtros |
 | `/atletas/[id]` | Detalhe do atleta (stats, histórico de preço) |
 | `/elenco` | Elenco do usuário (comprar/vender/exportar PNG) |
+| `/carteira` | Histórico de transações de mercado (compras/vendas) com saldo atual |
 | `/provas` | Calendário de provas |
 | `/provas/[slug]` | Detalhe da prova + pontuações + time builder |
 | `/meu-time/[id]` | Breakdown de pontos do time em uma prova específica |
@@ -245,6 +246,10 @@ node scripts/create-athlete.mjs --name "Nome" --gender M --country France --coun
 # Repricing global por pontos PTO (atualiza todos os atletas)
 node scripts/reprice-athletes.mjs
 
+# Repricing só de atletas novos de uma prova específica (ex: Yokohama 2026)
+# Usa PTO API (live) + WTCS ranks hardcoded — não altera atletas existentes
+node scripts/reprice-yokohama-new.mjs
+
 # Importar resultados de prova a partir de URL (M + F automático)
 node scripts/fetch-results.mjs <URL> <RACE_ID>
 node scripts/fetch-results.mjs <URL> <RACE_ID> --dry-run  # preview sem gravar
@@ -284,10 +289,9 @@ O site bloqueia bots (403 no WebFetch) mas aceita `curl` com User-Agent de brows
 7. Para atletas **novos**: consultar PTO e WTCS e aplicar a tabela de preços (ver `/cadastrar-atleta`). Atualizar `athletes.current_price`, `pto_rank`, `wtcs_rank` e `race_athletes.price`.
 
 **APIs de ranking:**
-- PTO masculino: `https://stats.protriathletes.org/api/rankings?gender=male&limit=500` → JSON com `rankings[].{rank, name, points}`
-- PTO feminino: HTML de `https://stats.protriathletes.org/rankings/women` (API gender=female retorna MPRO por bug — parsear os `<div class="trow">` com `data-division="FPRO"`)
-- WTCS homens: `https://triathlon.org/tri-api/v1/rankings/15` → `data.rankings[].athlete_full_name` (ordem = posição)
-- WTCS mulheres: `https://triathlon.org/tri-api/v1/rankings/16`
+- PTO masculino: `https://stats.protriathletes.org/api/rankings/men?limit=500` → JSON com `rankings[].{rank, name, points}` (retorna ~500 atletas)
+- PTO feminino: `https://stats.protriathletes.org/api/rankings/women?limit=500` → mesmo formato
+- WTCS: `https://api.triathlon.org/v1/rankings` requer autenticação (401). Usar ranking hardcoded ou triathlon.org (JS-rendered, não tem API pública simples)
 
 **Não alterar T$ de atletas já existentes** — o preço atual reflete histórico de provas anteriores.
 
