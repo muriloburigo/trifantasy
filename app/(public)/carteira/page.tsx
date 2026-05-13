@@ -4,6 +4,7 @@ import { createClient } from '~/lib/supabase/server'
 import BackLink from '~/app/components/BackLink'
 import { TrendingUp, TrendingDown, ShoppingCart, Tag, Wallet } from 'lucide-react'
 import { getTranslations, getLocale } from 'next-intl/server'
+import LocalDate from '~/app/components/LocalDate'
 
 export const revalidate = 0
 
@@ -16,13 +17,6 @@ const COUNTRY_FLAGS: Record<string, string> = {
   'Mexico': '🇲🇽', 'Argentina': '🇦🇷', 'Chile': '🇨🇱', 'Uruguay': '🇺🇾',
 }
 function flag(country: string | null) { return COUNTRY_FLAGS[country ?? ''] ?? '' }
-
-function formatDate(dateStr: string, locale: string) {
-  return new Date(dateStr).toLocaleString(locale === 'pt' ? 'pt-BR' : locale === 'es' ? 'es-ES' : 'en-US', {
-    day: '2-digit', month: '2-digit', year: '2-digit',
-    hour: '2-digit', minute: '2-digit',
-  })
-}
 
 export default async function CarteiraPage() {
   const [t, locale] = await Promise.all([getTranslations('wallet'), getLocale()])
@@ -160,7 +154,9 @@ export default async function CarteiraPage() {
 
                     {/* Date */}
                     <div className="text-right">
-                      <span className="text-[10px] text-[var(--color-muted)] tabular-nums">{formatDate(tx.created_at, locale)}</span>
+                      <span className="text-[10px] text-[var(--color-muted)] tabular-nums">
+                        <LocalDate dateStr={tx.created_at} locale={locale} />
+                      </span>
                     </div>
                   </div>
                 )
