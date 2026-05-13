@@ -246,10 +246,6 @@ node scripts/create-athlete.mjs --name "Nome" --gender M --country France --coun
 # Repricing global por pontos PTO (atualiza todos os atletas)
 node scripts/reprice-athletes.mjs
 
-# Repricing só de atletas novos de uma prova específica (ex: Yokohama 2026)
-# Usa PTO API (live) + WTCS ranks hardcoded — não altera atletas existentes
-node scripts/reprice-yokohama-new.mjs
-
 # Importar resultados de prova a partir de URL (M + F automático)
 node scripts/fetch-results.mjs <URL> <RACE_ID>
 node scripts/fetch-results.mjs <URL> <RACE_ID> --dry-run  # preview sem gravar
