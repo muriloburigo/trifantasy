@@ -33,6 +33,7 @@ export default async function NovaProvaPage() {
               <option value="full">Full (Ironman)</option>
               <option value="70.3">70.3 (Half)</option>
               <option value="T100">T100 Series</option>
+              <option value="olympic">Olympic / WTCS</option>
               <option value="ows">OWS / Open Water</option>
               <option value="other">Outra</option>
             </select>

@@ -16,7 +16,7 @@ for (const line of envContent.split('\n')) {
   const match = line.match(/^([^#=\s][^=]*)=(.*)$/)
   if (match) {
     const key = match[1].trim()
-    const val = match[2].trim().replace(/^"(.*)"$/, '$1')
+    const val = match[2].trim().replace(/^"(.*)"$/, '$1').replace(/\\n$/, '').trim()
     env[key] = val
   }
 }
@@ -33,13 +33,12 @@ const headers = {
   'Authorization': `Bearer ${SERVICE_KEY}`,
   'apikey': SERVICE_KEY,
   'Content-Type': 'application/json',
-  'Prefer': 'return=representation',
 }
 
-async function supabase(path, method = 'GET', body) {
+async function supabase(path, method = 'GET', body, prefer = 'return=representation') {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     method,
-    headers: body ? headers : { ...headers, 'Content-Type': undefined },
+    headers: { ...headers, ...(body ? { 'Prefer': prefer } : {}) },
     body: body ? JSON.stringify(body) : undefined,
   })
   const text = await res.text()
@@ -60,7 +59,7 @@ const RACE = {
   date: '2026-05-16',
   location: 'Yokohama',
   country: 'Japan',
-  country_code: 'JPN',
+  country_code: 'JP',
   distance: 'olympic',
   has_pro_field: true,
   status: 'upcoming',
@@ -69,117 +68,117 @@ const RACE = {
 // ── Athletes ──────────────────────────────────────────────────────────────────
 const MEN = [
   // Great Britain (5)
-  { name: 'Alex Yee',        country: 'Great Britain', country_code: 'GBR' },
-  { name: 'Hugo Milner',     country: 'Great Britain', country_code: 'GBR' },
-  { name: 'Jack Willis',     country: 'Great Britain', country_code: 'GBR' },
-  { name: 'Harry Leleu',     country: 'Great Britain', country_code: 'GBR' },
-  { name: 'Max Stapley',     country: 'Great Britain', country_code: 'GBR' },
+  { name: 'Alex Yee',        country: 'Great Britain', country_code: 'GB' },
+  { name: 'Hugo Milner',     country: 'Great Britain', country_code: 'GB' },
+  { name: 'Jack Willis',     country: 'Great Britain', country_code: 'GB' },
+  { name: 'Harry Leleu',     country: 'Great Britain', country_code: 'GB' },
+  { name: 'Max Stapley',     country: 'Great Britain', country_code: 'GB' },
   // Australia (4)
-  { name: 'Matthew Hauser',    country: 'Australia', country_code: 'AUS' },
-  { name: 'Luke Willian',      country: 'Australia', country_code: 'AUS' },
-  { name: 'Brandon Copeland',  country: 'Australia', country_code: 'AUS' },
-  { name: 'Bradley Course',    country: 'Australia', country_code: 'AUS' },
+  { name: 'Matthew Hauser',    country: 'Australia', country_code: 'AU' },
+  { name: 'Luke Willian',      country: 'Australia', country_code: 'AU' },
+  { name: 'Brandon Copeland',  country: 'Australia', country_code: 'AU' },
+  { name: 'Bradley Course',    country: 'Australia', country_code: 'AU' },
   // United States (5)
-  { name: 'Morgan Pearson',    country: 'United States', country_code: 'USA' },
-  { name: 'John Reed',         country: 'United States', country_code: 'USA' },
-  { name: 'Reese Vannerson',   country: 'United States', country_code: 'USA' },
-  { name: 'Darr Smith',        country: 'United States', country_code: 'USA' },
-  { name: 'Chase McQueen',     country: 'United States', country_code: 'USA' },
+  { name: 'Morgan Pearson',    country: 'United States', country_code: 'US' },
+  { name: 'John Reed',         country: 'United States', country_code: 'US' },
+  { name: 'Reese Vannerson',   country: 'United States', country_code: 'US' },
+  { name: 'Darr Smith',        country: 'United States', country_code: 'US' },
+  { name: 'Chase McQueen',     country: 'United States', country_code: 'US' },
   // Germany (4)
-  { name: 'Tim Hellwig',       country: 'Germany', country_code: 'GER' },
-  { name: 'Valentin Wernz',    country: 'Germany', country_code: 'GER' },
-  { name: 'Jonas Osterholt',   country: 'Germany', country_code: 'GER' },
-  { name: 'Chris Ziehmer',     country: 'Germany', country_code: 'GER' },
+  { name: 'Tim Hellwig',       country: 'Germany', country_code: 'DE' },
+  { name: 'Valentin Wernz',    country: 'Germany', country_code: 'DE' },
+  { name: 'Jonas Osterholt',   country: 'Germany', country_code: 'DE' },
+  { name: 'Chris Ziehmer',     country: 'Germany', country_code: 'DE' },
   // Canada (3)
-  { name: 'Charles Paquet',    country: 'Canada', country_code: 'CAN' },
-  { name: 'Mathis Beaulieu',   country: 'Canada', country_code: 'CAN' },
-  { name: 'Martin Sobey',      country: 'Canada', country_code: 'CAN' },
+  { name: 'Charles Paquet',    country: 'Canada', country_code: 'CA' },
+  { name: 'Mathis Beaulieu',   country: 'Canada', country_code: 'CA' },
+  { name: 'Martin Sobey',      country: 'Canada', country_code: 'CA' },
   // Belgium (3)
-  { name: 'Arnaud Mengal',        country: 'Belgium', country_code: 'BEL' },
-  { name: 'Erwin Vanderplancke',  country: 'Belgium', country_code: 'BEL' },
-  { name: 'Marten van Riel',      country: 'Belgium', country_code: 'BEL' },
+  { name: 'Arnaud Mengal',        country: 'Belgium', country_code: 'BE' },
+  { name: 'Erwin Vanderplancke',  country: 'Belgium', country_code: 'BE' },
+  { name: 'Marten van Riel',      country: 'Belgium', country_code: 'BE' },
   // Hungary (2)
-  { name: 'Marton Kropko',    country: 'Hungary', country_code: 'HUN' },
-  { name: 'Zsombor Devay',    country: 'Hungary', country_code: 'HUN' },
+  { name: 'Marton Kropko',    country: 'Hungary', country_code: 'HU' },
+  { name: 'Zsombor Devay',    country: 'Hungary', country_code: 'HU' },
   // Norway (2)
-  { name: 'Vetle Bergsvik Thorn', country: 'Norway', country_code: 'NOR' },
-  { name: 'Sebastian Wernersen',  country: 'Norway', country_code: 'NOR' },
+  { name: 'Vetle Bergsvik Thorn', country: 'Norway', country_code: 'NO' },
+  { name: 'Sebastian Wernersen',  country: 'Norway', country_code: 'NO' },
   // Luxembourg (2)
-  { name: 'Theo Marti',       country: 'Luxembourg', country_code: 'LUX' },
-  { name: 'Gregor Payet',     country: 'Luxembourg', country_code: 'LUX' },
+  { name: 'Theo Marti',       country: 'Luxembourg', country_code: 'LU' },
+  { name: 'Gregor Payet',     country: 'Luxembourg', country_code: 'LU' },
   // Single-athlete nations
-  { name: 'Miguel Hidalgo',         country: 'Brazil',       country_code: 'BRA' },
-  { name: 'Max Studer',             country: 'Switzerland',  country_code: 'SUI' },
-  { name: 'Izan Edo Aguilar',       country: 'Spain',        country_code: 'ESP' },
-  { name: 'Diego Moya',             country: 'Chile',        country_code: 'CHI' },
-  { name: 'Aram Penaflor Moysen',   country: 'Mexico',       country_code: 'MEX' },
-  { name: 'Vasco Vilaca',           country: 'Portugal',     country_code: 'POR' },
+  { name: 'Miguel Hidalgo',         country: 'Brazil',       country_code: 'BR' },
+  { name: 'Max Studer',             country: 'Switzerland',  country_code: 'CH' },
+  { name: 'Izan Edo Aguilar',       country: 'Spain',        country_code: 'ES' },
+  { name: 'Diego Moya',             country: 'Chile',        country_code: 'CL' },
+  { name: 'Aram Penaflor Moysen',   country: 'Mexico',       country_code: 'MX' },
+  { name: 'Vasco Vilaca',           country: 'Portugal',     country_code: 'PT' },
   // Japan (10)
-  { name: 'Takumi Hojo',      country: 'Japan', country_code: 'JPN' },
-  { name: 'Takuto Oshima',    country: 'Japan', country_code: 'JPN' },
-  { name: 'Aoba Yasumatsu',   country: 'Japan', country_code: 'JPN' },
-  { name: 'Kenji Nener',      country: 'Japan', country_code: 'JPN' },
-  { name: 'Genta Uchida',     country: 'Japan', country_code: 'JPN' },
-  { name: 'Kazushi Jozuka',   country: 'Japan', country_code: 'JPN' },
-  { name: 'Ren Sato',         country: 'Japan', country_code: 'JPN' },
-  { name: 'Koki Iwamoto',     country: 'Japan', country_code: 'JPN' },
-  { name: 'Satoshi Iwamoto',  country: 'Japan', country_code: 'JPN' },
-  { name: 'Kenshin Mori',     country: 'Japan', country_code: 'JPN' },
+  { name: 'Takumi Hojo',      country: 'Japan', country_code: 'JP' },
+  { name: 'Takuto Oshima',    country: 'Japan', country_code: 'JP' },
+  { name: 'Aoba Yasumatsu',   country: 'Japan', country_code: 'JP' },
+  { name: 'Kenji Nener',      country: 'Japan', country_code: 'JP' },
+  { name: 'Genta Uchida',     country: 'Japan', country_code: 'JP' },
+  { name: 'Kazushi Jozuka',   country: 'Japan', country_code: 'JP' },
+  { name: 'Ren Sato',         country: 'Japan', country_code: 'JP' },
+  { name: 'Koki Iwamoto',     country: 'Japan', country_code: 'JP' },
+  { name: 'Satoshi Iwamoto',  country: 'Japan', country_code: 'JP' },
+  { name: 'Kenshin Mori',     country: 'Japan', country_code: 'JP' },
 ].map(a => ({ ...a, gender: 'male', type: 'pro' }))
 
 const WOMEN = [
   // Great Britain (4)
-  { name: 'Beth Potter',     country: 'Great Britain', country_code: 'GBR' },
-  { name: 'Kate Waugh',      country: 'Great Britain', country_code: 'GBR' },
-  { name: 'Sian Rainsley',   country: 'Great Britain', country_code: 'GBR' },
-  { name: 'Jess Fullagar',   country: 'Great Britain', country_code: 'GBR' },
+  { name: 'Beth Potter',     country: 'Great Britain', country_code: 'GB' },
+  { name: 'Kate Waugh',      country: 'Great Britain', country_code: 'GB' },
+  { name: 'Sian Rainsley',   country: 'Great Britain', country_code: 'GB' },
+  { name: 'Jess Fullagar',   country: 'Great Britain', country_code: 'GB' },
   // Germany (6)
-  { name: 'Lisa Tertsch',      country: 'Germany', country_code: 'GER' },
-  { name: 'Laura Lindemann',   country: 'Germany', country_code: 'GER' },
-  { name: 'Nina Eim',          country: 'Germany', country_code: 'GER' },
-  { name: 'Annika Koch',       country: 'Germany', country_code: 'GER' },
-  { name: 'Franka Rust',       country: 'Germany', country_code: 'GER' },
-  { name: 'Julia Brocker',     country: 'Germany', country_code: 'GER' },
+  { name: 'Lisa Tertsch',      country: 'Germany', country_code: 'DE' },
+  { name: 'Laura Lindemann',   country: 'Germany', country_code: 'DE' },
+  { name: 'Nina Eim',          country: 'Germany', country_code: 'DE' },
+  { name: 'Annika Koch',       country: 'Germany', country_code: 'DE' },
+  { name: 'Franka Rust',       country: 'Germany', country_code: 'DE' },
+  { name: 'Julia Brocker',     country: 'Germany', country_code: 'DE' },
   // Luxembourg (2)
-  { name: 'Jeanne Lehair',    country: 'Luxembourg', country_code: 'LUX' },
-  { name: 'Eva Daniels',      country: 'Luxembourg', country_code: 'LUX' },
+  { name: 'Jeanne Lehair',    country: 'Luxembourg', country_code: 'LU' },
+  { name: 'Eva Daniels',      country: 'Luxembourg', country_code: 'LU' },
   // France (1)
-  { name: 'Emma Lombardi',    country: 'France', country_code: 'FRA' },
+  { name: 'Emma Lombardi',    country: 'France', country_code: 'FR' },
   // United States (5)
-  { name: 'Taylor Spivey',    country: 'United States', country_code: 'USA' },
-  { name: 'Kirsten Kasper',   country: 'United States', country_code: 'USA' },
-  { name: 'Gwen Jorgensen',   country: 'United States', country_code: 'USA' },
-  { name: 'Katie Zaferes',    country: 'United States', country_code: 'USA' },
-  { name: 'Taylor Knibb',     country: 'United States', country_code: 'USA' },
+  { name: 'Taylor Spivey',    country: 'United States', country_code: 'US' },
+  { name: 'Kirsten Kasper',   country: 'United States', country_code: 'US' },
+  { name: 'Gwen Jorgensen',   country: 'United States', country_code: 'US' },
+  { name: 'Katie Zaferes',    country: 'United States', country_code: 'US' },
+  { name: 'Taylor Knibb',     country: 'United States', country_code: 'US' },
   // Australia (1)
-  { name: 'Richelle Hill',    country: 'Australia', country_code: 'AUS' },
+  { name: 'Richelle Hill',    country: 'Australia', country_code: 'AU' },
   // Sweden (1)
-  { name: 'Tilda Mansson',    country: 'Sweden', country_code: 'SWE' },
+  { name: 'Tilda Mansson',    country: 'Sweden', country_code: 'SE' },
   // Japan (8)
-  { name: 'Manami Hayashi',    country: 'Japan', country_code: 'JPN' },
-  { name: 'Kanae Takenaka',    country: 'Japan', country_code: 'JPN' },
-  { name: 'Sarika Nakayama',   country: 'Japan', country_code: 'JPN' },
-  { name: 'Miyu Sakai',        country: 'Japan', country_code: 'JPN' },
-  { name: 'Himeka Sato',       country: 'Japan', country_code: 'JPN' },
-  { name: 'Minori Ikeno',      country: 'Japan', country_code: 'JPN' },
-  { name: 'Mako Hiraizumi',    country: 'Japan', country_code: 'JPN' },
-  { name: 'Yoshiko Sato',      country: 'Japan', country_code: 'JPN' },
+  { name: 'Manami Hayashi',    country: 'Japan', country_code: 'JP' },
+  { name: 'Kanae Takenaka',    country: 'Japan', country_code: 'JP' },
+  { name: 'Sarika Nakayama',   country: 'Japan', country_code: 'JP' },
+  { name: 'Miyu Sakai',        country: 'Japan', country_code: 'JP' },
+  { name: 'Himeka Sato',       country: 'Japan', country_code: 'JP' },
+  { name: 'Minori Ikeno',      country: 'Japan', country_code: 'JP' },
+  { name: 'Mako Hiraizumi',    country: 'Japan', country_code: 'JP' },
+  { name: 'Yoshiko Sato',      country: 'Japan', country_code: 'JP' },
   // AIN – Authorized Individual Neutral (3)
-  { name: 'Diana Isakova',       country: 'AIN', country_code: 'AIN' },
-  { name: 'Valentina Riasova',   country: 'AIN', country_code: 'AIN' },
-  { name: 'Iana Chenskaia',      country: 'AIN', country_code: 'AIN' },
+  { name: 'Diana Isakova',       country: 'AIN', country_code: null },
+  { name: 'Valentina Riasova',   country: 'AIN', country_code: null },
+  { name: 'Iana Chenskaia',      country: 'AIN', country_code: null },
   // Portugal (1)
-  { name: 'Maria Tome',          country: 'Portugal',       country_code: 'POR' },
+  { name: 'Maria Tome',          country: 'Portugal',       country_code: 'PT' },
   // Spain (2)
-  { name: 'Miriam Casillas Garcia',      country: 'Spain', country_code: 'ESP' },
-  { name: 'Cecilia Santamaria Surroca',  country: 'Spain', country_code: 'ESP' },
+  { name: 'Miriam Casillas Garcia',      country: 'Spain', country_code: 'ES' },
+  { name: 'Cecilia Santamaria Surroca',  country: 'Spain', country_code: 'ES' },
   // Czech Republic (2)
-  { name: 'Tereza Zimovjanova',  country: 'Czech Republic', country_code: 'CZE' },
-  { name: 'Heidi Jurankova',     country: 'Czech Republic', country_code: 'CZE' },
+  { name: 'Tereza Zimovjanova',  country: 'Czech Republic', country_code: 'CZ' },
+  { name: 'Heidi Jurankova',     country: 'Czech Republic', country_code: 'CZ' },
   // Hungary (1)
-  { name: 'Marta Kropko',        country: 'Hungary',  country_code: 'HUN' },
+  { name: 'Marta Kropko',        country: 'Hungary',  country_code: 'HU' },
   // Brazil (1)
-  { name: 'Djenyfer Arnold',     country: 'Brazil',   country_code: 'BRA' },
+  { name: 'Djenyfer Arnold',     country: 'Brazil',   country_code: 'BR' },
 ].map(a => ({ ...a, gender: 'female', type: 'pro' }))
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -246,7 +245,7 @@ async function main() {
       race_id: raceId,
       athlete_id: athleteId,
       price: 10,
-    })
+    }, 'resolution=merge-duplicates,return=representation')
   }
 
   // ── Summary ───────────────────────────────────────────────────────────────
