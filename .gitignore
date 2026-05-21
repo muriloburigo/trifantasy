@@ -44,3 +44,6 @@ next-env.d.ts
 
 # Agent reports (local only)
 .agent-reports/
+
+# Supabase CLI temp files (contain connection strings and project metadata)
+supabase/.temp/
