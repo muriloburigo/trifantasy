@@ -453,7 +453,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
                               : 'bg-white/5 text-[var(--color-muted)]'
                           }`}
                         >
-                          {item.label}
+                          {translateBreakdown(item, t)}
                         </span>
                       ))}
                     </div>
