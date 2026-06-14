@@ -49,6 +49,32 @@ function initials(name: string) {
   return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
 }
 
+function formatDelta(delta: number): string {
+  if (delta > 0) return `+${delta}`
+  if (delta < 0) return `−${Math.abs(delta)}`
+  return '0'
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function translateBreakdown(item: { code: string; label: string; delta: number; metadata?: { position?: number } }, t: any): string {
+  switch (item.code) {
+    case 'pro_position':
+      return t('breakdown.pro_position', { pos: item.metadata?.position ?? '?', delta: formatDelta(item.delta) })
+    case 'fastest_swim_overall':
+      return t('breakdown.fastest_swim_overall')
+    case 'fastest_bike_overall':
+      return t('breakdown.fastest_bike_overall')
+    case 'fastest_run_overall':
+      return t('breakdown.fastest_run_overall')
+    case 'dnf':
+      return t('breakdown.dnf')
+    case 'dns':
+      return t('breakdown.dns')
+    default:
+      return item.label
+  }
+}
+
 function PriceTrend({ change }: { change: number }) {
   if (change > 0) return (
     <span className="flex items-center gap-1 text-[var(--color-success)] font-bold">
@@ -372,7 +398,7 @@ export default async function AthleteDetailPage({ params }: { params: Promise<{ 
                                     : 'bg-white/5 text-[var(--color-muted)]'
                                 }`}
                               >
-                                {item.label}
+                                {translateBreakdown(item, t)}
                               </span>
                             ))}
                           </div>

@@ -391,7 +391,15 @@
     "upcomingLabel": "Coming soon",
     "priceChangeLabel": "Price change after this race:",
     "noResult": "Result not available",
-    "priceHistoryTitle": "Valorization History"
+    "priceHistoryTitle": "Valorization History",
+    "breakdown": {
+      "pro_position": "{pos}th place {delta}",
+      "fastest_swim_overall": "Best swim +1",
+      "fastest_bike_overall": "Best bike +1",
+      "fastest_run_overall": "Best run +1",
+      "dnf": "DNF −2",
+      "dns": "DNS −2"
+    }
   },
   "rules": {
     "title": "How It Works",

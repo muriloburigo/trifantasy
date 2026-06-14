@@ -381,7 +381,15 @@
     "upcomingLabel": "Próximamente",
     "priceChangeLabel": "Variación de precio tras esta carrera:",
     "noResult": "Resultado no disponible",
-    "priceHistoryTitle": "Historial de Valorización"
+    "priceHistoryTitle": "Historial de Valorización",
+    "breakdown": {
+      "pro_position": "{pos}º puesto {delta}",
+      "fastest_swim_overall": "Mejor natación +1",
+      "fastest_bike_overall": "Mejor bici +1",
+      "fastest_run_overall": "Mejor carrera +1",
+      "dnf": "DNF −2",
+      "dns": "DNS −2"
+    }
   },
   "rules": {
     "title": "Cómo Funciona",
